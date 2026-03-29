@@ -170,16 +170,58 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        if(registerForm) {
-            registerForm.addEventListener('submit', (e) => {
+        if (registerForm) {
+            registerForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                // Simulation
+                
+                const password = document.getElementById('reg-password').value;
+                const confirmPassword = document.getElementById('reg-confirm-password').value;
+                
+                // Vì database Entity Backend hiện chỉ có username, ta lấy email làm giá trị username
+                const email = document.getElementById('reg-email').value; 
+                
+                if (password !== confirmPassword) {
+                    alert('Mật khẩu nhập lại không khớp!');
+                    return;
+                }
+
                 const btn = registerForm.querySelector('button');
+                const originalText = btn.innerText;
                 btn.innerText = 'ĐANG XỬ LÝ...';
-                setTimeout(() => {
-                    switchTab('login');
-                    btn.innerText = 'ĐĂNG KÝ';
-                }, 800);
+                btn.disabled = true;
+                
+                try {
+                    const response = await fetch('/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: email,
+                            password: password
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.status === 200) {
+                        alert('Đăng ký thành công! Vui lòng tiến hành đăng nhập.');
+                        registerForm.reset();
+                        switchTab('login');
+                        // Tiện tay điền thẳng số email vừa lên form Login cho user
+                        if(document.getElementById('login-username')) {
+                            document.getElementById('login-username').value = email;
+                        }
+                    } else {
+                        alert('Lỗi: ' + (result.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.'));
+                    }
+                } catch (error) {
+                    console.error('Lỗi khi gọi API:', error);
+                    alert('Không thể kết nối với máy chủ API!');
+                } finally {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
             });
         }
     }
