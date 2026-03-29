@@ -1,5 +1,6 @@
 package com.example.DienCamTamThe.controller;
 
+import com.example.DienCamTamThe.dto.request.LoginRequest;
 import com.example.DienCamTamThe.dto.request.RegisterRequest;
 import com.example.DienCamTamThe.dto.response.ApiResponse;
 import com.example.DienCamTamThe.service.UserService;
@@ -19,5 +20,10 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<String>> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(userService.register(request));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<String>> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(userService.login(request));
     }
 }

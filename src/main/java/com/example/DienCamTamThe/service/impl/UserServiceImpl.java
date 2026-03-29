@@ -1,11 +1,13 @@
 package com.example.DienCamTamThe.service.impl;
 
+import com.example.DienCamTamThe.dto.request.LoginRequest;
 import com.example.DienCamTamThe.dto.request.RegisterRequest;
 import com.example.DienCamTamThe.dto.response.ApiResponse;
 import com.example.DienCamTamThe.entity.User;
 import com.example.DienCamTamThe.exception.UserAlreadyExistsException;
 import com.example.DienCamTamThe.repository.UserRepository;
 import com.example.DienCamTamThe.service.UserService;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,5 +38,20 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         return ApiResponse.success("User registered successfully");
+    }
+
+    @Override
+    public ApiResponse<String> login(LoginRequest request) {
+        // Tìm user theo username
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
+
+        // Kiểm tra password
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Invalid username or password");
+        }
+
+        // Thành công: có thể trả về Token nếu dùng JWT, đây tạm thời trả về thông báo thành công
+        return ApiResponse.success("Login successful");
     }
 }
