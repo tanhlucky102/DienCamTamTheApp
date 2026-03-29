@@ -6,5 +6,8 @@ import com.example.DienCamTamThe.dto.response.ApiResponse;
 
 public interface UserService {
     ApiResponse<String> register(RegisterRequest request);
+
     ApiResponse<String> login(LoginRequest request);
+
+    ApiResponse<String> forgotPassword(com.example.DienCamTamThe.dto.request.ForgotPasswordRequest request);
 }

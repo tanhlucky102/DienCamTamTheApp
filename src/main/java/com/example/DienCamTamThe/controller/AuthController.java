@@ -26,4 +26,9 @@ public class AuthController {
     public ResponseEntity<ApiResponse<String>> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(userService.login(request));
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody com.example.DienCamTamThe.dto.request.ForgotPasswordRequest request) {
+        return ResponseEntity.ok(userService.forgotPassword(request));
+    }
 }

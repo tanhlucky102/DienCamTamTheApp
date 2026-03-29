@@ -51,7 +51,21 @@ public class UserServiceImpl implements UserService {
             throw new BadCredentialsException("Invalid username or password");
         }
 
-        // Thành công: có thể trả về Token nếu dùng JWT, đây tạm thời trả về thông báo thành công
+        // Thành công: có thể trả về Token nếu dùng JWT, đây tạm thời trả về thông báo
+        // thành công
         return ApiResponse.success("Login successful");
+    }
+
+    @Override
+    public ApiResponse<String> forgotPassword(com.example.DienCamTamThe.dto.request.ForgotPasswordRequest request) {
+        // Tìm user theo username
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException("User not found"));
+
+        // Cập nhật mật khẩu mới
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        return ApiResponse.success("Password reset successful");
     }
 }

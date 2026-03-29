@@ -20,18 +20,21 @@ public class GlobalExceptionHandler {
 
     // Xử lý lỗi đăng nhập sai tài khoản/mật khẩu
     @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
-    public ResponseEntity<ApiResponse<Void>> handleBadCredentialsException(org.springframework.security.authentication.BadCredentialsException ex) {
+    public ResponseEntity<ApiResponse<Void>> handleBadCredentialsException(
+            org.springframework.security.authentication.BadCredentialsException ex) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "Tài khoản hoặc mật khẩu không chính xác"));
     }
 
-    // Bỏ qua lỗi 404 (Không tìm thấy trang/tài nguyên) để Spring xử lý mặc định hoặc trả về JSON 404 chuẩn
+    // Bỏ qua lỗi 404 (Không tìm thấy trang/tài nguyên) để Spring xử lý mặc định
+    // hoặc trả về JSON 404 chuẩn
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNotFoundResource(NoResourceFoundException ex) {
-         return ResponseEntity
+        return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Không tìm thấy trang hoặc tài nguyên: " + ex.getResourcePath()));
+                .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(),
+                        "Không tìm thấy trang hoặc tài nguyên: " + ex.getResourcePath()));
     }
 
     // Catch các lỗi chung khác
@@ -39,6 +42,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleGlobalException(Exception ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error: " + ex.getMessage()));
+                .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        "Internal Server Error: " + ex.getMessage()));
     }
 }
