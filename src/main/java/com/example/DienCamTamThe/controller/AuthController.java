@@ -1,19 +1,23 @@
 package com.example.DienCamTamThe.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import com.example.DienCamTamThe.model.User;
+import com.example.DienCamTamThe.dto.request.RegisterRequest;
+import com.example.DienCamTamThe.dto.response.ApiResponse;
 import com.example.DienCamTamThe.service.UserService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public AuthController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping("/register")
-    public String register(@RequestBody User user) {
-        return userService.register(user);
+    public ResponseEntity<ApiResponse<String>> register(@RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(userService.register(request));
     }
 }
