@@ -46,7 +46,7 @@ public class DivinationServiceImpl {
         String cot = mapChiToCot(chi);
         String mang = calculateMenh(birthYear % 10, birthYear % 12);
 
-        content.append("<div style='background: #f4f4f4; padding: 10px; border-radius: 5px; margin-bottom: 15px; color: #333'>");
+        content.append("<div class='log-box'>");
         content.append("<strong>[Log Hệ Thống] Thông số nội suy:</strong><br>");
         content.append("- Bạn tuổi: ").append(can.toUpperCase()).append(" ").append(chi.toUpperCase()).append("<br>");
         content.append("- Mệnh (Ngũ Hành): ").append(mang.toUpperCase()).append("<br>");
@@ -323,7 +323,7 @@ public class DivinationServiceImpl {
 
             String poem = extractJsonStringField(rawOut, "poem");
             if (poem != null && !poem.isEmpty()) {
-                sb.append("<blockquote style='font-style: italic; background: #fafafa; color: #333; border-left: 4px solid #ccc; padding: 10px; margin: 10px 0;'>")
+                sb.append("<blockquote class='poem-box'>")
                   .append(poem.replace("\n", "<br>"))
                   .append("</blockquote>");
             }
