@@ -159,9 +159,21 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(data => {
                 // Đổ dữ liệu định danh lên bảng
-                document.getElementById('display-name').innerText = data.fullname || fullnameValue;
-                // removed chart elements
-                document.getElementById('decoding-category').innerText = data.category || categoryValue;
+                const displayName = data.fullname || fullnameValue;
+                const displayDob = data.dob || dobValue;
+                const displayCategory = data.category || categoryValue;
+
+                document.getElementById('display-name').innerText = displayName;
+                document.getElementById('decoding-category').innerText = displayCategory;
+
+                const meta = document.getElementById('result-meta');
+                if (meta) {
+                    meta.innerHTML = `
+                        <span class="chip">Họ tên: ${displayName}</span>
+                        <span class="chip">Ngày sinh: ${displayDob}</span>
+                        <span class="chip">Danh mục: ${displayCategory}</span>
+                    `;
+                }
 
                 // Đổ nội dung luận giải
                 const decodingText = data.content || generateDecodingContent(categoryValue);

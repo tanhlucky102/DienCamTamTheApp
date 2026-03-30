@@ -60,15 +60,14 @@ public class DivinationServiceImpl {
         String can = LunarCalendarUtil.getCan(birthYear).toLowerCase();
         String chi = LunarCalendarUtil.getChi(birthYear).toLowerCase();
         String cot = mapChiToCot(chi);
-        String mang = calculateMenh(getCanIndex(can), getChiIndex(chi));
+        String mang = calculateMenh(birthYear % 10, birthYear % 12);
 
-        content.append(
-                "<div style='background: #fdf6e3; padding: 15px; border-radius: 8px; border: 1px solid #eee8d5; margin-bottom: 20px; color: #657b83'>");
-        content.append("<strong style='color: #b58900;'>[Thông số Diễn Cầm]</strong><br>");
-        content.append("- Ngày sinh (Âm lịch): <b>").append(ngaySinh).append("/").append(thangSinh).append("/").append(birthYear).append("</b>").append(calendarNote).append("<br>");
-        content.append("- Bạn tuổi: <b>").append(can.toUpperCase()).append(" ").append(chi.toUpperCase()).append("</b><br>");
-        content.append("- Mạng (Ngũ Hành): <b>").append(mang.toUpperCase()).append("</b> - Cốt (Xương): <b>").append(cot.toUpperCase()).append("</b><br>");
-        content.append("<em>=> Đang tra cứu chuyên mục: <b>").append(category).append("</b></em>");
+        content.append("<div class='log-box'>");
+        content.append("<strong>[Log Hệ Thống] Thông số nội suy:</strong><br>");
+        content.append("- Bạn tuổi: ").append(can.toUpperCase()).append(" ").append(chi.toUpperCase()).append("<br>");
+        content.append("- Mệnh (Ngũ Hành): ").append(mang.toUpperCase()).append("<br>");
+        content.append("- Cốt (Xương con gì): ").append(cot.toUpperCase()).append("<br>");
+        content.append("<em>=> Tiến hành rà soát chuyên mục: <b>").append(category).append("</b></em>");
         content.append("</div>");
 
         List<BookSection> sections = sectionRepo.findAllByOrderBySectionNoAsc();
@@ -383,10 +382,9 @@ public class DivinationServiceImpl {
 
             String poem = extractJsonStringField(rawOut, "poem");
             if (poem != null && !poem.isEmpty()) {
-                sb.append(
-                        "<blockquote style='font-style: italic; background: #fafafa; color: #333; border-left: 4px solid #ccc; padding: 10px; margin: 10px 0;'>")
-                        .append(poem.replace("\n", "<br>"))
-                        .append("</blockquote>");
+                sb.append("<blockquote class='poem-box'>")
+                  .append(poem.replace("\n", "<br>"))
+                  .append("</blockquote>");
             }
 
             if (sb.length() == 0) {
