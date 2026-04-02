@@ -7,17 +7,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('sidebar-overlay');
 
     const openSidebar = () => {
+        if (!sidebar) return;
         if(window.innerWidth <= 1024) {
             sidebar.classList.add('active');
-            overlay.classList.add('active');
+            if (overlay) overlay.classList.add('active');
         } else {
             sidebar.scrollIntoView({ behavior: 'smooth' });
         }
     };
 
     const closeSidebar = () => {
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
+        if (sidebar) sidebar.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
     };
 
     if(toggleBtn) toggleBtn.addEventListener('click', openSidebar);
@@ -107,16 +108,58 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('decoding-content').innerHTML = data.content;
 
         const resultsSection = document.getElementById('results-section');
+        const resultsOverlay = document.getElementById('results-overlay');
+        
         resultsSection.classList.remove('hidden');
-        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (resultsOverlay) resultsOverlay.classList.add('active');
 
         if(window.innerWidth <= 1024) closeSidebar();
     }
 
+    // Modal Results logic
+    const closeResultsBtn = document.getElementById('close-results-btn');
+    const resultsOverlay = document.getElementById('results-overlay');
+    
+    const closeResults = () => {
+        const resultsSection = document.getElementById('results-section');
+        if (resultsSection) resultsSection.classList.add('hidden');
+        if (resultsOverlay) resultsOverlay.classList.remove('active');
+        
+        // Revert magical animation when closing popup
+        const wheelImg = document.querySelector('.wheel-img');
+        const inputCards = document.querySelectorAll('.input-card');
+        if(wheelImg) wheelImg.classList.remove('fast-spin');
+        if(inputCards) inputCards.forEach(card => card.classList.remove('sucked-in'));
+    };
+    
+    if (closeResultsBtn) closeResultsBtn.addEventListener('click', closeResults);
+    if (resultsOverlay) resultsOverlay.addEventListener('click', closeResults);
+
     // Xử lý sự kiện tra cứu và gọi API Diễn Cầm
     const form = document.getElementById('horoscope-form');
     const resultsSection = document.getElementById('results-section');
-    const submitBtn = document.getElementById('submit-lookup');
+    const wheelImgBtn = document.querySelector('.wheel-img');
+    const inputCards = document.querySelectorAll('.input-card');
+
+    if (wheelImgBtn) {
+        wheelImgBtn.addEventListener('click', () => {
+            if (form && !form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Trigger Magical Animation
+            wheelImgBtn.classList.add('fast-spin');
+            if (inputCards) {
+                inputCards.forEach(card => card.classList.add('sucked-in'));
+            }
+
+            // Wait for animation to finish before fetching
+            setTimeout(() => {
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }, 1200);
+        });
+    }
 
     if (form) {
         form.addEventListener('submit', (e) => {
@@ -126,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const fullnameValue = document.getElementById('fullname').value;
             const categoryValue = document.getElementById('lookup-category').value;
             const dobValue = `${document.getElementById('birth-day').value}/${document.getElementById('birth-month').value}/${document.getElementById('birth-year').value}`;
-            // Map Payload
+            
             const requestPayload = {
                 fullname: fullnameValue,
                 gender: document.getElementById('gender').value,
@@ -137,11 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 birthYear: document.getElementById('birth-year').value,
                 lookupCategory: categoryValue
             };
-
-            // UI Loading state
-            const originalText = submitBtn.innerText;
-            submitBtn.innerText = 'ĐANG GIẢI MÃ LÁ SỐ...';
-            submitBtn.disabled = true;
 
             // Gắn tín hiệu gọi Backend
             fetch('/api/divination/process', {
@@ -181,21 +219,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 decodingTarget.innerHTML = decodingText;
 
                 resultsSection.classList.remove('hidden');
-
-                setTimeout(() => {
-                    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-
-                submitBtn.innerText = originalText;
-                submitBtn.disabled = false;
+                const resultsOverlay = document.getElementById('results-overlay');
+                if (resultsOverlay) resultsOverlay.classList.add('active');
 
                 appendHistory(data.fullname || fullnameValue, data.category || categoryValue, data.dob || dobValue, decodingText);
             })
             .catch(error => {
                 console.error("Lỗi:", error);
                 alert("Đã xảy ra lỗi khi giải mã lá số. Vui lòng thử lại!");
-                submitBtn.innerText = originalText;
-                submitBtn.disabled = false;
+                // Revert animation on error
+                if(wheelImgBtn) wheelImgBtn.classList.remove('fast-spin');
+                if(inputCards) inputCards.forEach(card => card.classList.remove('sucked-in'));
             });
         });
     }
