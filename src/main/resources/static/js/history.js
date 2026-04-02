@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="history-category">Tra cứu: ${item.category}</p>
             `;
             newItem.addEventListener('click', () => {
-                window.location.href = `dashboard.html?history_id=${i}`;
+                window.location.href = `/dashboard?history_id=${i}`;
             });
             sidebarHistoryList.appendChild(newItem);
         }
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.addEventListener('mouseleave', () => card.style.transform = 'translateY(0)');
 
             card.addEventListener('click', () => {
-                window.location.href = 'dashboard.html?history_id=' + i;
+                window.location.href = '/dashboard?history_id=' + i;
             });
 
             grid.appendChild(card);

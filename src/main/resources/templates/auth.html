@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 
 <body class="auth-body">
@@ -126,7 +126,7 @@
         </div>
     </div>
 
-    <script src="js/global.js"></script>
+    <script th:src="@{/js/global.js}"></script>
     <script>
         // Wait for the DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', () => {
@@ -241,7 +241,7 @@
                                 // localStorage.setItem('user', JSON.stringify(result.data));
 
                                 // Chuyển hướng sang dashboard
-                                window.location.href = 'dashboard.html';
+                                window.location.href = '/dashboard';
                             } else {
                                 alert('Đăng nhập thất bại: ' + (result.message || 'Tài khoản hoặc mật khẩu không chính xác.'));
                             }

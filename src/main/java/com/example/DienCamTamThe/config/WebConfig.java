@@ -9,7 +9,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        // Tự động chuyển hướng từ '/' sang trang '/auth.html' cho tiện lợi
-        registry.addRedirectViewController("/", "/auth.html");
+        // Tự động chuyển hướng từ '/' sang trang '/auth' cho tiện lợi
+        registry.addRedirectViewController("/", "/auth");
     }
 }

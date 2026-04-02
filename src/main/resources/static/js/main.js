@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Simulate network request then redirect
                 setTimeout(() => {
-                    window.location.href = 'dashboard.html';
+                    window.location.href = '/dashboard';
                 }, 800);
             });
         }
