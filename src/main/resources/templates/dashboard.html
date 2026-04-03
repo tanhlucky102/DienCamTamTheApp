@@ -279,6 +279,17 @@
         .card-tr { top: 18.5%; left: 104.4%; }
         .card-mr { top: 50%; left: 112.8%; } 
         .card-br { top: 81.4%; left: 104.4%; } 
+        
+        .disabled-card {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: grayscale(1);
+            transition: all 0.5s ease;
+        }
+        .disabled-card:hover {
+            filter: none;
+            opacity: 0.8;
+        }
 
         /* Tăng cỡ chữ để tương vứng hộp to */
         .card-header span {
@@ -527,23 +538,13 @@
                 </select>
             </div>
 
-            <!-- Thẻ 3: CHỌN LỊCH (Góc Trên Phải) -->
+            <!-- THẺ 3: ĐÃ XÓA CHỌN LỊCH -->
+
+            <!-- Thẻ 4: NGÀY SINH (Góc Trên Phải) -->
             <div class="input-card card-tr">
                 <div class="card-header">
-                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11z"/></svg>
-                    CHỌN LỊCH
-                </div>
-                <select id="calendar-type">
-                    <option value="Xem theo lịch dương">Lịch Dương</option>
-                    <option value="Xem theo lịch âm">Lịch Âm</option>
-                </select>
-            </div>
-
-            <!-- Thẻ 4: NGÀY SINH (Sườn Phải) -->
-            <div class="input-card card-mr">
-                <div class="card-header">
                     <svg fill="currentColor" viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
-                    NGÀY THÁNG NĂM SINH
+                    NGÀY SINH (DƯƠNG LỊCH)
                 </div>
                 <div class="date-inputs">
                     <input type="number" id="birth-day" placeholder="Ngày" required min="1" max="31">
@@ -552,8 +553,8 @@
                 </div>
             </div>
 
-            <!-- Thẻ 5: GIỜ SINH (Dưới Phải) -->
-            <div class="input-card card-br">
+            <!-- Thẻ 5: GIỜ SINH (Sườn Phải) -->
+            <div class="input-card card-mr">
                 <div class="card-header">
                     <svg fill="currentColor" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
                     GIỜ SINH
@@ -583,6 +584,20 @@
                     <option value="Công danh - sự nghiệp">Công danh - sự nghiệp</option>
                     <option value="Tài lộc - tiền bạc">Tài lộc - tiền bạc</option>
                 </select>
+            </div>
+
+            <!-- THẺ 6: VỢ CHỒNG (Góc Dưới Phải) -->
+            <div id="partner-card" class="input-card card-br disabled-card">
+                <div class="card-header">
+                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    VỢ / CHỒNG (DƯƠNG LỊCH)
+                </div>
+                <div class="date-inputs">
+                    <input type="number" id="partner-birth-day" placeholder="Ngày" min="1" max="31">
+                    <input type="number" id="partner-birth-month" placeholder="Tháng" min="1" max="12">
+                    <input type="number" id="partner-birth-year" placeholder="Năm" min="1900" max="2100">
+                </div>
+                <p style="font-size: 0.65rem; color: #856404; margin-top: 5px; font-style: italic;">* Chỉ nhập khi xem Duyên Nợ</p>
             </div>
             
             <div class="click-hint">Bấm vào Bát Quái để Tra Cứu</div>
