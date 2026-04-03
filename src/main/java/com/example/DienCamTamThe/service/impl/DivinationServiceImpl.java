@@ -2,6 +2,7 @@ package com.example.DienCamTamThe.service.impl;
 
 import com.example.DienCamTamThe.entity.*;
 import com.example.DienCamTamThe.repository.*;
+import com.example.DienCamTamThe.util.LunarCalendarUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,15 +25,34 @@ public class DivinationServiceImpl {
         if (category == null)
             category = "Tất cả";
 
-        // Lấy hạng mục cần tra cứu, mặc định là Tất cả
-        int birthYear = 1999;
-        int ngaySinh = 1;
-        int thangSinh = 1;
+        // Lấy thông số đầu vào
+        int rawYear = 1999;
+        int rawDay = 1;
+        int rawMonth = 1;
         try {
             birthYear = Integer.parseInt(request.getBirthYear());
             ngaySinh = Integer.parseInt(request.getBirthDay());
             thangSinh = Integer.parseInt(request.getBirthMonth());
         } catch (Exception e) {
+        }
+
+        // Chuyển đổi sang Âm lịch nếu là Dương lịch
+        int birthYear, ngaySinh, thangSinh;
+        String calendarNote = "";
+        
+        String calendarType = request.getCalendarType() != null ? request.getCalendarType().toLowerCase() : "";
+        boolean isSolar = calendarType.contains("solar") || calendarType.contains("duong") || calendarType.contains("dương");
+        
+        if (isSolar) {
+            LunarCalendarUtil.LunarDate lunar = LunarCalendarUtil.convertSolarToLunar(rawDay, rawMonth, rawYear, 7.0);
+            birthYear = lunar.year;
+            thangSinh = lunar.month;
+            ngaySinh = lunar.day;
+            calendarNote = String.format(" (Đã quy đổi từ Dương lịch %02d/%02d/%d)", rawDay, rawMonth, rawYear);
+        } else {
+            birthYear = rawYear;
+            thangSinh = rawMonth;
+            ngaySinh = rawDay;
         }
 
         String gioSinhFull = request.getBirthHour();
@@ -46,15 +66,17 @@ public class DivinationServiceImpl {
         String[] chiArray = { "than", "dau", "tuat", "hoi", "ty1", "suu", "dan", "mao", "thin", "ty2", "ngo", "mui" };
         String chi = chiArray[birthYear % 12];
 
+        String can = LunarCalendarUtil.getCan(birthYear).toLowerCase();
+        String chi = LunarCalendarUtil.getChi(birthYear).toLowerCase();
         String cot = mapChiToCot(chi);
-        String mang = calculateMenh(birthYear % 10, birthYear % 12);
+        String mang = calculateMenh(getCanIndex(can), getChiIndex(chi));
 
-        content.append("<div class='log-box'>");
-        content.append("<strong>[Log Hệ Thống] Thông số nội suy:</strong><br>");
-        content.append("- Bạn tuổi: ").append(can.toUpperCase()).append(" ").append(chi.toUpperCase()).append("<br>");
-        content.append("- Mệnh (Ngũ Hành): ").append(mang.toUpperCase()).append("<br>");
-        content.append("- Cốt (Xương con gì): ").append(cot.toUpperCase()).append("<br>");
-        content.append("<em>=> Tiến hành rà soát chuyên mục: <b>").append(category).append("</b></em>");
+        content.append("<div class='log-box' style='background: #fdf6e3; padding: 15px; border-radius: 8px; border: 1px solid #eee8d5; margin-bottom: 20px; color: #657b83'>");
+        content.append("<strong style='color: #b58900;'>[Thông số Diễn Cầm]</strong><br>");
+        content.append("- Ngày sinh (Âm lịch): <b>").append(ngaySinh).append("/").append(thangSinh).append("/").append(birthYear).append("</b>").append(calendarNote).append("<br>");
+        content.append("- Bạn tuổi: <b>").append(can.toUpperCase()).append(" ").append(chi.toUpperCase()).append("</b><br>");
+        content.append("- Mạng (Ngũ Hành): <b>").append(mang.toUpperCase()).append("</b> - Cốt (Xương): <b>").append(cot.toUpperCase()).append("</b><br>");
+        content.append("<em>=> Đang tra cứu chuyên mục: <b>").append(category).append("</b></em>");
         content.append("</div>");
 
         List<BookSection> sections = sectionRepo.findAllByOrderBySectionNoAsc();
@@ -122,7 +144,6 @@ public class DivinationServiceImpl {
     }
 
     // --- SỞ 8: Giờ sinh tam thế ---
-    // Tìm kiếm lời đoán dựa trên giờ sinh của người dùng
     private void appendSo8(StringBuilder content, String sectionCode, String canChiGio) {
         List<BookEntry> entries = entryRepo.findBySectionCode(sectionCode);
         if (entries.isEmpty()) {
@@ -131,7 +152,6 @@ public class DivinationServiceImpl {
         }
 
         BookEntry matched = null;
-        // Tìm entry có input_data chứa giờ sinh khớp
         for (BookEntry e : entries) {
             String inputStr = e.getInputData() != null ? e.getInputData().toLowerCase() : "";
             if (canChiGio != null && inputStr.contains(canChiGio.toLowerCase())) {
@@ -144,7 +164,6 @@ public class DivinationServiceImpl {
             matched = entries.get(0);
 
         if (matched.getOutputData() != null) {
-            // Hiển thị giờ sinh từ input_data
             String tenGio = extractJsonStringField(matched.getInputData(), "gio_sinh");
             if (tenGio == null || tenGio.isEmpty())
                 tenGio = canChiGio;
@@ -156,7 +175,6 @@ public class DivinationServiceImpl {
     }
 
     // --- SỞ 9: Hiệu ngày ---
-    // Tra cứu tên hiệu và lời đoán dựa trên ngày sinh âm lịch
     private void appendSo9(StringBuilder content, String sectionCode, int ngaySinh) {
         List<BookEntry> entries = entryRepo.findBySectionCode(sectionCode);
         if (entries.isEmpty()) {
@@ -167,10 +185,8 @@ public class DivinationServiceImpl {
         BookEntry matched = null;
         String foundTenHieu = null;
 
-        // Tìm entry có input_data chứa ngày sinh
         for (BookEntry e : entries) {
             String inputStr = e.getInputData() != null ? e.getInputData() : "";
-            // Kiểm tra dạng JSON: "ngay": 15 hoặc "ngay_am_lich": "...,15,..."
             String ngayField = extractJsonStringField(inputStr, "ngay_am_lich");
             String ngayNum = extractJsonNumberField(inputStr, "ngay");
 
@@ -198,7 +214,6 @@ public class DivinationServiceImpl {
     }
 
     // --- SỞ 10: Tổng luận ---
-    // Đưa ra lời đoán tổng quát dựa trên tháng thọ thai và tháng sinh
     private void appendSo10(StringBuilder content, String sectionCode, int thangThoThai, int thangSinh) {
         List<BookEntry> entries = entryRepo.findBySectionCode(sectionCode);
         if (entries.isEmpty()) {
@@ -207,7 +222,6 @@ public class DivinationServiceImpl {
         }
 
         BookEntry matched = null;
-        // Tìm entry khớp tháng thọ thai + tháng sinh
         for (BookEntry e : entries) {
             String inputStr = e.getInputData() != null ? e.getInputData() : "";
             String ttField = extractJsonNumberField(inputStr, "thang_tho_thai");
@@ -225,7 +239,6 @@ public class DivinationServiceImpl {
                 break;
             } // chỉ có trường tháng thọ thai
         }
-        // Fallback tìm theo tháng thọ thai
         if (matched == null) {
             for (BookEntry e : entries) {
                 String inputStr = e.getInputData() != null ? e.getInputData() : "";
@@ -249,7 +262,6 @@ public class DivinationServiceImpl {
     }
 
     // --- Xử lý các sở khác ---
-    // Áp dụng logic tra cứu chung cho các mục còn lại (theo Cốt, Mệnh, Tuổi...)
     private void appendOtherSections(StringBuilder content, BookSection sec, String cot, String mang) {
         List<BookEntry> entries = entryRepo.findBySectionCode(sec.getSectionCode());
         if (entries.isEmpty()) {
@@ -258,7 +270,7 @@ public class DivinationServiceImpl {
         }
 
         BookEntry matched = null;
-        String vietName = mapChiToVietnamese(mapCotToChi(cot)); // Lấy tên tiếng Việt (Tý, Sửu...)
+        String vietName = mapChiToVietnamese(mapCotToChi(cot));
 
         for (BookEntry e : entries) {
             String inJson = e.getInputData();
@@ -271,14 +283,12 @@ public class DivinationServiceImpl {
                 break;
             }
 
-            // 2. Kiểm tra "cot"
             String eCot = extractJsonStringField(inJson, "cot");
             if (eCot != null && eCot.equalsIgnoreCase(cot)) {
                 matched = e;
                 break;
             }
 
-            // 3. So khớp theo Mạng (Hoả, Thổ, Kim...)
             String eMang = extractJsonStringField(inJson, "mang");
             if (eMang == null)
                 eMang = extractJsonStringField(inJson, "menh");
@@ -287,7 +297,6 @@ public class DivinationServiceImpl {
                 break;
             }
 
-            // 4. Kiểm tra "tuoi" (So khớp tiếng Việt có dấu: Tý, Sửu...)
             String eTuoi = extractJsonStringField(inJson, "tuoi");
             if (eTuoi != null && eTuoi.equalsIgnoreCase(vietName)) {
                 matched = e;
@@ -344,8 +353,6 @@ public class DivinationServiceImpl {
         }
     }
 
-    // --- Các hàm hỗ trợ xử lý dữ liệu ---
-
     private String parseOutputJsonToText(String rawOut) {
         if (rawOut == null || rawOut.isBlank())
             return "";
@@ -354,39 +361,31 @@ public class DivinationServiceImpl {
         }
         try {
             StringBuilder sb = new StringBuilder();
-
             String loiDoan = extractJsonStringField(rawOut, "loi_doan");
             if (loiDoan != null && !loiDoan.isEmpty()) {
                 sb.append("<p><strong>Lời đoán:</strong> ").append(loiDoan).append("</p>");
             }
-
             String summary = extractJsonStringField(rawOut, "result_summary");
             if (summary != null && !summary.isEmpty()) {
                 sb.append("<p><strong>Tổng quan:</strong> ").append(summary).append("</p>");
             }
-
             String text = extractJsonStringField(rawOut, "result_text");
             if (text != null && !text.isEmpty()) {
                 sb.append("<p>").append(text.replace("\n", "<br>")).append("</p>");
             }
-
             String poem = extractJsonStringField(rawOut, "poem");
             if (poem != null && !poem.isEmpty()) {
                 sb.append("<blockquote class='poem-box'>")
                         .append(poem.replace("\n", "<br>"))
                         .append("</blockquote>");
             }
-
-            if (sb.length() == 0) {
-                return "<p>" + rawOut.replace("\n", "<br>") + "</p>";
-            }
+            if (sb.length() == 0) return "<p>" + rawOut.replace("\n", "<br>") + "</p>";
             return sb.toString();
         } catch (Exception e) {
             return "<p>" + rawOut.replace("\n", "<br>") + "</p>";
         }
     }
 
-    /** Hàm trích xuất giá trị chuỗi từ định dạng JSON đơn giản */
     private String extractJsonStringField(String json, String field) {
         if (json == null)
             return null;
@@ -414,7 +413,6 @@ public class DivinationServiceImpl {
         return val;
     }
 
-    /** Hàm trích xuất giá trị số từ định dạng JSON đơn giản */
     private String extractJsonNumberField(String json, String field) {
         if (json == null)
             return null;
@@ -441,7 +439,6 @@ public class DivinationServiceImpl {
         return json.substring(start, end);
     }
 
-    /** Kiểm tra chuỗi ngày "1, 2, 15, 30" có chứa ngày ngaySinh không */
     private boolean containsDayNumber(String ngayStr, int ngaySinh) {
         String target = String.valueOf(ngaySinh);
         String[] parts = ngayStr.split("[,\\s]+");
@@ -455,7 +452,6 @@ public class DivinationServiceImpl {
                 || ngayStr.equals(target);
     }
 
-    // --- Thuật toán tính toán thông số Diễn Cầm ---
     private String extractCanChi(String rawGio) {
         if (rawGio == null || rawGio.isEmpty())
             return "Ngọ";
@@ -492,6 +488,22 @@ public class DivinationServiceImpl {
             default:
                 return "chuot";
         }
+    }
+
+    private int getCanIndex(String can) {
+        String[] cans = {"canh", "tan", "nham", "quy", "giap", "at", "binh", "dinh", "mau", "ky"};
+        for (int i = 0; i < cans.length; i++) {
+            if (cans[i].equalsIgnoreCase(can)) return i;
+        }
+        return 0;
+    }
+
+    private int getChiIndex(String chi) {
+        String[] chis = {"than", "dau", "tuat", "hoi", "ty1", "suu", "dan", "mao", "thin", "ty2", "ngo", "mui"};
+        for (int i = 0; i < chis.length; i++) {
+            if (chis[i].equalsIgnoreCase(chi)) return i;
+        }
+        return 0;
     }
 
     private String calculateMenh(int canIndex, int chiIndex) {
@@ -531,7 +543,6 @@ public class DivinationServiceImpl {
             case 5:
                 return "moc";
         }
-        return "kim";
     }
 
     private String mapChiToVietnamese(String chi) {
