@@ -24,8 +24,9 @@ public class DivinationController {
         response.setCategory(request.getLookupCategory());
 
         // Chuyển dữ liệu sang Service xử lý
-        String content = divinationServiceImpl.processDivination(request);
-        response.setContent(content);
+        java.util.Map<String, String> resultMap = divinationServiceImpl.processDivination(request);
+        response.setContent(resultMap.get("html"));
+        response.setAnalysisJson(resultMap.get("json"));
 
         return ResponseEntity.ok(response);
     }
