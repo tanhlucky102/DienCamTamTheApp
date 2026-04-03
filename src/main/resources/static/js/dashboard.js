@@ -144,9 +144,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = historyData[index];
         if (!data) return;
 
-        // Bỏ việc bật Modal cũ:
-        // Đảo qua mở Flashcards
-        showFlashcards(data.content, data.fullname, data.category);
+        // Trigger full divination animation — giống bấm Bát Quái
+        setSpinSpeed(12);
+        const inputCardsAll = document.querySelectorAll('.input-card');
+        if (inputCardsAll) inputCardsAll.forEach(card => card.classList.add('sucked-in'));
+
+        // Đợi animation hoàn thành rồi mới tung thẻ
+        setTimeout(() => {
+            showFlashcards(data.content, data.fullname, data.category);
+        }, 1200);
 
         if (window.innerWidth <= 1024) closeSidebar();
     }
