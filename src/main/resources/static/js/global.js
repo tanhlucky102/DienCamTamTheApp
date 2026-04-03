@@ -23,5 +23,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Add more global behaviors here if needed
+    // 3. Account Dropdown Toggle
+    const accountBtn = document.getElementById('account-btn');
+    const accountDropdown = document.getElementById('account-dropdown');
+
+    if (accountBtn && accountDropdown) {
+        accountBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (accountDropdown.style.display === 'none' || accountDropdown.classList.contains('show') === false) {
+                accountDropdown.style.display = 'flex';
+                // Trigger reflow
+                void accountDropdown.offsetWidth;
+                accountDropdown.classList.add('show');
+            } else {
+                accountDropdown.classList.remove('show');
+                setTimeout(() => accountDropdown.style.display = 'none', 300);
+            }
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!accountBtn.contains(e.target) && !accountDropdown.contains(e.target)) {
+                accountDropdown.classList.remove('show');
+                setTimeout(() => {
+                    if(!accountDropdown.classList.contains('show')) {
+                       accountDropdown.style.display = 'none';
+                    }
+                }, 300);
+            }
+        });
+    }
+
 });
