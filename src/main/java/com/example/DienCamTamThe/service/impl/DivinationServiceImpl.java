@@ -30,9 +30,9 @@ public class DivinationServiceImpl {
         int rawDay = 1;
         int rawMonth = 1;
         try {
-            birthYear = Integer.parseInt(request.getBirthYear());
-            ngaySinh = Integer.parseInt(request.getBirthDay());
-            thangSinh = Integer.parseInt(request.getBirthMonth());
+            rawYear = Integer.parseInt(request.getBirthYear());
+            rawDay = Integer.parseInt(request.getBirthDay());
+            rawMonth = Integer.parseInt(request.getBirthMonth());
         } catch (Exception e) {
         }
 
@@ -60,11 +60,6 @@ public class DivinationServiceImpl {
         int thangThoThai = thangSinh - 9;
         if (thangThoThai <= 0)
             thangThoThai += 12;
-
-        String[] canhArray = { "canh", "tan", "nham", "quy", "giap", "at", "binh", "dinh", "mau", "ky" };
-        String can = canhArray[birthYear % 10];
-        String[] chiArray = { "than", "dau", "tuat", "hoi", "ty1", "suu", "dan", "mao", "thin", "ty2", "ngo", "mui" };
-        String chi = chiArray[birthYear % 12];
 
         String can = LunarCalendarUtil.getCan(birthYear).toLowerCase();
         String chi = LunarCalendarUtil.getChi(birthYear).toLowerCase();
@@ -542,6 +537,8 @@ public class DivinationServiceImpl {
                 return "tho";
             case 5:
                 return "moc";
+            default:
+                return "kim";
         }
     }
 
