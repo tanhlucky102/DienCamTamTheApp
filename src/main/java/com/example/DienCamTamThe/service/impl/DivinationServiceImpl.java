@@ -4,6 +4,7 @@ import com.example.DienCamTamThe.entity.*;
 import com.example.DienCamTamThe.repository.*;
 import com.example.DienCamTamThe.util.LunarCalendarUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +18,8 @@ public class DivinationServiceImpl {
     private BookSectionRepository sectionRepo;
 
     @Autowired
-    private BookEntryRepository entryRepo;
+    private JdbcTemplate jdbcTemplate;
+
 
     public Map<String, String> processDivination(DivinationRequest request) {
         StringBuilder content = new StringBuilder();
@@ -65,7 +67,6 @@ public class DivinationServiceImpl {
         String can = LunarCalendarUtil.getCan(birthYear).toLowerCase();
         String chi = LunarCalendarUtil.getChi(birthYear).toLowerCase();
         String cot = mapChiToCot(chi);
-        String mangShort = calculateMenh(getCanIndex(can), getChiIndex(chi));
         String napAmFull = LunarCalendarUtil.getNapAm(birthYear);
         String canXuong = LunarCalendarUtil.getCanXuong(birthYear, thangSinh, ngaySinh, gioSinhFull);
         
@@ -119,6 +120,20 @@ public class DivinationServiceImpl {
         }
         content.append("</div>");
 
+        int canId = getDatabaseCanId(birthYear);
+        int chiId = getDatabaseChiId(birthYear);
+        int nguHanhId = 1; // Default
+        String menhChiTiet = "";
+        try {
+            List<Map<String, Object>> mRes = jdbcTemplate.queryForList("SELECT NguHanhID, ChiTietMang FROM so04_tuoimang WHERE CanID = ? AND ChiID = ?", canId, chiId);
+            if (!mRes.isEmpty()) {
+                nguHanhId = (Integer) mRes.get(0).get("NguHanhID");
+                menhChiTiet = (String) mRes.get(0).get("ChiTietMang");
+            }
+        } catch(Exception e){}
+
+        if(napAmFull == null || napAmFull.isEmpty()) napAmFull = menhChiTiet;
+
         List<BookSection> sections = sectionRepo.findAllByOrderBySectionNoAsc();
         boolean foundAny = false;
 
@@ -130,14 +145,62 @@ public class DivinationServiceImpl {
             content.append("<hr><h4>Sở ").append(sec.getSectionNo()).append(". ").append(sec.getTitle())
                     .append("</h4>");
 
-            if (sec.getSectionNo() == 8) {
-                appendSo8(content, sec.getSectionCode(), canChiGio);
+            if (sec.getSectionNo() == 4) {
+                 appendSo04(content, canId, chiId);
+            } else if (sec.getSectionNo() == 7) {
+                 appendSo07(content, nguHanhId, thangSinh);
+            } else if (sec.getSectionNo() == 8) {
+                 appendSo08(content, gioSinhFull, request.getBirthMinute(), canChiGio);
             } else if (sec.getSectionNo() == 9) {
-                appendSo9(content, sec.getSectionCode(), ngaySinh);
-            } else if (sec.getSectionNo() == 10) {
-                appendSo10(content, sec.getSectionCode(), thangThoThai, thangSinh);
+                 appendSo09(content, ngaySinh);
+            } else if (sec.getSectionNo() == 11) {
+                 appendSo11(content, nguHanhId, thangSinh);
+            } else if (sec.getSectionNo() == 12) {
+                 appendSo12(content, chiId, thangSinh);
+            } else if (sec.getSectionNo() == 13) {
+                 appendSo13(content, canId, chiId, thangSinh, sec.getTitle());
+            } else if (sec.getSectionNo() == 14) {
+                 appendSo14(content, chiId, thangSinh);
+            } else if (sec.getSectionNo() == 15) {
+                 appendSo15(content, nguHanhId, thangSinh);
+            } else if (sec.getSectionNo() == 16) {
+                 appendSo16(content, chiId, thangSinh);
+            } else if (sec.getSectionNo() == 17) {
+                 appendSo17(content, chiId, thangSinh);
+            } else if (sec.getSectionNo() == 18) {
+                 appendSo18(content, canId, chiId, thangSinh);
+            } else if (sec.getSectionNo() == 19) {
+                 appendSo19(content, chiId, thangSinh, request.getGender());
+            } else if (sec.getSectionNo() == 20) {
+                 appendSo20(content, canId, chiId);
+            } else if (sec.getSectionNo() == 21) {
+                 appendSo21(content, nguHanhId, chiId);
+            } else if (sec.getSectionNo() == 22) {
+                 appendSo22(content, thangSinh, ngaySinh);
+            } else if (sec.getSectionNo() == 23) {
+                 appendSo23(content, chiId, thangSinh);
+            } else if (sec.getSectionNo() == 24) {
+                 appendSo24(content, chiId, thangSinh);
+            } else if (sec.getSectionNo() == 25) {
+                 appendSo25(content, chiId, thangSinh);
+            } else if (sec.getSectionNo() == 26) {
+                 appendSo26(content, chiId, thangSinh);
+            } else if (sec.getSectionNo() == 27) {
+                 appendSo27(content, canId, chiId, request.getGender());
+            } else if (sec.getSectionNo() == 28) {
+                 appendSo28(content, request.getGender(), birthYear);
+            } else if (sec.getSectionNo() == 29) {
+                 appendSo29(content, request.getGender(), birthYear);
+            } else if (sec.getSectionNo() == 30) {
+                 appendSo30(content, chiId, thangSinh);
+            } else if (sec.getSectionNo() == 31) {
+                 appendSo31(content, nguHanhId, thangSinh);
+            } else if (sec.getSectionNo() == 32) {
+                 appendSo32(content, chiId, thangSinh);
+            } else if (sec.getSectionNo() == 34) {
+                 appendSo34(content, chiId, thangSinh);
             } else {
-                appendOtherSections(content, sec, cot, mangShort);
+                content.append("<p><em>(Dữ liệu Sở ").append(sec.getSectionNo()).append(" đang được phân tích và cập nhật DB...)</em></p>");
             }
         }
 
@@ -187,169 +250,392 @@ public class DivinationServiceImpl {
         return true;
     }
 
-    // --- SỞ 8: Giờ sinh tam thế ---
-    private void appendSo8(StringBuilder content, String sectionCode, String canChiGio) {
-        List<BookEntry> entries = entryRepo.findBySectionCode(sectionCode);
-        if (entries.isEmpty()) {
-            content.append("<p><em>(Dữ liệu Sở 8 đang được cập nhật...)</em></p>");
-            return;
-        }
-
-        BookEntry matched = null;
-        for (BookEntry e : entries) {
-            String inputStr = e.getInputData() != null ? e.getInputData().toLowerCase() : "";
-            if (canChiGio != null && inputStr.contains(canChiGio.toLowerCase())) {
-                matched = e;
-                break;
+    // --- SỞ 04: Mạng ---
+    private void appendSo04(StringBuilder content, int canId, int chiId) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT ChiTietMang FROM so04_tuoimang WHERE CanID = ? AND ChiID = ?", canId, chiId);
+            if (!rows.isEmpty()) {
+                String mang = (String) rows.get(0).get("ChiTietMang");
+                content.append("<p><strong>Ngũ hành nạp âm:</strong> ").append(mang).append("</p>");
+            } else {
+                content.append("<p><em>(Không tìm thấy dữ liệu)</em></p>");
             }
-        }
-        if (matched == null) matched = entries.get(0);
-
-        if (matched.getOutputData() != null) {
-            String tenGio = extractJsonStringField(matched.getInputData(), "gio_sinh");
-            if (tenGio == null || tenGio.isEmpty()) tenGio = canChiGio;
-            content.append("<p><strong>Giờ sinh:</strong> ").append(tenGio).append("</p>");
-            content.append(parseOutputJsonToText(matched.getOutputData()));
-        } else {
-            content.append("<p><em>(Không tìm thấy lời đoán cho giờ ").append(canChiGio).append(")</em></p>");
+        } catch (Exception e) {
+            content.append("<p><em>(Lỗi tra cứu bảng so04_tuoimang)</em></p>");
         }
     }
 
-    // --- SỞ 9: Hiệu ngày ---
-    private void appendSo9(StringBuilder content, String sectionCode, int ngaySinh) {
-        List<BookEntry> entries = entryRepo.findBySectionCode(sectionCode);
-        if (entries.isEmpty()) {
-            content.append("<p><em>(Dữ liệu Sở 9 đang được cập nhật...)</em></p>");
-            return;
-        }
-
-        BookEntry matched = null;
-        String foundTenHieu = null;
-
-        for (BookEntry e : entries) {
-            String inputStr = e.getInputData() != null ? e.getInputData() : "";
-            String ngayField = extractJsonStringField(inputStr, "ngay_am_lich");
-            String ngayNum = extractJsonNumberField(inputStr, "ngay");
-
-            boolean matched1 = ngayField != null && containsDayNumber(ngayField, ngaySinh);
-            boolean matched2 = ngayNum != null && Integer.parseInt(ngayNum) == ngaySinh;
-
-            if (matched1 || matched2) {
-                matched = e;
-                foundTenHieu = extractJsonStringField(inputStr, "ten_hieu");
-                break;
+    // --- SỞ 07: Hồn thác ---
+    private void appendSo07(StringBuilder content, int nguHanhId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT LoiGiai FROM so07_hondauthai WHERE NguHanhID = ? AND ThangSanh = ?", nguHanhId, thangSinh);
+            if (!rows.isEmpty()) {
+                String lg = (String) rows.get(0).get("LoiGiai");
+                content.append("<p>").append(lg.replace("\n", "<br>")).append("</p>");
+            } else {
+                content.append("<p><em>(Không tìm thấy dữ liệu hồn thác)</em></p>");
             }
-        }
-
-        if (matched == null) matched = entries.get(0);
-
-        if (foundTenHieu != null && !foundTenHieu.isEmpty()) {
-            content.append("<p><strong>Hiệu ngày:</strong> ").append(foundTenHieu).append("</p>");
-        }
-        if (matched.getOutputData() != null) {
-            content.append(parseOutputJsonToText(matched.getOutputData()));
-        } else {
-            content.append("<p><em>(Không tìm thấy lời đoán cho ngày ").append(ngaySinh).append(")</em></p>");
+        } catch (Exception e) {
+            content.append("<p><em>(Lỗi tra cứu)</em></p>");
         }
     }
 
-    // --- SỞ 10: Tổng luận ---
-    private void appendSo10(StringBuilder content, String sectionCode, int thangThoThai, int thangSinh) {
-        List<BookEntry> entries = entryRepo.findBySectionCode(sectionCode);
-        if (entries.isEmpty()) {
-            content.append("<p><em>(Dữ liệu Sở 10 đang được cập nhật...)</em></p>");
-            return;
-        }
-
-        BookEntry matched = null;
-        for (BookEntry e : entries) {
-            String inputStr = e.getInputData() != null ? e.getInputData() : "";
-            String ttField = extractJsonNumberField(inputStr, "thang_tho_thai");
-            String tsField = extractJsonNumberField(inputStr, "thang_sinh");
-
-            boolean matchTT = ttField != null && Integer.parseInt(ttField) == thangThoThai;
-            boolean matchTS = tsField != null && Integer.parseInt(tsField) == thangSinh;
-
-            if (matchTT && matchTS) {
-                matched = e;
-                break;
+    // --- SỞ 08: Giờ sinh tam thế ---
+    private void appendSo08(StringBuilder content, String hourInput, String minuteInput, String canChiGio) {
+        int chiGioId = getDatabaseChiIdForHour(hourInput);
+        String giaiDoan = "Giữa";
+        try {
+            if (minuteInput != null && !minuteInput.isEmpty()) {
+                int min = Integer.parseInt(minuteInput);
+                if (min < 40) giaiDoan = "Đầu";
+                else if (min < 80) giaiDoan = "Giữa";
+                else giaiDoan = "Sau";
             }
-            if (matchTT && tsField == null) {
-                matched = e;
-                break;
+        } catch (Exception e) {}
+
+        content.append("<p><strong>Giờ sinh:</strong> ").append(canChiGio).append(" (Giai đoạn: ").append(giaiDoan).append(")</p>");
+        
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT LoiGiai FROM so08_36giosanh WHERE ChiID = ? AND GiaiDoan = ?", chiGioId, giaiDoan);
+            if (!rows.isEmpty()) {
+                String lg = (String) rows.get(0).get("LoiGiai");
+                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
+            } else {
+                content.append("<p><em>(Dữ liệu giờ ").append(canChiGio).append(" giai đoạn ").append(giaiDoan).append(" chưa được cập nhật trong Database. Xin đợi bản vá tiếp theo!)</em></p>");
             }
+        } catch (Exception e) {
+            content.append("<p><em>(Lỗi tra cứu bảng so08_36giosanh)</em></p>");
         }
-        if (matched == null) {
-            for (BookEntry e : entries) {
-                String inputStr = e.getInputData() != null ? e.getInputData() : "";
-                String ttField = extractJsonNumberField(inputStr, "thang_tho_thai");
-                if (ttField != null && Integer.parseInt(ttField) == thangThoThai) {
-                    matched = e;
-                    break;
+    }
+
+    // --- SỞ 09: Hiệu ngày ---
+    private void appendSo09(StringBuilder content, int ngaySinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenSao, LoiGiai FROM so09_ngaysanh WHERE Ngay = ?", ngaySinh);
+            if (!rows.isEmpty()) {
+                String tenSao = (String) rows.get(0).get("TenSao");
+                String lg = (String) rows.get(0).get("LoiGiai");
+                content.append("<p><strong>Sao chiếu ngày:</strong> ").append(tenSao).append("</p>");
+                content.append("<p>").append(lg.replace("\n", "<br>")).append("</p>");
+            } else {
+                content.append("<p><em>(Không tìm thấy dữ liệu cho ngày ").append(ngaySinh).append(")</em></p>");
+            }
+        } catch (Exception e) {
+            content.append("<p><em>(Lỗi tra cứu bảng so09_ngaysanh)</em></p>");
+        }
+    }
+
+    // --- SỞ 11: Làm ăn nghề nghiệp gì ---
+    private void appendSo11(StringBuilder content, int nguHanhId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT NhomNghe FROM so11_nghenghiep WHERE NguHanhID = ? AND ThangSanh = ?", nguHanhId, thangSinh);
+            if (!rows.isEmpty()) {
+                String lg = (String) rows.get(0).get("NhomNghe");
+                content.append("<p><strong>Nhóm nghề khuyên làm:</strong> ").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
+            } else {
+                content.append("<p><em>(Không có dữ liệu nghề nghiệp)</em></p>");
+            }
+        } catch (Exception e) {
+            content.append("<p><em>(Lỗi tra cứu bảng so11)</em></p>");
+        }
+    }
+
+    // --- SỞ 12: Cốt con gì ---
+    private void appendSo12(StringBuilder content, int chiId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenCot, LoiGiai FROM so12_cotcongi WHERE Tuoi_ChiID = ? AND ThangSanh = ?", chiId, thangSinh);
+            if (!rows.isEmpty()) {
+                String tenCot = (String) rows.get(0).get("TenCot");
+                String lg = (String) rows.get(0).get("LoiGiai");
+                content.append("<p><strong>Cốt:</strong> Con ").append(tenCot).append("</p>");
+                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
+            } else {
+                content.append("<p><em>(Chưa có dữ liệu cốt cho tổ hợp này)</em></p>");
+            }
+        } catch (Exception e) {
+            content.append("<p><em>(Lỗi tra cứu bảng so12_cotcongi)</em></p>");
+        }
+    }
+
+    // --- SỞ 13: Các bảng sao/Lộc/Thú/Sát ---
+    private void appendSo13(StringBuilder content, int canId, int chiId, int thangSinh, String title) {
+        try {
+            if (title.contains("13d") || title.toLowerCase().contains("12 lộc")) {
+                List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenKetQua FROM so13_can_loc WHERE CanID = ? AND ThangSanh = ?", canId, thangSinh);
+                if (!rows.isEmpty()) content.append("<p><strong>Kết quả:</strong> ").append(rows.get(0).get("TenKetQua")).append("</p>");
+            }
+            else if (title.contains("13e") || title.toLowerCase().contains("chi bảng 1")) {
+                List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT KetQua, LoiGiai FROM so13_chi_thu WHERE ChiID = ? AND ThangSanh = ?", chiId, thangSinh);
+                if (!rows.isEmpty()) {
+                    content.append("<p><strong>Sao/Thú:</strong> ").append(rows.get(0).get("KetQua")).append("</p>");
+                    String lg = (String) rows.get(0).get("LoiGiai");
+                    if (lg != null) content.append("<p>").append(lg.replace("\n", "<br>")).append("</p>");
                 }
+            } else {
+               content.append("<p><em>(Chờ update truy vấn riêng cho nhánh ").append(title).append(")</em></p>");
             }
-        }
-        if (matched == null) matched = entries.get(0);
-
-        content.append("<p><em>Tháng thọ thai: ").append(thangThoThai).append(" | Tháng sinh: ").append(thangSinh).append("</em></p>");
-        if (matched.getOutputData() != null) {
-            content.append(parseOutputJsonToText(matched.getOutputData()));
-        } else {
-            content.append("<p><em>(Không tìm thấy lời đoán tương ứng)</em></p>");
+        } catch (Exception e) {
+            content.append("<p><em>(Lỗi tra cứu Sở 13)</em></p>");
         }
     }
 
-    // --- Xử lý các sở khác ---
-    private void appendOtherSections(StringBuilder content, BookSection sec, String cot, String mang) {
-        List<BookEntry> entries = entryRepo.findBySectionCode(sec.getSectionCode());
-        if (entries.isEmpty()) {
-            content.append("<p><em>(Dữ liệu đang được cập nhật...)</em></p>");
-            return;
-        }
+    // --- SỞ 14: Nuôi thú vật ---
+    private void appendSo14(StringBuilder content, int chiId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT KetQua, LoiGiai FROM so14_nuoithuvat WHERE ChiID = ? AND ThangSanh = ?", chiId, thangSinh);
+            if (!rows.isEmpty()) {
+                String lg = (String) rows.get(0).get("LoiGiai");
+                content.append("<p><strong>Đoán:</strong> ").append(rows.get(0).get("KetQua")).append("</p>");
+                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
+            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
+        } catch (Exception e) {}
+    }
 
-        BookEntry matched = null;
-        String vietName = mapChiToVietnamese(mapCotToChi(cot));
+    // --- SỞ 15: Ruộng đất ---
+    private void appendSo15(StringBuilder content, int nguHanhId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT KetQua, LoiGiai FROM so15_ruongdat WHERE NguHanhID = ? AND ThangSanh = ?", nguHanhId, thangSinh);
+            if (!rows.isEmpty()) {
+                String lg = (String) rows.get(0).get("LoiGiai");
+                content.append("<p><strong>Đoán:</strong> ").append(rows.get(0).get("KetQua")).append("</p>");
+                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
+            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
+        } catch (Exception e) {}
+    }
 
-        for (BookEntry e : entries) {
-            String inJson = e.getInputData();
-            if (inJson == null || inJson.isBlank()) continue;
+    // --- SỞ 16: Thi cử ---
+    private void appendSo16(StringBuilder content, int chiId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenTruc, LoiGiai FROM so16_hocgioido WHERE ChiID = ? AND ThangSanh = ?", chiId, thangSinh);
+            if (!rows.isEmpty()) {
+                String truc = (String) rows.get(0).get("TenTruc");
+                String lg = (String) rows.get(0).get("LoiGiai");
+                content.append("<p><strong>Học giỏi/dở:</strong> ").append(truc).append("</p>");
+                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
+            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
+        } catch (Exception e) {}
+    }
 
-            if (inJson.contains("tat_ca")) {
-                matched = e;
-                break;
+    // --- SỞ 17: Đi học ---
+    private void appendSo17(StringBuilder content, int chiId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenTu, LoiGiai FROM so17_thicu_kynhat WHERE ChiID = ? AND ThangSanh = ?", chiId, thangSinh);
+            if (!rows.isEmpty()) {
+                String tu = (String) rows.get(0).get("TenTu");
+                String lg = (String) rows.get(0).get("LoiGiai");
+                content.append("<p><strong>Sao:</strong> ").append(tu).append("</p>");
+                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
+            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
+        } catch (Exception e) {}
+    }
+
+    // --- SỞ 19: Phá sản ---
+    private void appendSo19(StringBuilder content, int chiId, int thangSinh, String gioiTinh) {
+        try {
+            String gt = gioiTinh != null && gioiTinh.equalsIgnoreCase("Nữ") ? "Nu" : "Nam";
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT LoiGiai FROM so19_phasanvochong WHERE Tuoi_ChiID = ? AND GioiTinh = ? AND ThangSanh = ?", chiId, gt, thangSinh);
+            if (!rows.isEmpty()) {
+                String lg = (String) rows.get(0).get("LoiGiai");
+                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
+            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
+        } catch (Exception e) {}
+    }
+
+    // --- SỞ 20: Duyên nợ ---
+    private void appendSo20(StringBuilder content, int canId, int chiId) {
+        content.append("<p><em>(Sở 20 cần nhập chi tiết năm của vợ và chồng, hiện chỉ coi cho 1 người lấy Can Chi bản thể)</em></p>");
+    }
+
+    // --- SỞ 23: Anh em ---
+    private void appendSo23(StringBuilder content, int chiId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenKetQua, LoiGiai FROM so23_anhem WHERE ChiID = ? AND ThangSanh = ?", chiId, thangSinh);
+            if (!rows.isEmpty()) {
+                String kq = (String) rows.get(0).get("TenKetQua");
+                String lg = (String) rows.get(0).get("LoiGiai");
+                content.append("<p><strong>Tình trạng:</strong> ").append(kq).append("</p>");
+                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
+            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
+        } catch (Exception e) {}
+    }
+
+    // --- SỞ 28: Sao hạn ---
+    private void appendSo28(StringBuilder content, String gioiTinh, int birthYear) {
+         java.time.Year currentYear = java.time.Year.now();
+         int tuoiMu = currentYear.getValue() - birthYear + 1;
+         String gt = gioiTinh != null && gioiTinh.equalsIgnoreCase("Nữ") ? "Nu" : "Nam";
+         try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenSao FROM so28_saochieumenh WHERE TuoiAmLich = ? AND GioiTinh = ?", tuoiMu, gt);
+            if (!rows.isEmpty()) {
+                content.append("<p><strong>Tuổi mụ:</strong> ").append(tuoiMu).append(" - <strong>Sao chiếu:</strong> ").append(rows.get(0).get("TenSao")).append("</p>");
+            } else { content.append("<p><em>(Năm nay chưa tính được sao)</em></p>"); }
+         } catch(Exception e){}
+    }
+
+    // --- SỞ 29: Hạn năm ---
+    private void appendSo29(StringBuilder content, String gioiTinh, int birthYear) {
+         java.time.Year currentYear = java.time.Year.now();
+         int tuoiMu = currentYear.getValue() - birthYear + 1;
+         String gt = gioiTinh != null && gioiTinh.equalsIgnoreCase("Nữ") ? "Nu" : "Nam";
+         try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenHan, LoiGiai FROM so29_hanhangnam WHERE TuoiAmLich = ? AND GioiTinh = ?", tuoiMu, gt);
+            if (!rows.isEmpty()) {
+                content.append("<p><strong>Hạn:</strong> ").append(rows.get(0).get("TenHan")).append("</p>");
+                String lg = (String) rows.get(0).get("LoiGiai");
+                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
+            } else { content.append("<p><em>(Chưa có dữ liệu hạn)</em></p>"); }
+         } catch(Exception e){}
+    }
+
+    // --- SỞ 18: Tù tội ---
+    private void appendSo18(StringBuilder content, int canId, int chiId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT LoiGiai FROM so18_otuhaykhong WHERE Tuoi_CanID = ? AND Tuoi_ChiID = ? AND ThangSanh = ?", canId, chiId, thangSinh);
+            if (!rows.isEmpty()) {
+                String lg = (String) rows.get(0).get("LoiGiai");
+                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
+            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
+        } catch(Exception e){}
+    }
+
+    // --- SỞ 21: Trường sanh ---
+    private void appendSo21(StringBuilder content, int nguHanhId, int chiId) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TruongSanhID FROM so21_truongsanh_mapping WHERE NguHanhID = ? AND ChiID = ?", nguHanhId, chiId);
+            if (!rows.isEmpty()) {
+                int tsId = (Integer) rows.get(0).get("TruongSanhID");
+                content.append("<p><strong>Trường Sanh ID:</strong> ").append(tsId).append("</p>");
+            } else { content.append("<p><em>(Chưa phân tích trường sanh)</em></p>"); }
+        } catch(Exception e){}
+    }
+
+    // --- SỞ 22: Sinh con ---
+    private void appendSo22(StringBuilder content, int thangSinh, int ngaySinh) {
+        content.append("<p><em>(Sở 22 là thơ đoán, cấu trúc CSDL chưa hoàn thiện)</em></p>");
+    }
+
+    // --- SỞ 24: Huynh Đệ (4 mùa) ---
+    private void appendSo24(StringBuilder content, int chiId, int thangSinh) {
+        try {
+            String mua = "Xuan";
+            if (thangSinh >= 4 && thangSinh <= 6) mua = "Ha";
+            else if (thangSinh >= 7 && thangSinh <= 9) mua = "Thu";
+            else if (thangSinh >= 10 || thangSinh <= 12) mua = "Dong";
+            
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT ViTri FROM so24_huynhde_mapping WHERE Mua = ? AND ChiID = ?", mua, chiId);
+            if (!rows.isEmpty()) {
+                String vt = (String) rows.get(0).get("ViTri");
+                content.append("<p><strong>Vị trí:</strong> sinh vào cung ").append(vt).append("</p>");
+            } else { content.append("<p><em>(Chưa có dữ liệu 4 mùa)</em></p>"); }
+        } catch(Exception e){}
+    }
+
+    // --- SỞ 25: Con vua ---
+    private void appendSo25(StringBuilder content, int chiId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenVua, LoiGiai FROM so25_con_vua WHERE ChiID = ?", chiId);
+            if (!rows.isEmpty()) {
+                content.append("<p><strong>Sinh dưới trướng:</strong> ").append(rows.get(0).get("TenVua")).append("</p>");
+                String lg = (String) rows.get(0).get("LoiGiai");
+                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
+            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
+        } catch(Exception e){}
+    }
+
+    // --- SỞ 26: Có nhà hay không ---
+    private void appendSo26(StringBuilder content, int chiId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenKetQua, LoiGiai FROM so26_conha WHERE ChiID = ? AND ThangSanh = ?", chiId, thangSinh);
+            if (!rows.isEmpty()) {
+                String kq = (String) rows.get(0).get("TenKetQua");
+                if (kq != null) content.append("<p><strong>Tình trạng:</strong> ").append(kq).append("</p>");
+                String lg = (String) rows.get(0).get("LoiGiai");
+                if (lg != null) content.append("<p>").append(lg.replace("\n", "<br>")).append("</p>");
+            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
+        } catch(Exception e){}
+    }
+
+    // --- SỞ 27: Số mạng mỗi tuổi ---
+    private void appendSo27(StringBuilder content, int canId, int chiId, String gioiTinh) {
+        try {
+            String gt = gioiTinh != null && gioiTinh.equalsIgnoreCase("Nữ") ? "Nu" : "Nam";
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT Mang, Tho, Luan FROM so27_tongquan WHERE Tuoi_CanID = ? AND Tuoi_ChiID = ? AND GioiTinh = ?", canId, chiId, gt);
+            if (!rows.isEmpty()) {
+                String tho = (String) rows.get(0).get("Tho");
+                String luan = (String) rows.get(0).get("Luan");
+                if (tho != null) content.append("<p><strong>Thơ:</strong><br>").append(tho.replace("\n", "<br>")).append("</p>");
+                if (luan != null) content.append("<p><strong>Luận:</strong><br>").append(luan.replace("\n", "<br>")).append("</p>");
+            } else { content.append("<p><em>(Chưa có tổng quan)</em></p>"); }
+        } catch(Exception e){}
+    }
+
+    // --- SỞ 30: Cầu tiên bà ---
+    private void appendSo30(StringBuilder content, int chiId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenLoiKhuyen, NoiDung FROM so30_loikhuyen LIMIT 2");
+            for (Map<String, Object> r : rows) {
+                content.append("<p><strong>").append(r.get("TenLoiKhuyen")).append(":</strong> ").append(r.get("NoiDung")).append("</p>");
             }
+        } catch(Exception e){}
+    }
 
-            String eCot = extractJsonStringField(inJson, "cot");
-            if (eCot != null && eCot.equalsIgnoreCase(cot)) {
-                matched = e;
-                break;
+    // --- SỞ 31: Sống lâu/Quy Tiên ---
+    private void appendSo31(StringBuilder content, int nguHanhId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT PhanTram FROM so31_mang_thang_phantram WHERE NguHanhID = ? AND ThangSanh = ?", nguHanhId, thangSinh);
+            if (!rows.isEmpty()) {
+                content.append("<p><strong>Tỷ lệ sinh:</strong> ").append(rows.get(0).get("PhanTram")).append("%</p>");
+            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
+        } catch(Exception e){}
+    }
+
+    // --- SỞ 32: Có hòm ---
+    private void appendSo32(StringBuilder content, int chiId, int thangSinh) {
+        content.append("<p><em>(Chưa có bảng so32)</em></p>");
+    }
+
+    // --- SỞ 34: Giác hồng trần ---
+    private void appendSo34(StringBuilder content, int chiId, int thangSinh) {
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TieuDe, NoiDung FROM so34_trietly LIMIT 1");
+            if (!rows.isEmpty()) {
+                String lg = (String) rows.get(0).get("NoiDung");
+                content.append("<p><strong>Triết lý:</strong> ").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
             }
+        } catch(Exception e){}
+    }
 
-            String eMang = extractJsonStringField(inJson, "mang");
-            if (eMang == null) eMang = extractJsonStringField(inJson, "menh");
-            if (eMang != null && eMang.equalsIgnoreCase(mang)) {
-                matched = e;
-                break;
-            }
+    // ID Mapping Database Helper
+    private int getDatabaseCanId(int year) {
+        int[] canIdMap = {7, 8, 9, 10, 1, 2, 3, 4, 5, 6};
+        int index = year % 10;
+        if (index < 0) index += 10;
+        return canIdMap[index];
+    }
 
-            String eTuoi = extractJsonStringField(inJson, "tuoi");
-            if (eTuoi != null && eTuoi.equalsIgnoreCase(vietName)) {
-                matched = e;
-                break;
-            }
+    private int getDatabaseChiId(int year) {
+        int[] chiIdMap = {9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8};
+        int index = year % 12;
+        if (index < 0) index += 12;
+        return chiIdMap[index];
+    }
 
-            if (inJson.contains("\"sao\"") || inJson.contains("\"nghe\"")) {
-                matched = e;
-            }
-        }
-
-        if (matched == null) matched = entries.get(0);
-
-        if (matched != null && matched.getOutputData() != null) {
-            content.append(parseOutputJsonToText(matched.getOutputData()));
-        } else {
-            content.append("<p><em>(Dữ liệu không khớp hoặc đang phân tích...)</em></p>");
-        }
+    private int getDatabaseChiIdForHour(String hour) {
+        if (hour == null) return 7; // Mặc định Ngọ
+        hour = hour.toLowerCase().trim();
+        if (hour.startsWith("tý") || hour.startsWith("chuột") || hour.startsWith("ty1")) return 1;
+        if (hour.startsWith("sửu") || hour.startsWith("trâu")) return 2;
+        if (hour.startsWith("dần") || hour.startsWith("hổ") || hour.startsWith("cọp")) return 3;
+        if (hour.startsWith("mão") || hour.startsWith("mẹo") || hour.startsWith("thỏ")) return 4;
+        if (hour.startsWith("thìn") || hour.startsWith("rồng")) return 5;
+        if (hour.startsWith("tỵ") || hour.startsWith("rắn") || hour.startsWith("ty2")) return 6;
+        if (hour.startsWith("ngọ") || hour.startsWith("ngựa")) return 7;
+        if (hour.startsWith("mùi") || hour.startsWith("dê")) return 8;
+        if (hour.startsWith("thân") || hour.startsWith("khỉ")) return 9;
+        if (hour.startsWith("dậu") || hour.startsWith("gà")) return 10;
+        if (hour.startsWith("tuất") || hour.startsWith("chó")) return 11;
+        if (hour.startsWith("hợi") || hour.startsWith("heo") || hour.startsWith("lợn")) return 12;
+        return 7;
     }
 
     private String mapCotToChi(String cot) {
