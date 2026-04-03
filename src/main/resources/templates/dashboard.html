@@ -228,23 +228,20 @@
             /* Chói sáng rực rỡ */
         }
 
-        /* Bánh xe Bát Quái LUÔN NẰM CHÍNH GIỮA, CỰC TO */
+        /* Bánh xe Bát Quái LUÔN NẰM CHÍNH GIỮA, CỰC TO */
         .wheel-img {
             width: 95%;
-            /* Chiếm phần lớn khu vực 700px */
             height: 95%;
             object-fit: contain;
-            filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.5));
+            filter: drop-shadow(0 10px 25px rgba(220, 185, 110, 0.2));
             border-radius: 50%;
-            animation: slowRotate 240s linear infinite;
             cursor: pointer;
-            transition: transform 0.3s ease, filter 0.3s ease;
             z-index: 30;
+            will-change: transform;
         }
 
         .wheel-img:hover {
-            filter: drop-shadow(0 15px 50px rgba(220, 185, 110, 0.8));
-            transform: scale(1.02);
+            filter: drop-shadow(0 10px 30px rgba(220, 185, 110, 0.5)) !important;
         }
 
         @keyframes reverseRotate {
@@ -254,16 +251,6 @@
 
             100% {
                 transform: translate(-50%, -50%) rotate(0deg);
-            }
-        }
-
-        @keyframes slowRotate {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
             }
         }
 
@@ -306,42 +293,7 @@
             pointer-events: none;
         }
 
-        /* Khi click vào bánh xe, quay lẹ */
-        .wheel-img.fast-spin {
-            animation: fastRotate 1s linear infinite !important;
-        }
-
-        .wheel-img.fast-spin-reverse {
-            animation: fastRotateReverse 1s linear infinite !important;
-        }
-
-        .wheel-img.paused {
-            animation-play-state: paused !important;
-        }
-
-        @keyframes fastRotate {
-            0% {
-                transform: scale(1.05) rotate(0deg);
-                filter: drop-shadow(0 0 80px rgba(220, 185, 110, 1));
-            }
-
-            100% {
-                transform: scale(1.05) rotate(360deg);
-                filter: drop-shadow(0 0 80px rgba(220, 185, 110, 1));
-            }
-        }
-
-        @keyframes fastRotateReverse {
-            0% {
-                transform: scale(1.05) rotate(360deg);
-                filter: drop-shadow(0 0 80px rgba(220, 185, 110, 1));
-            }
-
-            100% {
-                transform: scale(1.05) rotate(0deg);
-                filter: drop-shadow(0 0 80px rgba(220, 185, 110, 1));
-            }
-        }
+        /* JS Controlled Smooth Rotation */
 
         /* 
            Vị trí cụ thể của 6 block (3 trái, 3 phải) 
@@ -614,24 +566,22 @@
         .flashcard-wrapper[data-view-state="idle"]:hover .flashcard,
         .flashcard-wrapper[data-view-state="stacked"]:hover .flashcard {
             /* Hiệu ứng 3D Premium: viền lõi sáng, viền ôm ngoài đậm rọi bóng râm và vầng sáng Vàng */
-            box-shadow: 
-                0 0 0 1.5px #fff3a1, 
-                0 0 0 4px #d4af37, 
-                0 10px 25px rgba(0, 0, 0, 0.8), 
-                0 0 25px rgba(255, 215, 0, 0.7), 
+            box-shadow:
+                0 0 0 1.5px #fff3a1,
+                0 0 0 4px #d4af37,
+                0 10px 25px rgba(0, 0, 0, 0.8),
+                0 0 25px rgba(255, 215, 0, 0.7),
                 inset 0 0 15px rgba(255, 220, 100, 0.3) !important;
             cursor: pointer;
         }
 
         .flashcard-wrapper[data-view-state="stacked"]:hover {
             z-index: 9999 !important;
-            /* Đẩy đè lên toàn bộ các lá khác để lộ y nguyên 100% lá bài */
+            margin-top: -25px !important;
+            /* Dùng margin-top để đẩy lên, tránh dùng transform vì nó đè mất scale/rotateZ của wrapper cài bằng JS */
         }
 
-        .flashcard-wrapper[data-view-state="stacked"]:hover .flashcard {
-            transform: translateY(-25px) !important;
-            /* !important để chèn đè lại inline CSS của JS */
-        }
+        /* Xóa rule lật đè transform của .flashcard để giữ yên is-flipped */
 
         .flashcard-face {
             position: absolute;
@@ -1067,6 +1017,17 @@
 
     <!-- Script tương tác form Tra cứu -->
     <script th:src="@{/js/dashboard.js}"></script>
+</body>
+
+</html>
+<div id="flashcards-container"></div>
+<button id="arrange-cards-btn" class="action-btn">🗂 Xếp Gọn Thẻ</button>
+<button id="clear-cards-btn" class="action-btn">✖ Dọn Bàn</button>
+
+</div>
+
+<!-- Script tương tác form Tra cứu -->
+<script th:src="@{/js/dashboard.js}"></script>
 </body>
 
 </html>
