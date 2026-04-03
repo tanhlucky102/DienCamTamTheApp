@@ -600,12 +600,37 @@
             position: relative;
             width: 100%;
             height: 100%;
-            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.8s, top 0.8s, left 0.8s;
+            border-radius: 12px;
+            /* Đồng bộ góc bo tròn với flashcard-face để đổ bóng */
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
             transform-style: preserve-3d;
         }
 
         .flashcard.is-flipped {
             transform: rotateY(180deg);
+        }
+
+        /* Hover: Tạo viền Vàng sang trọng, nổi 3D và tỏa hào quang */
+        .flashcard-wrapper[data-view-state="idle"]:hover .flashcard,
+        .flashcard-wrapper[data-view-state="stacked"]:hover .flashcard {
+            /* Hiệu ứng 3D Premium: viền lõi sáng, viền ôm ngoài đậm rọi bóng râm và vầng sáng Vàng */
+            box-shadow: 
+                0 0 0 1.5px #fff3a1, 
+                0 0 0 4px #d4af37, 
+                0 10px 25px rgba(0, 0, 0, 0.8), 
+                0 0 25px rgba(255, 215, 0, 0.7), 
+                inset 0 0 15px rgba(255, 220, 100, 0.3) !important;
+            cursor: pointer;
+        }
+
+        .flashcard-wrapper[data-view-state="stacked"]:hover {
+            z-index: 9999 !important;
+            /* Đẩy đè lên toàn bộ các lá khác để lộ y nguyên 100% lá bài */
+        }
+
+        .flashcard-wrapper[data-view-state="stacked"]:hover .flashcard {
+            transform: translateY(-25px) !important;
+            /* !important để chèn đè lại inline CSS của JS */
         }
 
         .flashcard-face {
@@ -630,12 +655,12 @@
                 repeating-linear-gradient(45deg, rgba(30, 15, 5, 0.1) 0px, rgba(30, 15, 5, 0.1) 2px, transparent 2px, transparent 6px),
                 linear-gradient(135deg, #4a2912 0%, #754c29 50%, #3d200e 100%);
             border: 2px solid #241103;
-            box-shadow: 
+            box-shadow:
                 inset 0 0 30px rgba(0, 0, 0, 0.9),
                 inset 0 0 5px rgba(255, 255, 255, 0.2),
                 inset 2px 2px 5px rgba(255, 255, 255, 0.1),
                 inset -2px -2px 10px rgba(0, 0, 0, 0.8),
-                0 5px 15px rgba(0,0,0,0.5);
+                0 5px 15px rgba(0, 0, 0, 0.5);
             border-radius: 8px;
             color: #ebb96e;
             justify-content: center;
@@ -667,16 +692,18 @@
             opacity: 0.6;
         }
 
-        /* Góc trên bên trái có số nhỏ */
+        /* Góc trên bên trái có số nhỏ - Dạng 3D Sáng rực */
         .corner-number {
             position: absolute;
-            top: 6px;
-            left: 6px;
-            font-size: 0.9rem;
+            top: 15px;
+            left: 15px;
+            font-size: 1.3rem;
             font-weight: 900;
-            color: #ffda8d;
+            color: #fff878;
             font-family: 'Times New Roman', serif;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 0 8px rgba(255, 218, 141, 0.6);
+            /* Thiết kế 3D nịnh mắt: viền mỏng, bóng đen lõm sâu 3D và lớp viền hào quang sáng */
+            -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.5);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5)
         }
 
         .que-title {
@@ -687,7 +714,7 @@
             font-family: 'Inter', sans-serif;
             font-weight: 800;
             color: #ffe6aa;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
         }
 
         .que-subtitle {
@@ -747,12 +774,32 @@
             container-type: size;
         }
 
-        .que-title { font-size: 7cqw; }
-        .que-subtitle { font-size: 6cqw; }
-        .que-number { font-size: 25cqw; }
-        .corner-number { font-size: 8cqw; }
-        .flashcard-back { font-size: 5cqw; padding: 4cqw; }
-        .flashcard-back strong { font-size: 6cqw; }
+        .que-title {
+            font-size: 7cqw;
+        }
+
+        .que-subtitle {
+            font-size: 6cqw;
+            display: none;
+        }
+
+        /* User requested to hide this */
+        .que-number {
+            font-size: 25cqw;
+        }
+
+        .corner-number {
+            font-size: 11cqw;
+        }
+
+        .flashcard-back {
+            font-size: 5cqw;
+            padding: 4cqw;
+        }
+
+        .flashcard-back strong {
+            font-size: 6cqw;
+        }
 
         @keyframes fallDownCard {
             0% {
