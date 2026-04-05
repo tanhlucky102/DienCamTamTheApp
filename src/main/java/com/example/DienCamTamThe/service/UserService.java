@@ -1,13 +1,19 @@
 package com.example.DienCamTamThe.service;
 
-import com.example.DienCamTamThe.dto.request.LoginRequest;
-import com.example.DienCamTamThe.dto.request.RegisterRequest;
+import com.example.DienCamTamThe.dto.request.*;
 import com.example.DienCamTamThe.dto.response.ApiResponse;
+import com.example.DienCamTamThe.dto.response.UserInfoResponse;
 
 public interface UserService {
-    ApiResponse<String> register(RegisterRequest request);
+    ApiResponse<UserInfoResponse> register(RegisterRequest request);
 
-    ApiResponse<String> login(LoginRequest request);
+    ApiResponse<UserInfoResponse> login(LoginRequest request);
 
-    ApiResponse<String> forgotPassword(com.example.DienCamTamThe.dto.request.ForgotPasswordRequest request);
+    ApiResponse<String> forgotPassword(ForgotPasswordRequest request);
+
+    ApiResponse<UserInfoResponse> getUserInfo(String username);
+
+    ApiResponse<UserInfoResponse> updateProfile(String username, UpdateProfileRequest request);
+
+    ApiResponse<String> changePassword(ChangePasswordRequest request);
 }
