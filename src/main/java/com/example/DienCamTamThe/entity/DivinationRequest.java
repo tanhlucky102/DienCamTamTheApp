@@ -10,6 +10,9 @@ public class DivinationRequest {
     private String birthMonth;
     private String birthYear;
     private String lookupCategory;
+    private String partnerBirthDay;
+    private String partnerBirthMonth;
+    private String partnerBirthYear;
 
     public DivinationRequest() {
     }
@@ -84,5 +87,29 @@ public class DivinationRequest {
 
     public void setLookupCategory(String lookupCategory) {
         this.lookupCategory = lookupCategory;
+    }
+
+    public String getPartnerBirthDay() {
+        return partnerBirthDay;
+    }
+
+    public void setPartnerBirthDay(String partnerBirthDay) {
+        this.partnerBirthDay = partnerBirthDay;
+    }
+
+    public String getPartnerBirthMonth() {
+        return partnerBirthMonth;
+    }
+
+    public void setPartnerBirthMonth(String partnerBirthMonth) {
+        this.partnerBirthMonth = partnerBirthMonth;
+    }
+
+    public String getPartnerBirthYear() {
+        return partnerBirthYear;
+    }
+
+    public void setPartnerBirthYear(String partnerBirthYear) {
+        this.partnerBirthYear = partnerBirthYear;
     }
 }
