@@ -166,10 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (resultsSection) resultsSection.classList.add('hidden');
         if (resultsOverlay) resultsOverlay.classList.remove('active');
 
-        // Revert magical animation when closing popup
-        setSpinSpeed(0.05); // Trở về trạng thái idle tra cứu
-        const inputCards = document.querySelectorAll('.input-card');
-        if (inputCards) inputCards.forEach(card => card.classList.remove('sucked-in'));
+        // Chỉ ẩn modal, để nguyên thẻ bài trên màn hình
     };
 
     if (closeResultsBtn) closeResultsBtn.addEventListener('click', closeResults);
@@ -370,6 +367,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (viewAllBtn) {
         viewAllBtn.addEventListener('click', () => {
+            // Lật tất cả thẻ sang mặt quẻ số (xoá is-flipped) tại chỗ
+            generatedCards.forEach(card => {
+                const fi = card.querySelector('.flashcard');
+                if (fi) fi.classList.remove('is-flipped');
+            });
+
             const resultsSection = document.getElementById('results-section');
             const resultsOverlay = document.getElementById('results-overlay');
             if (resultsSection && resultsOverlay) {
@@ -776,42 +779,55 @@ document.addEventListener('DOMContentLoaded', () => {
         tempDiv.innerHTML = contentHtml;
         const segments = [];
 
-        // Dữ liệu từ API thường bọc trong thẻ div đầu tiên
-        const wrapper = tempDiv.querySelector('div') || tempDiv;
+        // Backend bọc toàn bộ HTML trong một thẻ <div style='text-align: left;'>
+        // Nên ta phải trỏ vào đứa con đầu tiên (nếu là div) để lấy ruột mới đúng
+        const wrapper = (tempDiv.firstElementChild && tempDiv.firstElementChild.tagName === 'DIV') 
+            ? tempDiv.firstElementChild 
+            : tempDiv;
+
+        // Duyệt TOÀN BỘ nhánh chính của mã HTML
         const nodes = Array.from(wrapper.childNodes);
 
-        let currentSegmentHtml = '';
-        let currentTitle = '';
+        let currentHtml = '';
+        let currentTitle = 'THÔNG TIN BẢN MỆNH';
 
         nodes.forEach(node => {
             if (node.nodeType === Node.ELEMENT_NODE) {
                 if (node.tagName === 'H4') {
-                    if (currentSegmentHtml.trim() || currentTitle) {
-                        segments.push({ title: currentTitle || 'THÔNG TIN BẢN MỆNH', html: currentSegmentHtml });
-                        currentSegmentHtml = '';
+                    // Đóng gói Quẻ cũ trước khi sang Quẻ mới (Sở mới)
+                    if (currentHtml.trim().length > 0) {
+                        segments.push({ title: currentTitle, html: currentHtml });
+                    } else if (currentTitle !== 'THÔNG TIN BẢN MỆNH') {
+                        // Thẻ bài rỗng do dữ liệu backend bị lỗi thiếu
+                        segments.push({ title: currentTitle, html: '<p><em style="color:#888;">(Nội dung đang được bổ sung...)</em></p>' });
                     }
-                    currentTitle = node.innerText.replace(/Sở\s+/i, '').trim();
+
+                    // Setup Quẻ mới
+                    currentHtml = '';
+                    currentTitle = (node.innerText || node.textContent).replace(/Sở\s+/i, '').trim();
                 } else if (node.tagName === 'HR') {
-                    // Dọn dẹp dấu gạch ngang
+                    // Xóa đường gạch ngang
                 } else {
-                    currentSegmentHtml += node.outerHTML;
+                    currentHtml += node.outerHTML;
                 }
-            } else if (node.nodeType === Node.TEXT_NODE) {
-                if (node.textContent.trim()) {
-                    currentSegmentHtml += '<p>' + node.textContent + '</p>';
-                }
+            } else if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                currentHtml += '<p>' + node.textContent.trim() + '</p>';
             }
         });
 
-        if (currentSegmentHtml.trim() || currentTitle) {
-            segments.push({ title: currentTitle || 'THÔNG TIN BẢN MỆNH', html: currentSegmentHtml });
+        // Đóng gói mảng thẻ cuối cùng
+        if (currentHtml.trim().length > 0) {
+            segments.push({ title: currentTitle, html: currentHtml });
+        } else if (currentTitle !== 'THÔNG TIN BẢN MỆNH') {
+            segments.push({ title: currentTitle, html: '<p><em style="color:#888;">(Nội dung đang được bổ sung...)</em></p>' });
         }
 
+        // Trường hợp khẩn cấp nếu dữ liệu sai bét
         if (segments.length === 0 && contentHtml.trim().length > 0) {
-            segments.push({ title: 'TỔNG LUẬN', html: '<p>' + contentHtml + '</p>' });
+            segments.push({ title: 'TỔNG LUẬN', html: tempDiv.innerHTML });
         }
 
-        return segments.filter(seg => seg.html.replace(/<[^>]*>?/gm, '').trim().length > 0);
+        return segments;
     }
 
     function makeDraggable(el) {

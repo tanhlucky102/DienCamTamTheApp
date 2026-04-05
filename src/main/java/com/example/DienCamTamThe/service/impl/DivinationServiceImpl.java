@@ -39,10 +39,11 @@ public class DivinationServiceImpl {
         // Chuyển đổi sang Âm lịch nếu là Dương lịch
         int birthYear, ngaySinh, thangSinh;
         String calendarNote = "";
-        
+
         String calendarType = request.getCalendarType() != null ? request.getCalendarType().toLowerCase() : "";
-        boolean isSolar = calendarType.contains("solar") || calendarType.contains("duong") || calendarType.contains("dương");
-        
+        boolean isSolar = calendarType.contains("solar") || calendarType.contains("duong")
+                || calendarType.contains("dương");
+
         if (isSolar) {
             LunarCalendarUtil.LunarDate lunar = LunarCalendarUtil.convertSolarToLunar(rawDay, rawMonth, rawYear, 7.0);
             birthYear = lunar.year;
@@ -66,11 +67,15 @@ public class DivinationServiceImpl {
         String cot = mapChiToCot(chi);
         String mang = calculateMenh(getCanIndex(can), getChiIndex(chi));
 
-        content.append("<div class='log-box' style='background: #fdf6e3; padding: 15px; border-radius: 8px; border: 1px solid #eee8d5; margin-bottom: 20px; color: #657b83'>");
+        content.append(
+                "<div class='log-box' style='background: #fdf6e3; padding: 15px; border-radius: 8px; border: 1px solid #eee8d5; margin-bottom: 20px; color: #657b83'>");
         content.append("<strong style='color: #b58900;'>[Thông số Diễn Cầm]</strong><br>");
-        content.append("- Ngày sinh (Âm lịch): <b>").append(ngaySinh).append("/").append(thangSinh).append("/").append(birthYear).append("</b>").append(calendarNote).append("<br>");
-        content.append("- Bạn tuổi: <b>").append(can.toUpperCase()).append(" ").append(chi.toUpperCase()).append("</b><br>");
-        content.append("- Mạng (Ngũ Hành): <b>").append(mang.toUpperCase()).append("</b> - Cốt (Xương): <b>").append(cot.toUpperCase()).append("</b><br>");
+        content.append("- Ngày sinh (Âm lịch): <b>").append(ngaySinh).append("/").append(thangSinh).append("/")
+                .append(birthYear).append("</b>").append(calendarNote).append("<br>");
+        content.append("- Bạn tuổi: <b>").append(can.toUpperCase()).append(" ").append(chi.toUpperCase())
+                .append("</b><br>");
+        content.append("- Mạng (Ngũ Hành): <b>").append(mang.toUpperCase()).append("</b> - Cốt (Xương): <b>")
+                .append(cot.toUpperCase()).append("</b><br>");
         content.append("<em>=> Đang tra cứu chuyên mục: <b>").append(category).append("</b></em>");
         content.append("</div>");
 
@@ -374,7 +379,8 @@ public class DivinationServiceImpl {
                         .append(poem.replace("\n", "<br>"))
                         .append("</blockquote>");
             }
-            if (sb.length() == 0) return "<p>" + rawOut.replace("\n", "<br>") + "</p>";
+            if (sb.length() == 0)
+                return "<p>" + rawOut.replace("\n", "<br>") + "</p>";
             return sb.toString();
         } catch (Exception e) {
             return "<p>" + rawOut.replace("\n", "<br>") + "</p>";
@@ -486,17 +492,19 @@ public class DivinationServiceImpl {
     }
 
     private int getCanIndex(String can) {
-        String[] cans = {"canh", "tan", "nham", "quy", "giap", "at", "binh", "dinh", "mau", "ky"};
+        String[] cans = { "canh", "tan", "nham", "quy", "giap", "at", "binh", "dinh", "mau", "ky" };
         for (int i = 0; i < cans.length; i++) {
-            if (cans[i].equalsIgnoreCase(can)) return i;
+            if (cans[i].equalsIgnoreCase(can))
+                return i;
         }
         return 0;
     }
 
     private int getChiIndex(String chi) {
-        String[] chis = {"than", "dau", "tuat", "hoi", "ty1", "suu", "dan", "mao", "thin", "ty2", "ngo", "mui"};
+        String[] chis = { "than", "dau", "tuat", "hoi", "ty1", "suu", "dan", "mao", "thin", "ty2", "ngo", "mui" };
         for (int i = 0; i < chis.length; i++) {
-            if (chis[i].equalsIgnoreCase(chi)) return i;
+            if (chis[i].equalsIgnoreCase(chi))
+                return i;
         }
         return 0;
     }

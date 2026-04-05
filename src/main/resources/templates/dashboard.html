@@ -580,9 +580,8 @@
         }
 
         .flashcard-wrapper[data-view-state="stacked"]:hover {
-            z-index: 9999 !important;
-            margin-top: -25px !important;
-            /* Dùng margin-top để đẩy lên, tránh dùng transform vì nó đè mất scale/rotateZ của wrapper cài bằng JS */
+            margin-top: -15px !important; /* Nhấc lên 1 chút */
+            /* Tuyệt đối không dùng z-index ở đây để tránh thẻ đè lộn xộn lên các thẻ bài khác trong cột */
         }
 
         /* Xóa rule lật đè transform của .flashcard để giữ yên is-flipped */
