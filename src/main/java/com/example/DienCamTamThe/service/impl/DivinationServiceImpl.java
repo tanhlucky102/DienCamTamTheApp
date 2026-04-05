@@ -35,7 +35,8 @@ public class DivinationServiceImpl {
             rawYear = Integer.parseInt(request.getBirthYear());
             rawDay = Integer.parseInt(request.getBirthDay());
             rawMonth = Integer.parseInt(request.getBirthMonth());
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         // Chuyển đổi sang Âm lịch nếu là Dương lịch
         int birthYear, ngaySinh, thangSinh;
@@ -203,11 +204,14 @@ public class DivinationServiceImpl {
                 break;
             }
         }
-        if (matched == null) matched = entries.get(0);
+        // Fallback: entry đầu tiên
+        if (matched == null)
+            matched = entries.get(0);
 
         if (matched.getOutputData() != null) {
             String tenGio = extractJsonStringField(matched.getInputData(), "gio_sinh");
-            if (tenGio == null || tenGio.isEmpty()) tenGio = canChiGio;
+            if (tenGio == null || tenGio.isEmpty())
+                tenGio = canChiGio;
             content.append("<p><strong>Giờ sinh:</strong> ").append(tenGio).append("</p>");
             content.append(parseOutputJsonToText(matched.getOutputData()));
         } else {
@@ -241,7 +245,8 @@ public class DivinationServiceImpl {
             }
         }
 
-        if (matched == null) matched = entries.get(0);
+        if (matched == null)
+            matched = entries.get(0);
 
         if (foundTenHieu != null && !foundTenHieu.isEmpty()) {
             content.append("<p><strong>Hiệu ngày:</strong> ").append(foundTenHieu).append("</p>");
@@ -277,7 +282,7 @@ public class DivinationServiceImpl {
             if (matchTT && tsField == null) {
                 matched = e;
                 break;
-            }
+            } // chỉ có trường tháng thọ thai
         }
         if (matched == null) {
             for (BookEntry e : entries) {
@@ -289,9 +294,11 @@ public class DivinationServiceImpl {
                 }
             }
         }
-        if (matched == null) matched = entries.get(0);
+        if (matched == null)
+            matched = entries.get(0);
 
-        content.append("<p><em>Tháng thọ thai: ").append(thangThoThai).append(" | Tháng sinh: ").append(thangSinh).append("</em></p>");
+        content.append("<p><em>Tháng thọ thai: ").append(thangThoThai)
+                .append(" | Tháng sinh: ").append(thangSinh).append("</em></p>");
         if (matched.getOutputData() != null) {
             content.append(parseOutputJsonToText(matched.getOutputData()));
         } else {
@@ -312,8 +319,10 @@ public class DivinationServiceImpl {
 
         for (BookEntry e : entries) {
             String inJson = e.getInputData();
-            if (inJson == null || inJson.isBlank()) continue;
+            if (inJson == null || inJson.isBlank())
+                continue;
 
+            // 1. Kiểm tra "tat_ca"
             if (inJson.contains("tat_ca")) {
                 matched = e;
                 break;
@@ -326,7 +335,8 @@ public class DivinationServiceImpl {
             }
 
             String eMang = extractJsonStringField(inJson, "mang");
-            if (eMang == null) eMang = extractJsonStringField(inJson, "menh");
+            if (eMang == null)
+                eMang = extractJsonStringField(inJson, "menh");
             if (eMang != null && eMang.equalsIgnoreCase(mang)) {
                 matched = e;
                 break;
@@ -338,12 +348,17 @@ public class DivinationServiceImpl {
                 break;
             }
 
+            // 5. Kiểm tra "sao" hoặc "nghe"
             if (inJson.contains("\"sao\"") || inJson.contains("\"nghe\"")) {
+                // Nếu là bảng tra chung thì cho qua, nếu là text cụ thể thì cần thêm logic
+                // filter
+                // Hiện tại lấy entry đầu tiên khớp format
                 matched = e;
             }
         }
 
-        if (matched == null) matched = entries.get(0);
+        if (matched == null)
+            matched = entries.get(0);
 
         if (matched != null && matched.getOutputData() != null) {
             content.append(parseOutputJsonToText(matched.getOutputData()));
@@ -354,24 +369,38 @@ public class DivinationServiceImpl {
 
     private String mapCotToChi(String cot) {
         switch (cot) {
-            case "chuot": return "ty1";
-            case "trau": return "suu";
-            case "cop": return "dan";
-            case "tho": return "mao";
-            case "rong": return "thin";
-            case "ran": return "ty2";
-            case "ngua": return "ngo";
-            case "de": return "mui";
-            case "khi": return "than";
-            case "ga": return "dau";
-            case "cho": return "tuat";
-            case "heo": return "hoi";
-            default: return cot;
+            case "chuot":
+                return "ty1";
+            case "trau":
+                return "suu";
+            case "cop":
+                return "dan";
+            case "tho":
+                return "mao";
+            case "rong":
+                return "thin";
+            case "ran":
+                return "ty2";
+            case "ngua":
+                return "ngo";
+            case "de":
+                return "mui";
+            case "khi":
+                return "than";
+            case "ga":
+                return "dau";
+            case "cho":
+                return "tuat";
+            case "heo":
+                return "hoi";
+            default:
+                return cot;
         }
     }
 
     private String parseOutputJsonToText(String rawOut) {
-        if (rawOut == null || rawOut.isBlank()) return "";
+        if (rawOut == null || rawOut.isBlank())
+            return "";
         if (!rawOut.trim().startsWith("{")) {
             return "<p>" + rawOut.replace("\n", "<br>") + "</p>";
         }
@@ -391,9 +420,9 @@ public class DivinationServiceImpl {
             }
             String poem = extractJsonStringField(rawOut, "poem");
             if (poem != null && !poem.isEmpty()) {
-                sb.append("<blockquote class='poem-box' style='font-style: italic; background: #fafafa; color: #333; border-left: 4px solid #ccc; padding: 10px; margin: 10px 0;'>")
-                  .append(poem.replace("\n", "<br>"))
-                  .append("</blockquote>");
+                sb.append("<blockquote class='poem-box'>")
+                        .append(poem.replace("\n", "<br>"))
+                        .append("</blockquote>");
             }
             if (sb.length() == 0) return "<p>" + rawOut.replace("\n", "<br>") + "</p>";
             return sb.toString();
@@ -403,41 +432,55 @@ public class DivinationServiceImpl {
     }
 
     private String extractJsonStringField(String json, String field) {
-        if (json == null) return null;
+        if (json == null)
+            return null;
         String search = "\"" + field + "\":";
         int idx = json.indexOf(search);
         if (idx < 0) {
             search = "\"" + field + "\" :";
             idx = json.indexOf(search);
         }
-        if (idx < 0) return null;
+        if (idx < 0)
+            return null;
+
         int startQuote = json.indexOf("\"", idx + search.length());
-        if (startQuote < 0) return null;
+        if (startQuote < 0)
+            return null;
         int endQuote = json.indexOf("\"", startQuote + 1);
         while (endQuote > 0 && json.charAt(endQuote - 1) == '\\') {
             endQuote = json.indexOf("\"", endQuote + 1);
         }
-        if (endQuote < 0) return null;
+        if (endQuote < 0)
+            return null;
+
         String val = json.substring(startQuote + 1, endQuote);
         val = val.replace("\\n", "<br>").replace("\\\"", "\"").replace("\\\\", "\\");
         return val;
     }
 
     private String extractJsonNumberField(String json, String field) {
-        if (json == null) return null;
+        if (json == null)
+            return null;
         String search = "\"" + field + "\":";
         int idx = json.indexOf(search);
         if (idx < 0) {
             search = "\"" + field + "\" :";
             idx = json.indexOf(search);
         }
-        if (idx < 0) return null;
+        if (idx < 0)
+            return null;
+
         int start = idx + search.length();
-        while (start < json.length() && json.charAt(start) == ' ') start++;
-        if (start >= json.length()) return null;
+        while (start < json.length() && json.charAt(start) == ' ')
+            start++;
+        if (start >= json.length())
+            return null;
+
         int end = start;
-        while (end < json.length() && (Character.isDigit(json.charAt(end)) || json.charAt(end) == '-')) end++;
-        if (end == start) return null;
+        while (end < json.length() && (Character.isDigit(json.charAt(end)) || json.charAt(end) == '-'))
+            end++;
+        if (end == start)
+            return null;
         return json.substring(start, end);
     }
 
@@ -445,33 +488,50 @@ public class DivinationServiceImpl {
         String target = String.valueOf(ngaySinh);
         String[] parts = ngayStr.split("[,\\s]+");
         for (String p : parts) {
-            if (p.trim().equals(target)) return true;
+            if (p.trim().equals(target))
+                return true;
         }
-        return ngayStr.contains(" " + ngaySinh + ",") || ngayStr.contains(" " + ngaySinh) || ngayStr.equals(target);
+        // fallback: kiểm tra dạng plain " 15 " hay "15,"
+        return ngayStr.contains(" " + ngaySinh + ",")
+                || ngayStr.contains(" " + ngaySinh)
+                || ngayStr.equals(target);
     }
 
     private String extractCanChi(String rawGio) {
-        if (rawGio == null || rawGio.isEmpty()) return "Ngọ";
+        if (rawGio == null || rawGio.isEmpty())
+            return "Ngọ";
         int idx = rawGio.indexOf(" ");
         return idx > 0 ? rawGio.substring(0, idx).trim() : rawGio;
     }
 
     private String mapChiToCot(String chi) {
-        if (chi == null) return "chuot";
-        switch (chi.toLowerCase()) {
-            case "tý": return "chuot";
-            case "sửu": return "trau";
-            case "dần": return "cop";
-            case "mão": return "tho";
-            case "thìn": return "rong";
-            case "tỵ": return "ran";
-            case "ngọ": return "ngua";
-            case "mùi": return "de";
-            case "thân": return "khi";
-            case "dậu": return "ga";
-            case "tuất": return "cho";
-            case "hợi": return "heo";
-            default: return "chuot";
+        switch (chi) {
+            case "ty1":
+                return "chuot";
+            case "suu":
+                return "trau";
+            case "dan":
+                return "cop";
+            case "mao":
+                return "tho";
+            case "thin":
+                return "rong";
+            case "ty2":
+                return "ran";
+            case "ngo":
+                return "ngua";
+            case "mui":
+                return "de";
+            case "than":
+                return "khi";
+            case "dau":
+                return "ga";
+            case "tuat":
+                return "cho";
+            case "hoi":
+                return "heo";
+            default:
+                return "chuot";
         }
     }
 
@@ -493,46 +553,75 @@ public class DivinationServiceImpl {
 
     private String calculateMenh(int canIndex, int chiIndex) {
         int canVal = 0;
-        if (canIndex == 4 || canIndex == 5) canVal = 1;
-        else if (canIndex == 6 || canIndex == 7) canVal = 2;
-        else if (canIndex == 8 || canIndex == 9) canVal = 3;
-        else if (canIndex == 0 || canIndex == 1) canVal = 4;
-        else if (canIndex == 2 || canIndex == 3) canVal = 5;
+        if (canIndex == 4 || canIndex == 5)
+            canVal = 1;
+        else if (canIndex == 6 || canIndex == 7)
+            canVal = 2;
+        else if (canIndex == 8 || canIndex == 9)
+            canVal = 3;
+        else if (canIndex == 0 || canIndex == 1)
+            canVal = 4;
+        else if (canIndex == 2 || canIndex == 3)
+            canVal = 5;
 
         int chiVal = 0;
-        if (chiIndex == 4 || chiIndex == 5 || chiIndex == 10 || chiIndex == 11) chiVal = 0;
-        else if (chiIndex == 6 || chiIndex == 7 || chiIndex == 0 || chiIndex == 1) chiVal = 1;
-        else chiVal = 2;
+        if (chiIndex == 4 || chiIndex == 5 || chiIndex == 10 || chiIndex == 11)
+            chiVal = 0;
+        else if (chiIndex == 6 || chiIndex == 7 || chiIndex == 0 || chiIndex == 1)
+            chiVal = 1;
+        else
+            chiVal = 2;
 
         int finalMenh = canVal + chiVal;
-        if (finalMenh > 5) finalMenh -= 5;
+        if (finalMenh > 5)
+            finalMenh -= 5;
 
         switch (finalMenh) {
-            case 1: return "kim";
-            case 2: return "thuy";
-            case 3: return "hoa";
-            case 4: return "tho";
-            case 5: return "moc";
-            default: return "kim";
+            case 1:
+                return "kim";
+            case 2:
+                return "thuy";
+            case 3:
+                return "hoa";
+            case 4:
+                return "tho";
+            case 5:
+                return "moc";
+            default:
+                return "kim";
         }
     }
 
     private String mapChiToVietnamese(String chi) {
-        if (chi == null) return "";
+        if (chi == null)
+            return "";
         switch (chi.toLowerCase()) {
-            case "ty1": return "Tý";
-            case "suu": return "Sửu";
-            case "dan": return "Dần";
-            case "mao": return "Mẹo";
-            case "thin": return "Thìn";
-            case "ty2": return "Tỵ";
-            case "ngo": return "Ngọ";
-            case "mui": return "Mùi";
-            case "than": return "Thân";
-            case "dau": return "Dậu";
-            case "tuat": return "Tuất";
-            case "hoi": return "Hợi";
-            default: return chi;
+            case "ty1":
+                return "Tý";
+            case "suu":
+                return "Sửu";
+            case "dan":
+                return "Dần";
+            case "mao":
+                return "Mẹo";
+            case "thin":
+                return "Thìn";
+            case "ty2":
+                return "Tỵ";
+            case "ngo":
+                return "Ngọ";
+            case "mui":
+                return "Mùi";
+            case "than":
+                return "Thân";
+            case "dau":
+                return "Dậu";
+            case "tuat":
+                return "Tuất";
+            case "hoi":
+                return "Hợi";
+            default:
+                return chi;
         }
     }
 }
