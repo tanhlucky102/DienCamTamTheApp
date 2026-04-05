@@ -177,6 +177,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsSection = document.getElementById('results-section');
     const wheelImgBtn = document.querySelector('.wheel-img');
     const inputCards = document.querySelectorAll('.input-card');
+    const partnerCard = document.getElementById('partner-card');
+
+    // Tự động hiện partner card nếu chọn Tình cảm hoặc Tất cả
+    const lookupCategorySelect = document.getElementById('lookup-category');
+    if (lookupCategorySelect) {
+        lookupCategorySelect.addEventListener('change', (e) => {
+            if (e.target.value === 'Tình cảm - Hôn nhân' || e.target.value === 'Tất cả') {
+                partnerCard.classList.remove('disabled-card');
+            } else {
+                partnerCard.classList.add('disabled-card');
+            }
+        });
+    }
 
     if (wheelImgBtn) {
         wheelImgBtn.addEventListener('click', () => {
@@ -222,12 +235,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const requestPayload = {
                 fullname: fullnameValue,
                 gender: document.getElementById('gender').value,
-                calendarType: document.getElementById('calendar-type').value,
+                calendarType: 'solar', // Mặc định là Dương lịch như yêu cầu
                 birthHour: document.getElementById('birth-hour').value,
                 birthDay: document.getElementById('birth-day').value,
                 birthMonth: document.getElementById('birth-month').value,
                 birthYear: document.getElementById('birth-year').value,
-                lookupCategory: categoryValue
+                lookupCategory: categoryValue,
+                partnerBirthDay: document.getElementById('partner-birth-day').value,
+                partnerBirthMonth: document.getElementById('partner-birth-month').value,
+                partnerBirthYear: document.getElementById('partner-birth-year').value
             };
 
             // Gắn tín hiệu gọi Backend
