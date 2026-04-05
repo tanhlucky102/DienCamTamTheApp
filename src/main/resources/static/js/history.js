@@ -44,7 +44,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderGrid = (filterTxt = '') => {
         if (!grid) return;
         grid.innerHTML = '';
-        const lowerFilter = filterTxt.toLowerCase();
+        
+        const normalizeString = (str) => {
+            if (!str) return '';
+            return str.normalize('NFD')
+                      .replace(/[\u0300-\u036f]/g, '')
+                      .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+                      .toLowerCase();
+        };
+        const lowerFilter = normalizeString(filterTxt);
 
         let matchCount = 0;
         // Reverse to show newest first
@@ -54,9 +62,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const catS = item.category || '';
             const nameS = item.fullname || '';
 
-            // Search match
-            if (filterTxt && !nameS.toLowerCase().includes(lowerFilter) && !catS.toLowerCase().includes(lowerFilter) && !dateS.toLowerCase().includes(lowerFilter)) {
-                continue;
+            // Search match: ignore accents
+            if (filterTxt) {
+                const normName = normalizeString(nameS);
+                const normCat = normalizeString(catS);
+                const normDate = normalizeString(dateS);
+                
+                if (!normName.includes(lowerFilter) && !normCat.includes(lowerFilter) && !normDate.includes(lowerFilter)) {
+                    continue;
+                }
             }
 
             matchCount++;

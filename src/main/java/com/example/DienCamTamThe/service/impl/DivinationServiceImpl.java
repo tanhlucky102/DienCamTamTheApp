@@ -37,7 +37,8 @@ public class DivinationServiceImpl {
             rawYear = Integer.parseInt(request.getBirthYear());
             rawDay = Integer.parseInt(request.getBirthDay());
             rawMonth = Integer.parseInt(request.getBirthMonth());
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         // Chuyển đổi sang Âm lịch nếu là Dương lịch
         int birthYear, ngaySinh, thangSinh;
@@ -277,33 +278,18 @@ public class DivinationServiceImpl {
         } catch (Exception e) {
             content.append("<p><em>(Lỗi tra cứu)</em></p>");
         }
-    }
+        // Fallback: entry đầu tiên
+        if (matched == null)
+            matched = entries.get(0);
 
-    // --- SỞ 08: Giờ sinh tam thế ---
-    private void appendSo08(StringBuilder content, String hourInput, String minuteInput, String canChiGio) {
-        int chiGioId = getDatabaseChiIdForHour(hourInput);
-        String giaiDoan = "Giữa";
-        try {
-            if (minuteInput != null && !minuteInput.isEmpty()) {
-                int min = Integer.parseInt(minuteInput);
-                if (min < 40) giaiDoan = "Đầu";
-                else if (min < 80) giaiDoan = "Giữa";
-                else giaiDoan = "Sau";
-            }
-        } catch (Exception e) {}
-
-        content.append("<p><strong>Giờ sinh:</strong> ").append(canChiGio).append(" (Giai đoạn: ").append(giaiDoan).append(")</p>");
-        
-        try {
-            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT LoiGiai FROM so08_36giosanh WHERE ChiID = ? AND GiaiDoan = ?", chiGioId, giaiDoan);
-            if (!rows.isEmpty()) {
-                String lg = (String) rows.get(0).get("LoiGiai");
-                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
-            } else {
-                content.append("<p><em>(Dữ liệu giờ ").append(canChiGio).append(" giai đoạn ").append(giaiDoan).append(" chưa được cập nhật trong Database. Xin đợi bản vá tiếp theo!)</em></p>");
-            }
-        } catch (Exception e) {
-            content.append("<p><em>(Lỗi tra cứu bảng so08_36giosanh)</em></p>");
+        if (matched.getOutputData() != null) {
+            String tenGio = extractJsonStringField(matched.getInputData(), "gio_sinh");
+            if (tenGio == null || tenGio.isEmpty())
+                tenGio = canChiGio;
+            content.append("<p><strong>Giờ sinh:</strong> ").append(tenGio).append("</p>");
+            content.append(parseOutputJsonToText(matched.getOutputData()));
+        } else {
+            content.append("<p><em>(Không tìm thấy lời đoán cho giờ ").append(canChiGio).append(")</em></p>");
         }
     }
 
@@ -339,20 +325,16 @@ public class DivinationServiceImpl {
         }
     }
 
-    // --- SỞ 12: Cốt con gì ---
-    private void appendSo12(StringBuilder content, int chiId, int thangSinh) {
-        try {
-            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenCot, LoiGiai FROM so12_cotcongi WHERE Tuoi_ChiID = ? AND ThangSanh = ?", chiId, thangSinh);
-            if (!rows.isEmpty()) {
-                String tenCot = (String) rows.get(0).get("TenCot");
-                String lg = (String) rows.get(0).get("LoiGiai");
-                content.append("<p><strong>Cốt:</strong> Con ").append(tenCot).append("</p>");
-                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
-            } else {
-                content.append("<p><em>(Chưa có dữ liệu cốt cho tổ hợp này)</em></p>");
-            }
-        } catch (Exception e) {
-            content.append("<p><em>(Lỗi tra cứu bảng so12_cotcongi)</em></p>");
+        if (matched == null)
+            matched = entries.get(0);
+
+        if (foundTenHieu != null && !foundTenHieu.isEmpty()) {
+            content.append("<p><strong>Hiệu ngày:</strong> ").append(foundTenHieu).append("</p>");
+        }
+        if (matched.getOutputData() != null) {
+            content.append(parseOutputJsonToText(matched.getOutputData()));
+        } else {
+            content.append("<p><em>(Không tìm thấy lời đoán cho ngày ").append(ngaySinh).append(")</em></p>");
         }
     }
 
@@ -402,111 +384,34 @@ public class DivinationServiceImpl {
         } catch (Exception e) {}
     }
 
-    // --- SỞ 16: Thi cử ---
-    private void appendSo16(StringBuilder content, int chiId, int thangSinh) {
-        try {
-            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenTruc, LoiGiai FROM so16_hocgioido WHERE ChiID = ? AND ThangSanh = ?", chiId, thangSinh);
-            if (!rows.isEmpty()) {
-                String truc = (String) rows.get(0).get("TenTruc");
-                String lg = (String) rows.get(0).get("LoiGiai");
-                content.append("<p><strong>Học giỏi/dở:</strong> ").append(truc).append("</p>");
-                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
-            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
-        } catch (Exception e) {}
-    }
-
-    // --- SỞ 17: Đi học ---
-    private void appendSo17(StringBuilder content, int chiId, int thangSinh) {
-        try {
-            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenTu, LoiGiai FROM so17_thicu_kynhat WHERE ChiID = ? AND ThangSanh = ?", chiId, thangSinh);
-            if (!rows.isEmpty()) {
-                String tu = (String) rows.get(0).get("TenTu");
-                String lg = (String) rows.get(0).get("LoiGiai");
-                content.append("<p><strong>Sao:</strong> ").append(tu).append("</p>");
-                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
-            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
-        } catch (Exception e) {}
-    }
-
-    // --- SỞ 19: Phá sản ---
-    private void appendSo19(StringBuilder content, int chiId, int thangSinh, String gioiTinh) {
-        try {
-            // Sửa lỗi so sánh giới tính: kiểm tra chuỗi chứa "nữ" cho "Nữ giới"
-            String gt = gioiTinh != null && gioiTinh.toLowerCase().contains("nữ") ? "Nu" : "Nam";
-            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT LoiGiai FROM so19_phasanvochong WHERE Tuoi_ChiID = ? AND GioiTinh = ? AND ThangSanh = ?", chiId, gt, thangSinh);
-            if (!rows.isEmpty()) {
-                String lg = (String) rows.get(0).get("LoiGiai");
-                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
-            } else { 
-                content.append("<p><em>Số này không phạm phá sản của vợ/chồng.</em></p>"); 
+            if (matchTT && matchTS) {
+                matched = e;
+                break;
             }
-        } catch (Exception e) {}
-    }
-
-    // --- SỞ 20: Duyên nợ ---
-    private void appendSo20(StringBuilder content, DivinationRequest request, int userCanId, int userChiId, int userThangSinh) {
-        try {
-            int chongNguHanhId = 0;
-            int voThangSanh = 0;
-            String partnerLunarInfo = "";
-
-            boolean isMale = request.getGender() != null && request.getGender().toLowerCase().contains("nam");
-            
-            // Xử lý thông tin đối tác (Partner) - Quy đổi Dương sang Âm
-            int pDay = 0, pMonth = 0, pYear = 0;
-            try {
-                pDay = Integer.parseInt(request.getPartnerBirthDay());
-                pMonth = Integer.parseInt(request.getPartnerBirthMonth());
-                pYear = Integer.parseInt(request.getPartnerBirthYear());
-            } catch(Exception e) {}
-
-            if (pDay > 0 && pMonth > 0 && pYear > 0) {
-                LunarCalendarUtil.LunarDate pLunar = LunarCalendarUtil.convertSolarToLunar(pDay, pMonth, pYear, 7.0);
-                int pLunarYear = pLunar.year;
-                int pLunarMonth = pLunar.month;
-                String pCanChi = LunarCalendarUtil.getCanChiString(pLunarYear);
-                partnerLunarInfo = pCanChi + " (Tháng " + pLunarMonth + " Âm lịch)";
-
-                if (isMale) {
-                    // Người dùng là Chồng
-                    chongNguHanhId = getLocalNguHanhId(userCanId, userChiId);
-                    // Đối tác là Vợ
-                    voThangSanh = pLunarMonth;
-                } else {
-                    // Người dùng là Vợ
-                    voThangSanh = userThangSinh;
-                    // Đối tác là Chồng
-                    int pCanId = getDatabaseCanId(pLunarYear);
-                    int pChiId = getDatabaseChiId(pLunarYear);
-                    chongNguHanhId = getLocalNguHanhId(pCanId, pChiId);
+            if (matchTT && tsField == null) {
+                matched = e;
+                break;
+            } // chỉ có trường tháng thọ thai
+        }
+        if (matched == null) {
+            for (BookEntry e : entries) {
+                String inputStr = e.getInputData() != null ? e.getInputData() : "";
+                String ttField = extractJsonNumberField(inputStr, "thang_tho_thai");
+                if (ttField != null && Integer.parseInt(ttField) == thangThoThai) {
+                    matched = e;
+                    break;
                 }
             }
+        }
+        if (matched == null)
+            matched = entries.get(0);
 
-            if (chongNguHanhId > 0 && voThangSanh > 0) {
-                content.append("<p><strong>Đối tác:</strong> <span style='color: #b45309;'>").append(partnerLunarInfo).append("</span></p>");
-                
-                List<Map<String, Object>> rows = jdbcTemplate.queryForList(
-                    "SELECT KetQua FROM so20_ma_tran_duyen_no WHERE Chong_NguHanhID = ? AND Vo_ThangSanh = ?", 
-                    chongNguHanhId, voThangSanh);
-                
-                if (!rows.isEmpty()) {
-                    String kq = (String) rows.get(0).get("KetQua");
-                    content.append("<p><strong>Kết quả:</strong> ").append(kq).append("</p>");
-                    
-                    List<Map<String, Object>> gRes = jdbcTemplate.queryForList(
-                        "SELECT LoiGiai FROM so20_loi_giai_duyen_no WHERE KetQua = ?", kq);
-                    if (!gRes.isEmpty()) {
-                        String lg = (String) gRes.get(0).get("LoiGiai");
-                        content.append("<p><strong>Luận giải:</strong> ").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
-                    }
-                } else {
-                    content.append("<p><em>(Không tìm thấy tổ hợp duyên nợ này trong ma trận)</em></p>");
-                }
-            } else {
-                content.append("<p style='color: #b45309;'><em>* Vui lòng bổ sung \"Thông tin Vợ/Chồng\" để xem chi tiết duyên nợ.</em></p>");
-            }
-        } catch(Exception e){
-            content.append("<p><em>(Lỗi xử lý duyên nợ: ").append(e.getMessage()).append(")</em></p>");
+        content.append("<p><em>Tháng thọ thai: ").append(thangThoThai)
+                .append(" | Tháng sinh: ").append(thangSinh).append("</em></p>");
+        if (matched.getOutputData() != null) {
+            content.append(parseOutputJsonToText(matched.getOutputData()));
+        } else {
+            content.append("<p><em>(Không tìm thấy lời đoán tương ứng)</em></p>");
         }
     }
 
@@ -519,18 +424,15 @@ public class DivinationServiceImpl {
     }
 
 
+        for (BookEntry e : entries) {
+            String inJson = e.getInputData();
+            if (inJson == null || inJson.isBlank())
+                continue;
 
-    // --- SỞ 21: Trường sanh ---
-    private void appendSo21(StringBuilder content, int nguHanhId, int chiId) {
-        try {
-            int tsId = getTruongSanhID(nguHanhId, chiId);
-            if (tsId > 0) {
-                // Lấy tên sao từ bảng Sở 22 hoặc 23 (chung schema)
-                List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenSao FROM so22_nuoicon WHERE TruongSanhID = ?", tsId);
-                String sao = !rows.isEmpty() ? (String) rows.get(0).get("TenSao") : "Không rõ";
-                content.append("<p><strong>Cung mạng:</strong> Đóng tại cung <span style='color: #b45309;'>").append(sao).append("</span></p>");
-            } else { 
-                content.append("<p><em>(Chưa phân tích được cung mạng Trường sanh)</em></p>"); 
+            // 1. Kiểm tra "tat_ca"
+            if (inJson.contains("tat_ca")) {
+                matched = e;
+                break;
             }
         } catch(Exception e){}
     }
@@ -561,18 +463,12 @@ public class DivinationServiceImpl {
         } catch(Exception e){}
     }
 
-    // --- SỞ 23: Anh em ---
-    private void appendSo23(StringBuilder content, int nguHanhId, int chiId) {
-        try {
-            int tsId = getTruongSanhID(nguHanhId, chiId);
-            if (tsId > 0) {
-                List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT BaiTho FROM so23_anhem WHERE TruongSanhID = ?", tsId);
-                if (!rows.isEmpty()) {
-                    String tho = (String) rows.get(0).get("BaiTho");
-                    content.append("<p style='white-space: pre-line; font-family: serif; font-style: italic; background: #fffcf2; padding: 10px; border-radius: 5px;'>").append(tho).append("</p>");
-                }
-            } else { 
-                content.append("<p><em>(Chưa có dữ liệu bài thơ anh em)</em></p>"); 
+            String eMang = extractJsonStringField(inJson, "mang");
+            if (eMang == null)
+                eMang = extractJsonStringField(inJson, "menh");
+            if (eMang != null && eMang.equalsIgnoreCase(mang)) {
+                matched = e;
+                break;
             }
         } catch (Exception e) {}
     }
@@ -585,30 +481,17 @@ public class DivinationServiceImpl {
         return 0;
     }
 
-    // --- SỞ 18: Tù tội ---
-    private void appendSo18(StringBuilder content, int canId, int chiId, int thangSinh) {
-        try {
-            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT LoiGiai FROM so18_otuhaykhong WHERE Tuoi_CanID = ? AND Tuoi_ChiID = ? AND ThangSanh = ?", canId, chiId, thangSinh);
-            if (!rows.isEmpty()) {
-                String lg = (String) rows.get(0).get("LoiGiai");
-                content.append("<p>").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
-            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
-        } catch(Exception e){}
-    }
+            // 5. Kiểm tra "sao" hoặc "nghe"
+            if (inJson.contains("\"sao\"") || inJson.contains("\"nghe\"")) {
+                // Nếu là bảng tra chung thì cho qua, nếu là text cụ thể thì cần thêm logic
+                // filter
+                // Hiện tại lấy entry đầu tiên khớp format
+                matched = e;
+            }
+        }
 
-    // --- SỞ 28: Sao hạn ---
-    private void appendSo28(StringBuilder content, String gioiTinh, int birthYear) {
-         java.time.Year currentYear = java.time.Year.now();
-         int tuoiMu = currentYear.getValue() - birthYear + 1;
-         // Sửa logic so sánh giới tính tương tự
-         String gt = gioiTinh != null && gioiTinh.toLowerCase().contains("nữ") ? "Nu" : "Nam";
-         try {
-            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenSao FROM so28_saochieumenh WHERE TuoiAmLich = ? AND GioiTinh = ?", tuoiMu, gt);
-            if (!rows.isEmpty()) {
-                content.append("<p><strong>Tuổi mụ:</strong> ").append(tuoiMu).append(" - <strong>Sao chiếu:</strong> ").append(rows.get(0).get("TenSao")).append("</p>");
-            } else { content.append("<p><em>(Năm nay chưa tính được sao)</em></p>"); }
-         } catch(Exception e){}
-    }
+        if (matched == null)
+            matched = entries.get(0);
 
     // --- SỞ 29: Hạn năm ---
     private void appendSo29(StringBuilder content, String gioiTinh, int birthYear) {
@@ -625,24 +508,43 @@ public class DivinationServiceImpl {
          } catch(Exception e){}
     }
 
-    // --- SỞ 24: Huynh Đệ (4 mùa) ---
-    private void appendSo24(StringBuilder content, int chiId, int thangSinh) {
-        try {
-            String mua = "Xuan";
-            if (thangSinh >= 4 && thangSinh <= 6) mua = "Ha";
-            else if (thangSinh >= 7 && thangSinh <= 9) mua = "Thu";
-            else if (thangSinh >= 10 || thangSinh <= 12) mua = "Dong";
-            
-            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT ViTri FROM so24_huynhde_mapping WHERE Mua = ? AND ChiID = ?", mua, chiId);
-            if (!rows.isEmpty()) {
-                String vt = (String) rows.get(0).get("ViTri");
-                content.append("<p><strong>Vị trí:</strong> sinh vào cung ").append(vt).append("</p>");
-            } else { content.append("<p><em>(Chưa có dữ liệu 4 mùa)</em></p>"); }
-        } catch(Exception e){}
+    private String mapCotToChi(String cot) {
+        switch (cot) {
+            case "chuot":
+                return "ty1";
+            case "trau":
+                return "suu";
+            case "cop":
+                return "dan";
+            case "tho":
+                return "mao";
+            case "rong":
+                return "thin";
+            case "ran":
+                return "ty2";
+            case "ngua":
+                return "ngo";
+            case "de":
+                return "mui";
+            case "khi":
+                return "than";
+            case "ga":
+                return "dau";
+            case "cho":
+                return "tuat";
+            case "heo":
+                return "hoi";
+            default:
+                return cot;
+        }
     }
 
-    // --- SỞ 25: Con vua ---
-    private void appendSo25(StringBuilder content, int chiId, int thangSinh) {
+    private String parseOutputJsonToText(String rawOut) {
+        if (rawOut == null || rawOut.isBlank())
+            return "";
+        if (!rawOut.trim().startsWith("{")) {
+            return "<p>" + rawOut.replace("\n", "<br>") + "</p>";
+        }
         try {
             List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TenVua, LoiGiai FROM so25_con_vua WHERE ChiID = ?", chiId);
             if (!rows.isEmpty()) {
@@ -687,90 +589,206 @@ public class DivinationServiceImpl {
             for (Map<String, Object> r : rows) {
                 content.append("<p><strong>").append(r.get("TenLoiKhuyen")).append(":</strong> ").append(r.get("NoiDung")).append("</p>");
             }
-        } catch(Exception e){}
-    }
-
-    // --- SỞ 31: Sống lâu/Quy Tiên ---
-    private void appendSo31(StringBuilder content, int nguHanhId, int thangSinh) {
-        try {
-            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT PhanTram FROM so31_mang_thang_phantram WHERE NguHanhID = ? AND ThangSanh = ?", nguHanhId, thangSinh);
-            if (!rows.isEmpty()) {
-                content.append("<p><strong>Tỷ lệ sinh:</strong> ").append(rows.get(0).get("PhanTram")).append("%</p>");
-            } else { content.append("<p><em>(Chưa có dữ liệu)</em></p>"); }
-        } catch(Exception e){}
-    }
-
-    // --- SỞ 32: Có hòm ---
-    private void appendSo32(StringBuilder content, int chiId, int thangSinh) {
-        content.append("<p><em>(Chưa có bảng so32)</em></p>");
-    }
-
-    // --- SỞ 34: Giác hồng trần ---
-    private void appendSo34(StringBuilder content, int chiId, int thangSinh) {
-        try {
-            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT TieuDe, NoiDung FROM so34_trietly LIMIT 1");
-            if (!rows.isEmpty()) {
-                String lg = (String) rows.get(0).get("NoiDung");
-                content.append("<p><strong>Triết lý:</strong> ").append(lg != null ? lg.replace("\n", "<br>") : "").append("</p>");
+            String poem = extractJsonStringField(rawOut, "poem");
+            if (poem != null && !poem.isEmpty()) {
+                sb.append("<blockquote class='poem-box'>")
+                        .append(poem.replace("\n", "<br>"))
+                        .append("</blockquote>");
             }
         } catch(Exception e){}
     }
 
-    // ID Mapping Database Helper
-    private int getDatabaseCanId(int year) {
-        int[] canIdMap = {7, 8, 9, 10, 1, 2, 3, 4, 5, 6};
-        int index = year % 10;
-        if (index < 0) index += 10;
-        return canIdMap[index];
+    private String extractJsonStringField(String json, String field) {
+        if (json == null)
+            return null;
+        String search = "\"" + field + "\":";
+        int idx = json.indexOf(search);
+        if (idx < 0) {
+            search = "\"" + field + "\" :";
+            idx = json.indexOf(search);
+        }
+        if (idx < 0)
+            return null;
+
+        int startQuote = json.indexOf("\"", idx + search.length());
+        if (startQuote < 0)
+            return null;
+        int endQuote = json.indexOf("\"", startQuote + 1);
+        while (endQuote > 0 && json.charAt(endQuote - 1) == '\\') {
+            endQuote = json.indexOf("\"", endQuote + 1);
+        }
+        if (endQuote < 0)
+            return null;
+
+        String val = json.substring(startQuote + 1, endQuote);
+        val = val.replace("\\n", "<br>").replace("\\\"", "\"").replace("\\\\", "\\");
+        return val;
     }
 
-    private int getDatabaseChiId(int year) {
-        int[] chiIdMap = {9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8};
-        int index = year % 12;
-        if (index < 0) index += 12;
-        return chiIdMap[index];
+    private String extractJsonNumberField(String json, String field) {
+        if (json == null)
+            return null;
+        String search = "\"" + field + "\":";
+        int idx = json.indexOf(search);
+        if (idx < 0) {
+            search = "\"" + field + "\" :";
+            idx = json.indexOf(search);
+        }
+        if (idx < 0)
+            return null;
+
+        int start = idx + search.length();
+        while (start < json.length() && json.charAt(start) == ' ')
+            start++;
+        if (start >= json.length())
+            return null;
+
+        int end = start;
+        while (end < json.length() && (Character.isDigit(json.charAt(end)) || json.charAt(end) == '-'))
+            end++;
+        if (end == start)
+            return null;
+        return json.substring(start, end);
     }
 
-    private int getDatabaseChiIdForHour(String hour) {
-        if (hour == null) return 7; // Mặc định Ngọ
-        hour = hour.toLowerCase().trim();
-        if (hour.startsWith("tý") || hour.startsWith("chuột") || hour.startsWith("ty1")) return 1;
-        if (hour.startsWith("sửu") || hour.startsWith("trâu")) return 2;
-        if (hour.startsWith("dần") || hour.startsWith("hổ") || hour.startsWith("cọp")) return 3;
-        if (hour.startsWith("mão") || hour.startsWith("mẹo") || hour.startsWith("thỏ")) return 4;
-        if (hour.startsWith("thìn") || hour.startsWith("rồng")) return 5;
-        if (hour.startsWith("tỵ") || hour.startsWith("rắn") || hour.startsWith("ty2")) return 6;
-        if (hour.startsWith("ngọ") || hour.startsWith("ngựa")) return 7;
-        if (hour.startsWith("mùi") || hour.startsWith("dê")) return 8;
-        if (hour.startsWith("thân") || hour.startsWith("khỉ")) return 9;
-        if (hour.startsWith("dậu") || hour.startsWith("gà")) return 10;
-        if (hour.startsWith("tuất") || hour.startsWith("chó")) return 11;
-        if (hour.startsWith("hợi") || hour.startsWith("heo") || hour.startsWith("lợn")) return 12;
-        return 7;
+    private boolean containsDayNumber(String ngayStr, int ngaySinh) {
+        String target = String.valueOf(ngaySinh);
+        String[] parts = ngayStr.split("[,\\s]+");
+        for (String p : parts) {
+            if (p.trim().equals(target))
+                return true;
+        }
+        // fallback: kiểm tra dạng plain " 15 " hay "15,"
+        return ngayStr.contains(" " + ngaySinh + ",")
+                || ngayStr.contains(" " + ngaySinh)
+                || ngayStr.equals(target);
     }
 
     private String extractCanChi(String rawGio) {
-        if (rawGio == null || rawGio.isEmpty()) return "Ngọ";
+        if (rawGio == null || rawGio.isEmpty())
+            return "Ngọ";
         int idx = rawGio.indexOf(" ");
         return idx > 0 ? rawGio.substring(0, idx).trim() : rawGio;
     }
 
     private String mapChiToCot(String chi) {
-        if (chi == null) return "chuot";
+        switch (chi) {
+            case "ty1":
+                return "chuot";
+            case "suu":
+                return "trau";
+            case "dan":
+                return "cop";
+            case "mao":
+                return "tho";
+            case "thin":
+                return "rong";
+            case "ty2":
+                return "ran";
+            case "ngo":
+                return "ngua";
+            case "mui":
+                return "de";
+            case "than":
+                return "khi";
+            case "dau":
+                return "ga";
+            case "tuat":
+                return "cho";
+            case "hoi":
+                return "heo";
+            default:
+                return "chuot";
+        }
+    }
+
+    private int getCanIndex(String can) {
+        String[] cans = {"canh", "tân", "nhâm", "quý", "giáp", "ất", "bính", "đinh", "mậu", "kỷ"};
+        for (int i = 0; i < cans.length; i++) {
+            if (cans[i].equalsIgnoreCase(can)) return i;
+        }
+        return 0;
+    }
+
+    private int getChiIndex(String chi) {
+        String[] chis = {"thân", "dậu", "tuất", "hợi", "tý", "sửu", "dần", "mão", "thìn", "tỵ", "ngọ", "mùi"};
+        for (int i = 0; i < chis.length; i++) {
+            if (chis[i].equalsIgnoreCase(chi)) return i;
+        }
+        return 0;
+    }
+
+    private String calculateMenh(int canIndex, int chiIndex) {
+        int canVal = 0;
+        if (canIndex == 4 || canIndex == 5)
+            canVal = 1;
+        else if (canIndex == 6 || canIndex == 7)
+            canVal = 2;
+        else if (canIndex == 8 || canIndex == 9)
+            canVal = 3;
+        else if (canIndex == 0 || canIndex == 1)
+            canVal = 4;
+        else if (canIndex == 2 || canIndex == 3)
+            canVal = 5;
+
+        int chiVal = 0;
+        if (chiIndex == 4 || chiIndex == 5 || chiIndex == 10 || chiIndex == 11)
+            chiVal = 0;
+        else if (chiIndex == 6 || chiIndex == 7 || chiIndex == 0 || chiIndex == 1)
+            chiVal = 1;
+        else
+            chiVal = 2;
+
+        int finalMenh = canVal + chiVal;
+        if (finalMenh > 5)
+            finalMenh -= 5;
+
+        switch (finalMenh) {
+            case 1:
+                return "kim";
+            case 2:
+                return "thuy";
+            case 3:
+                return "hoa";
+            case 4:
+                return "tho";
+            case 5:
+                return "moc";
+            default:
+                return "kim";
+        }
+    }
+
+    private String mapChiToVietnamese(String chi) {
+        if (chi == null)
+            return "";
         switch (chi.toLowerCase()) {
-            case "tý": return "chuot";
-            case "sửu": return "trau";
-            case "dần": return "cop";
-            case "mão": return "tho";
-            case "thìn": return "rong";
-            case "tỵ": return "ran";
-            case "ngọ": return "ngua";
-            case "mùi": return "de";
-            case "thân": return "khi";
-            case "dậu": return "ga";
-            case "tuất": return "cho";
-            case "hợi": return "heo";
-            default: return "chuot";
+            case "ty1":
+                return "Tý";
+            case "suu":
+                return "Sửu";
+            case "dan":
+                return "Dần";
+            case "mao":
+                return "Mẹo";
+            case "thin":
+                return "Thìn";
+            case "ty2":
+                return "Tỵ";
+            case "ngo":
+                return "Ngọ";
+            case "mui":
+                return "Mùi";
+            case "than":
+                return "Thân";
+            case "dau":
+                return "Dậu";
+            case "tuat":
+                return "Tuất";
+            case "hoi":
+                return "Hợi";
+            default:
+                return chi;
         }
     }
 }

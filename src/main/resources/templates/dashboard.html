@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,37 +8,48 @@
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body, html {
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body,
+        html {
             font-family: 'Inter', sans-serif;
             width: 100%;
             height: 100vh;
-            background-color: #000; 
-            overflow: hidden; /* Cắt thanh cuộn để trang web nằm trọn 1 màn hình */
+            background-color: #000;
+            overflow: hidden;
+            /* Cắt thanh cuộn để trang web nằm trọn 1 màn hình */
         }
 
         /* Hình nền khít màn hình và đẩy xuống dưới Header để lộ rồng phượng */
         .dashboard-wrapper {
             width: 100%;
             height: 100vh;
-            background-color: #faf5ed; 
+            background-color: #faf5ed;
             background-image: url('/images/background.jpg');
-            background-size: 100vw auto; 
-            background-position: center 75px; /* Giữ ảnh dưới mép lưới Header 75px */
+            background-size: 100vw auto;
+            background-position: center 75px;
+            /* Giữ ảnh dưới mép lưới Header 75px */
             background-repeat: no-repeat;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            z-index: 0; 
+            z-index: 0;
         }
 
         /* Lớp phủ "Hiệu ứng lùi màn" (Vignette) - Độ sáng cân bằng, hơi tối nhẹ ở viền */
         .bg-overlay {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.4) 85%, rgba(0,0,0,0.65) 100%);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.4) 85%, rgba(0, 0, 0, 0.65) 100%);
             pointer-events: none;
             z-index: 5;
         }
@@ -47,20 +59,24 @@
             width: 100%;
             height: 75px;
             margin: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(250,240,225,0.75)); /* Thả lỏng độ trong suốt */
-            backdrop-filter: blur(35px) saturate(150%); /* Gấp đôi độ mờ kính mờ sương */
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(250, 240, 225, 0.75));
+            /* Thả lỏng độ trong suốt */
+            backdrop-filter: blur(35px) saturate(150%);
+            /* Gấp đôi độ mờ kính mờ sương */
             border: none;
             border-bottom: 2px solid rgba(220, 185, 110, 0.6);
-            border-radius: 0; 
+            border-radius: 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 3rem;
-            position: absolute; 
-            top: 0; left: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
             transform: none;
             z-index: 100;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.25), inset 0 -1px 3px rgba(255,255,255,0.6); /* Bơm bóng sâu hơn */
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25), inset 0 -1px 3px rgba(255, 255, 255, 0.6);
+            /* Bơm bóng sâu hơn */
         }
 
         .header-left {
@@ -74,7 +90,7 @@
             align-items: center;
             text-decoration: none;
         }
-        
+
         .header-logo-text {
             font-family: 'Times New Roman', serif;
             font-size: 1.6rem;
@@ -85,7 +101,7 @@
             -webkit-text-fill-color: transparent;
             text-transform: uppercase;
             letter-spacing: 1px;
-            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.15));
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.15));
         }
 
         .header-nav {
@@ -105,20 +121,25 @@
             position: relative;
             padding: 5px 0;
         }
-        
+
         .nav-link::after {
             content: '';
             position: absolute;
-            bottom: -3px; left: 0; 
-            width: 0%; height: 2px;
+            bottom: -3px;
+            left: 0;
+            width: 0%;
+            height: 2px;
             background: #dcb96e;
             transition: width 0.3s ease;
         }
-        
-        .nav-link:hover, .nav-link.active {
+
+        .nav-link:hover,
+        .nav-link.active {
             color: #9e7100;
         }
-        .nav-link:hover::after, .nav-link.active::after {
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
             width: 100%;
         }
 
@@ -126,51 +147,63 @@
             display: flex;
             align-items: center;
             gap: 1.2rem;
+            position: relative;
         }
 
         .header-account-btn {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            background: linear-gradient(135deg, #dcb96e, #b8860b);
-            padding: 0.45rem 1.4rem;
-            border-radius: 30px; /* Góc nút cực tròn */
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            background:
+                linear-gradient(145deg,
+                    rgba(255, 230, 150, 0.3) 0%,
+                    transparent 40%,
+                    rgba(0, 0, 0, 0.1) 100%),
+                linear-gradient(135deg, #c8991a, #a07010, #c8991a);
+            border-radius: 50%;
             cursor: pointer;
-            font-weight: 700;
             color: #fff !important;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.2);
-            text-decoration: none;
-            box-shadow: 0 5px 15px rgba(220, 185, 110, 0.4);
-            border: 2px solid transparent;
-            transition: all 0.3s;
-        }
-        .header-account-btn:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(220, 185, 110, 0.6);
-            border: 2px solid rgba(255,255,255,0.8);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 240, 180, 0.5),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+                0 0 0 2px rgba(180, 130, 30, 0.6),
+                0 0 0 4px rgba(180, 130, 30, 0.15),
+                0 6px 20px rgba(150, 100, 0, 0.5);
+            border: none;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .icon-action-btn {
-            width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
+        .header-account-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
             border-radius: 50%;
-            background: rgba(255,255,255,0.6); 
-            border: 1px solid rgba(220, 185, 110, 0.4);
-            color: #9e7100;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: all 0.3s;
-            cursor: pointer;
+            background: radial-gradient(circle at 35% 30%, rgba(255, 240, 180, 0.4), transparent 60%);
+            pointer-events: none;
         }
-        .icon-action-btn:hover { 
-            background: #dcb96e; color: #fff;
-            transform: rotate(15deg) scale(1.1);
+
+        .header-account-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 240, 180, 0.5),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+                0 0 0 2px rgba(220, 185, 70, 0.9),
+                0 0 0 5px rgba(220, 185, 70, 0.25),
+                0 8px 25px rgba(150, 100, 0, 0.7),
+                0 0 20px rgba(220, 185, 70, 0.35);
         }
+
+
 
         /* ================= VÒNG TRÒN BAT QUÁI ================= */
         .zodiac-circle-wrapper {
             position: relative;
-            width: 700px; /* Phóng to tổng thể toàn khu vực trung tâm */
+            width: 700px;
+            /* Phóng to tổng thể toàn khu vực trung tâm */
             height: 700px;
             border-radius: 50%;
             display: flex;
@@ -179,74 +212,80 @@
             margin-top: 90px;
             z-index: 10;
         }
-        
+
         /* Vòng kết nối dạng HOA SEN và CÁP QUANG vàng để xuyên tâm 6 khối */
         .dashed-connection-ring {
             position: absolute;
-            top: 50%; left: 50%;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            width: 940px; /* Nhỉnh hơn khoảng cách 880 chút xíu để lấy biên */
+            width: 940px;
+            /* Nhỉnh hơn khoảng cách 880 chút xíu để lấy biên */
             height: 940px;
             border-radius: 50%;
             pointer-events: none;
-            z-index: 15; /* CHUẨN XÁC là nằm DƯỚI các input block (20) */
-            animation: reverseRotate 300s linear infinite; /* Xoay cực chậm */
-            filter: drop-shadow(0 0 20px rgba(255, 215, 130, 0.8)); /* Chói sáng rực rỡ */
+            z-index: 15;
+            /* CHUẨN XÁC là nằm DƯỚI các input block (20) */
+            animation: reverseRotate 300s linear infinite;
+            /* Xoay cực chậm */
+            filter: drop-shadow(0 0 20px rgba(255, 215, 130, 0.8));
+            /* Chói sáng rực rỡ */
         }
 
-        /* Bánh xe Bát Quái LUÔN NẰM CHÍNH GIỮA, CỰC TO */
+        /* Bánh xe Bát Quái LUÔN NẰM CHÍNH GIỮA, CỰC TO */
         .wheel-img {
-            width: 95%; /* Chiếm phần lớn khu vực 700px */
+            width: 95%;
             height: 95%;
             object-fit: contain;
-            filter: drop-shadow(0 20px 50px rgba(0,0,0,0.5)); 
+            filter: drop-shadow(0 10px 25px rgba(220, 185, 110, 0.2));
             border-radius: 50%;
-            animation: slowRotate 240s linear infinite;
             cursor: pointer;
-            transition: transform 0.3s ease, filter 0.3s ease;
             z-index: 30;
+            will-change: transform;
         }
 
         .wheel-img:hover {
-            filter: drop-shadow(0 15px 50px rgba(220, 185, 110, 0.8));
-            transform: scale(1.02);
+            filter: drop-shadow(0 10px 30px rgba(220, 185, 110, 0.5)) !important;
         }
 
         @keyframes reverseRotate {
-            0% { transform: translate(-50%, -50%) rotate(360deg); }
-            100% { transform: translate(-50%, -50%) rotate(0deg); }
-        }
+            0% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
 
-        @keyframes slowRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            100% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
         }
 
         /* Phóng to input-card */
         .input-card {
             position: absolute;
-            background: linear-gradient(145deg, rgba(255,255,255,0.85), rgba(245,245,245,0.7)); 
-            border: 2px solid rgba(255,255,255,0.95);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.85), rgba(245, 245, 245, 0.7));
+            border: 2px solid rgba(255, 255, 255, 0.95);
             border-radius: 12px;
-            padding: 1.2rem 1.4rem; /* Giãn cách bự hơn */
-            width: 280px; /* BỰ HƠN */
-            box-shadow: 
-                0 25px 45px rgba(0, 0, 0, 0.35),  
-                0 0 15px rgba(255, 255, 255, 0.3), 
-                inset 0 0 0 1px rgba(220, 185, 110, 0.4); 
-            transform: translate(-50%, -50%); 
-            backdrop-filter: blur(20px) saturate(120%); 
+            padding: 1.2rem 1.4rem;
+            /* Giãn cách bự hơn */
+            width: 280px;
+            /* BỰ HƠN */
+            box-shadow:
+                0 25px 45px rgba(0, 0, 0, 0.35),
+                0 0 15px rgba(255, 255, 255, 0.3),
+                inset 0 0 0 1px rgba(220, 185, 110, 0.4);
+            transform: translate(-50%, -50%);
+            backdrop-filter: blur(20px) saturate(120%);
             z-index: 20;
-            transition: all 1.2s cubic-bezier(0.8, 0, 0.2, 1); 
+            transition: all 1.2s cubic-bezier(0.8, 0, 0.2, 1);
         }
 
         .input-card:hover {
-            box-shadow: 
-                0 30px 60px rgba(0, 0, 0, 0.5), 
-                0 0 25px rgba(220, 185, 110, 0.4), /* Trỏ chuột sáng lên viền Vàng thay vì Trắng */
-                inset 0 0 0 1px rgba(220, 185, 110, 0.8); 
+            box-shadow:
+                0 30px 60px rgba(0, 0, 0, 0.5),
+                0 0 25px rgba(220, 185, 110, 0.4),
+                /* Trỏ chuột sáng lên viền Vàng thay vì Trắng */
+                inset 0 0 0 1px rgba(220, 185, 110, 0.8);
             z-index: 100;
-            background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,245,245,0.85));
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(245, 245, 245, 0.85));
         }
 
         /* Hiệu ứng bị hút vào hình bát quái */
@@ -258,43 +297,47 @@
             pointer-events: none;
         }
 
-        /* Khi click vào bánh xe, quay lẹ */
-        .wheel-img.fast-spin {
-            animation: fastRotate 1s linear infinite !important;
-        }
+        /* JS Controlled Smooth Rotation */
 
-        @keyframes fastRotate {
-            0% { transform: scale(1.05) rotate(0deg); filter: drop-shadow(0 0 80px rgba(220,185,110,1)); }
-            100% { transform: scale(1.05) rotate(360deg); filter: drop-shadow(0 0 80px rgba(220,185,110,1)); }
-        }
-        
         /* 
            Vị trí cụ thể của 6 block (3 trái, 3 phải) 
            Tọa độ đè khít lên vòng R=440px trên lưới 700px!
         */
-        .card-tl { top: 18.5%; left: -4.4%; } 
-        .card-ml { top: 50%; left: -12.8%; } 
-        .card-bl { top: 81.4%; left: -4.4%; } 
-
-        .card-tr { top: 18.5%; left: 104.4%; }
-        .card-mr { top: 50%; left: 112.8%; } 
-        .card-br { top: 81.4%; left: 104.4%; } 
-        
-        .disabled-card {
-            opacity: 0.5;
-            pointer-events: none;
-            filter: grayscale(1);
-            transition: all 0.5s ease;
+        .card-tl {
+            top: 18.5%;
+            left: -4.4%;
         }
-        .disabled-card:hover {
-            filter: none;
-            opacity: 0.8;
+
+        .card-ml {
+            top: 50%;
+            left: -12.8%;
+        }
+
+        .card-bl {
+            top: 81.4%;
+            left: -4.4%;
+        }
+
+        .card-tr {
+            top: 18.5%;
+            left: 104.4%;
+        }
+
+        .card-mr {
+            top: 50%;
+            left: 112.8%;
+        }
+
+        .card-br {
+            top: 81.4%;
+            left: 104.4%;
         }
 
         /* Tăng cỡ chữ để tương vứng hộp to */
         .card-header span {
             font-size: 1.15rem;
         }
+
         .form-select {
             padding: 0.6rem;
             font-size: 1.05rem;
@@ -319,7 +362,7 @@
         }
 
         /* Form Controls */
-        .input-card input, 
+        .input-card input,
         .input-card select {
             width: 100%;
             padding: 0.5rem;
@@ -332,15 +375,17 @@
             outline: none;
             transition: 0.2s border-color;
         }
-        
-        .input-card input:focus, .input-card select:focus {
-            border-color: #6a9679; 
+
+        .input-card input:focus,
+        .input-card select:focus {
+            border-color: #6a9679;
         }
 
         .date-inputs {
             display: flex;
             gap: 0.3rem;
         }
+
         .date-inputs input {
             text-align: center;
             padding: 0.5rem 0.2rem;
@@ -360,12 +405,21 @@
             animation: pulseText 2s infinite;
             pointer-events: none;
             white-space: nowrap;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8), 0 0 20px rgba(220, 185, 110, 0.5);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(220, 185, 110, 0.5);
         }
+
         @keyframes pulseText {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
+            0% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.5;
+            }
         }
 
         /* ================= KẾT QUẢ HIỂN THỊ (POPUP MODAL) ================= */
@@ -379,38 +433,49 @@
             background: rgba(255, 255, 255, 0.98);
             padding: 2.5rem;
             border-radius: 12px;
-            box-shadow: 0 15px 60px rgba(0,0,0,0.4);
+            box-shadow: 0 15px 60px rgba(0, 0, 0, 0.4);
             transition: opacity 0.4s, transform 0.4s;
-            z-index: 9999; 
-            max-height: 85vh; 
-            overflow-y: auto; 
+            z-index: 9999;
+            max-height: 85vh;
+            overflow-y: auto;
         }
+
         .results-section.hidden {
             display: none;
             opacity: 0;
             transform: translate(-50%, -50%) scale(0.9);
         }
-        
+
         .results-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.5);
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
             z-index: 9998;
             display: none;
             backdrop-filter: blur(3px);
         }
+
         .results-overlay.active {
             display: block;
         }
 
         .close-results-btn {
             position: absolute;
-            top: 15px; right: 20px;
-            background: none; border: none;
-            font-size: 1.5rem; color: #555;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #555;
             cursor: pointer;
         }
-        .close-results-btn:hover { color: #000; }
+
+        .close-results-btn:hover {
+            color: #000;
+        }
 
         .result-title {
             font-size: 1.4rem;
@@ -420,6 +485,7 @@
             border-bottom: 2px solid #cbb279;
             padding-bottom: 0.8rem;
         }
+
         .result-meta {
             display: flex;
             gap: 1rem;
@@ -427,6 +493,7 @@
             margin-bottom: 1.5rem;
             flex-wrap: wrap;
         }
+
         .chip {
             background-color: #f1f1f1;
             padding: 0.4rem 1rem;
@@ -435,31 +502,519 @@
             color: #444;
             border: 1px solid #ddd;
         }
+
         .decoding-title {
             font-size: 1.1rem;
             color: #a47600;
             margin-bottom: 1rem;
         }
+
         .decoding-content p {
             line-height: 1.5;
             margin-bottom: 0.8rem;
             color: #333;
             font-size: 0.95rem;
         }
-        
-        /* Chỉnh responsive tỷ lệ nếu màn hình nhỏ */
-        @media (max-width: 1400px) {
-            .zodiac-circle-wrapper { width: 550px; height: 550px; }
-            .input-card { width: 230px; }
+
+        /* ================= KẾT QUẢ FLASHCARDS ================= */
+        #flashcards-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 200;
+            overflow: hidden;
         }
+
+        .flashcard-wrapper {
+            position: absolute;
+            pointer-events: auto;
+            perspective: 1500px;
+            cursor: grab;
+            width: 200px;
+            /* Thẻ nhỏ nhắn */
+            height: 310px;
+        }
+
+        .flashcard-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .flashcard-wrapper.sucked-in {
+            /* Hiệu ứng thẻ bị hút lại vào bát quái */
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) scale(0) rotate(720deg) !important;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.8s cubic-bezier(0.8, -0.5, 0.2, 1.4) !important;
+        }
+
+        .flashcard {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            /* Đồng bộ góc bo tròn với flashcard-face để đổ bóng */
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
+            transform-style: preserve-3d;
+        }
+
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Hover: Tạo viền Vàng sang trọng, nổi 3D và tỏa hào quang */
+        .flashcard-wrapper[data-view-state="idle"]:hover .flashcard,
+        .flashcard-wrapper[data-view-state="stacked"]:hover .flashcard {
+            /* Hiệu ứng 3D Premium: viền lõi sáng, viền ôm ngoài đậm rọi bóng râm và vầng sáng Vàng */
+            box-shadow:
+                0 0 0 1.5px #fff3a1,
+                0 0 0 4px #d4af37,
+                0 10px 25px rgba(0, 0, 0, 0.8),
+                0 0 25px rgba(255, 215, 0, 0.7),
+                inset 0 0 15px rgba(255, 220, 100, 0.3) !important;
+            cursor: pointer;
+        }
+
+        .flashcard-wrapper[data-view-state="stacked"]:hover {
+            z-index: 9999 !important;
+            margin-top: -25px !important;
+            /* Dùng margin-top để đẩy lên, tránh dùng transform vì nó đè mất scale/rotateZ của wrapper cài bằng JS */
+        }
+
+        /* Xóa rule lật đè transform của .flashcard để giữ yên is-flipped */
+
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Front: Hình thẻ gỗ/bài cổ */
+        .flashcard-front {
+            background-color: #5c3a21;
+            /* Tạo vân gỗ cực sắc nét bằng các lớp gradient chìm */
+            background-image:
+                linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2)),
+                repeating-linear-gradient(45deg, rgba(30, 15, 5, 0.1) 0px, rgba(30, 15, 5, 0.1) 2px, transparent 2px, transparent 6px),
+                linear-gradient(135deg, #4a2912 0%, #754c29 50%, #3d200e 100%);
+            border: 2px solid #241103;
+            box-shadow:
+                inset 0 0 30px rgba(0, 0, 0, 0.9),
+                inset 0 0 5px rgba(255, 255, 255, 0.2),
+                inset 2px 2px 5px rgba(255, 255, 255, 0.1),
+                inset -2px -2px 10px rgba(0, 0, 0, 0.8),
+                0 5px 15px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            color: #ebb96e;
+            justify-content: center;
+            align-items: center;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.9);
+            position: relative;
+        }
+
+        .flashcard-front::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px dashed rgba(235, 185, 110, 0.3);
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        /* Hoa văn viền góc trên bên phải giả lập thẻ gỗ */
+        .flashcard-front::after {
+            content: '卍';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 1.2rem;
+            color: #ebb96e;
+            opacity: 0.6;
+        }
+
+        /* Góc trên bên trái có số nhỏ - Dạng 3D Sáng rực */
+        .corner-number {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #fff878;
+            font-family: 'Times New Roman', serif;
+            /* Thiết kế 3D nịnh mắt: viền mỏng, bóng đen lõm sâu 3D và lớp viền hào quang sáng */
+            -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.5);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5)
+        }
+
+        .que-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 2px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            color: #ffe6aa;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+        }
+
+        .que-subtitle {
+            font-size: 0.65rem;
+            margin-top: 5px;
+            font-style: italic;
+            color: #dea552;
+            text-align: center;
+            padding: 0 5px;
+        }
+
+        .que-number {
+            font-size: 3rem;
+            font-family: 'Times New Roman', serif;
+            font-weight: 900;
+            background: linear-gradient(180deg, #fffae6 0%, #ffd700 40%, #b8860b 80%, #6e4c00 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* 3D Drop shadow effect for text */
+            filter: drop-shadow(0px 3px 2px rgba(0, 0, 0, 0.8)) drop-shadow(0px 0px 8px rgba(255, 215, 0, 0.5));
+            line-height: 1.1;
+        }
+
+        /* Back: Giấy cổ/Da dê */
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(145deg, #fcebb6, #dfc081, #c4a159);
+            border: 3px solid #663c15;
+            color: #3b220b;
+            padding: 10px;
+            font-family: 'Times New Roman', serif;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            text-align: justify;
+            overflow-y: auto;
+            align-items: flex-start;
+            justify-content: flex-start;
+            box-shadow: inset 0 0 15px rgba(100, 60, 20, 0.3);
+        }
+
+        .flashcard-back strong {
+            color: #8c1010;
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(140, 93, 51, 0.4);
+            padding-bottom: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Khi click xem thẻ, thẻ bự lên => thẻ bự sẽ ăn class phóng to chữ nếu cần */
+        /* JS set in-line style width=300px, height=465px. We can use container queries if polyfilled, but simple method is let it flow. */
+        /* Using vw/vh could work, but using normal scaling is easier. */
+        /* To make fonts scale, we can scale the font-size of flashcard dynamically or use container units */
+        .flashcard-wrapper {
+            container-type: size;
+        }
+
+        .que-title {
+            font-size: 7cqw;
+        }
+
+        .que-subtitle {
+            font-size: 6cqw;
+            display: none;
+        }
+
+        /* User requested to hide this */
+        .que-number {
+            font-size: 25cqw;
+        }
+
+        .corner-number {
+            font-size: 11cqw;
+        }
+
+        .flashcard-back {
+            font-size: 5cqw;
+            padding: 4cqw;
+        }
+
+        .flashcard-back strong {
+            font-size: 6cqw;
+        }
+
+        @keyframes fallDownCard {
+            0% {
+                transform: translateY(-120vh) translateX(-50px) rotate(-45deg);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(0) translateX(0) rotate(0);
+                opacity: 1;
+            }
+        }
+
+        /* ====== BASE NÚT ====== */
+        .action-btn {
+            position: fixed;
+            bottom: 30px;
+            display: none;
+            pointer-events: auto;
+            cursor: pointer;
+            z-index: 205;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Times New Roman', serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s cubic-bezier(0.25, 0.85, 0.25, 1);
+            background: linear-gradient(135deg, rgba(20, 10, 5, 0.8), rgba(40, 20, 10, 0.9));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(220, 185, 110, 0.5);
+            color: #dcb96e;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, rgba(30, 15, 8, 0.9), rgba(50, 25, 12, 1));
+            border-color: rgba(220, 185, 110, 0.9);
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(220, 185, 110, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .action-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* ══ CÁC NÚT FLASHCARD ══ */
+        #arrange-cards-btn {
+            right: 30px;
+        }
+
+        #clear-cards-btn {
+            right: 320px;
+        }
+
+        #view-all-btn {
+            left: 30px;
+        }
+
+        #arrange-cards-btn::before {
+            content: '☵';
+            font-size: 1.2rem;
+            color: #dcb96e;
+        }
+
+        #clear-cards-btn::before {
+            content: '☲';
+            font-size: 1.2rem;
+            color: #dcb96e;
+        }
+
+        #view-all-btn::before {
+            content: '☰';
+            font-size: 1.2rem;
+            color: #dcb96e;
+        }
+
+
         @media (max-width: 1000px) {
-            .dashboard-wrapper { overflow-y: auto; height: auto; }
-            body, html { overflow-y: auto; }
-            .zodiac-circle-wrapper { border: none; margin-top: 100px; flex-direction: column; height: auto; }
-            .input-card { position: static; transform: none; margin: 10px 0; }
+            .dashboard-wrapper {
+                overflow-y: auto;
+                height: auto;
+            }
+
+            body,
+            html {
+                overflow-y: auto;
+            }
+
+            .zodiac-circle-wrapper {
+                border: none;
+                margin-top: 100px;
+                flex-direction: column;
+                height: auto;
+            }
+
+            .input-card {
+                position: static;
+                transform: none;
+                margin: 10px 0;
+            }
+        }
+
+        /* ═══ ACCOUNT DROPDOWN - PREMIUM GIẤY VÀNG ═══ */
+        .account-dropdown-wrapper {
+            position: relative;
+        }
+
+        .account-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 220px;
+            background: linear-gradient(170deg, #3a2010 0%, #5c3318 30%, #4a2810 60%, #3a1e0c 100%);
+            border: 1px solid rgba(180, 130, 50, 0.5);
+            border-top: none;
+            border-radius: 14px;
+            box-shadow:
+                0 0 0 1px rgba(180, 130, 50, 0.3),
+                0 0 0 3px rgba(60, 30, 10, 0.8),
+                0 20px 50px rgba(0, 0, 0, 0.7),
+                inset 0 1px 0 rgba(255, 220, 120, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-8px) scale(0.97);
+            transform-origin: top right;
+            transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            z-index: 9999;
+        }
+
+        .account-dropdown.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* ——— Avatar header panel ——— */
+        .dropdown-header {
+            padding: 1.1rem 1.2rem 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            background: linear-gradient(135deg, rgba(255, 215, 100, 0.1) 0%, transparent 70%);
+            border-bottom: 1px solid rgba(220, 185, 110, 0.25);
+        }
+
+        .dropdown-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #dcb96e, #b8860b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+        }
+
+        .dropdown-avatar svg {
+            stroke: #fff;
+        }
+
+        .dropdown-user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dropdown-username {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #f0d898;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .dropdown-role {
+            font-size: 0.7rem;
+            color: rgba(220, 185, 110, 0.6);
+            letter-spacing: 0.3px;
+            margin-top: 1px;
+        }
+
+        /* ——— Menu items ——— */
+        .dropdown-menu {
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .account-dropdown a {
+            padding: 0.7rem 0.9rem;
+            color: #ddc485;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.18s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            letter-spacing: 0.3px;
+            position: relative;
+        }
+
+        .account-dropdown a svg {
+            opacity: 0.7;
+            flex-shrink: 0;
+            transition: all 0.18s;
+        }
+
+        .account-dropdown a:hover {
+            background: linear-gradient(90deg, rgba(220, 185, 110, 0.18), rgba(220, 185, 110, 0.08));
+            color: #ffe9a0;
+            padding-left: 1.1rem;
+        }
+
+        .account-dropdown a:hover svg {
+            opacity: 1;
+            stroke: #dcb96e;
+        }
+
+        /* Divider trước Logout */
+        .dropdown-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(220, 185, 110, 0.3), transparent);
+            margin: 0.25rem 0.5rem;
+        }
+
+        .account-dropdown .logout-item {
+            color: #f4957a;
+        }
+
+        .account-dropdown .logout-item svg {
+            stroke: #f4957a;
+        }
+
+        .account-dropdown .logout-item:hover {
+            background: linear-gradient(90deg, rgba(220, 80, 50, 0.2), rgba(220, 80, 50, 0.08));
+            color: #ffb89e;
+        }
+
+        .account-dropdown .logout-item:hover svg {
+            stroke: #ffb89e;
         }
     </style>
 </head>
+
 <body>
 
     <div class="dashboard-wrapper">
@@ -470,46 +1025,91 @@
         <header class="top-header">
             <div class="header-left">
                 <a th:href="@{/dashboard}" class="header-logo">
-                    <span class="header-logo-text">Diên Cầm<br>Tam Thế</span>
+                    <span class="header-logo-text">Diên Cầm Tam Thế</span>
                 </a>
                 <nav class="header-nav">
-                    <a th:href="@{/dashboard}" class="nav-link active">TRANG CHỦ</a>
-                    <a th:href="@{/dashboard}" class="nav-link">TRA CỨU</a>
+                    <a th:href="@{/dashboard}" class="nav-link active">TRA CỨU</a>
                     <a th:href="@{/history}" class="nav-link">LỊCH SỬ</a>
-                    <a th:href="@{/profile}" class="nav-link">HỒ SƠ</a>
                 </nav>
             </div>
-            
+
             <div class="header-right">
-                <span class="icon-action-btn gold" title="Thông báo">🔔</span>
-                <span class="icon-action-btn" title="Cài đặt">⚙</span>
-                
-                <a th:href="@{/profile}" class="header-account-btn">
-                    <span>👤</span> TÀI KHOẢN
-                </a>
+                <div class="account-dropdown-wrapper" style="position: relative;">
+                    <button class="header-account-btn" id="account-btn" aria-label="Tài khoản">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </button>
+                    <!-- Dropdown -->
+                    <div class="account-dropdown" id="account-dropdown">
+                        <!-- Avatar Header -->
+                        <div class="dropdown-header">
+                            <div class="dropdown-avatar">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                            <div class="dropdown-user-info">
+                                <span class="dropdown-username"
+                                    th:text="${session.user != null ? session.user.username : 'Người dùng'}">Người
+                                    dùng</span>
+                                <span class="dropdown-role">Thành viên</span>
+                            </div>
+                        </div>
+                        <!-- Menu Items -->
+                        <div class="dropdown-menu">
+                            <a th:href="@{/profile}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                Hồ sơ
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a th:href="@{/auth}" class="logout-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                </svg>
+                                Đăng xuất
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
 
         <!-- Nội dung chính -->
         <form id="horoscope-form" class="zodiac-circle-wrapper">
-            
+
             <!-- Vòng tròn Quỹ đạo Liên Hoa (Hoa sen) kết nối vạn vật siêu chi tiết -->
             <svg class="dashed-connection-ring" viewBox="0 0 940 940">
                 <!-- Hai cạnh kim loại nẹp ngoài cứng cáp -->
-                <circle cx="470" cy="470" r="468" fill="none" stroke="rgba(220, 185, 110, 0.8)" stroke-width="4"/>
-                <circle cx="470" cy="470" r="412" fill="none" stroke="rgba(220, 185, 110, 0.8)" stroke-width="4"/>
-                
+                <circle cx="470" cy="470" r="468" fill="none" stroke="rgba(220, 185, 110, 0.8)" stroke-width="4" />
+                <circle cx="470" cy="470" r="412" fill="none" stroke="rgba(220, 185, 110, 0.8)" stroke-width="4" />
+
                 <!-- Hai dải cườm (beaded track) đứt khúc chạy dọc mép xăm tạo họa tiết viền siêu mịn -->
-                <circle cx="470" cy="470" r="459" fill="none" stroke="rgba(255, 215, 130, 0.9)" stroke-width="2" stroke-dasharray="5 7"/>
-                <circle cx="470" cy="470" r="421" fill="none" stroke="rgba(255, 215, 130, 0.9)" stroke-width="2" stroke-dasharray="5 7"/>
-                
+                <circle cx="470" cy="470" r="459" fill="none" stroke="rgba(255, 215, 130, 0.9)" stroke-width="2"
+                    stroke-dasharray="5 7" />
+                <circle cx="470" cy="470" r="421" fill="none" stroke="rgba(255, 215, 130, 0.9)" stroke-width="2"
+                    stroke-dasharray="5 7" />
+
                 <!-- Bán kính r=440 (Đường kính 880) đúng ngay trung tâm vòng cắt đè dưới 6 khối thẻ! -->
                 <path id="lotusPath" d="M 30, 470 a 440,440 0 1,1 880,0 a 440,440 0 1,1 -880,0" fill="none"></path>
-                
+
                 <!-- Họa tiết đài Sen và Hoàng Gia (Fleur-de-lis) xoay liên tục -->
-                <text fill="#ffe182" font-weight="900" font-size="34" font-family="'Times New Roman', serif" letter-spacing="14">
+                <text fill="#ffe182" font-weight="900" font-size="34" font-family="'Times New Roman', serif"
+                    letter-spacing="14">
                     <textPath href="#lotusPath" startOffset="0%" dominant-baseline="middle">
-                       ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜   ❀   ⚜
+                        ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜
+                        ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜ ❀ ⚜
                     </textPath>
                 </text>
             </svg>
@@ -520,7 +1120,10 @@
             <!-- Thẻ 1: HỌ VÀ TÊN (Góc Trên Trái) -->
             <div class="input-card card-tl">
                 <div class="card-header">
-                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
                     HỌ VÀ TÊN
                 </div>
                 <input type="text" id="fullname" placeholder="Nhập họ tên" required>
@@ -529,7 +1132,10 @@
             <!-- Thẻ 2: GIỚI TÍNH (Sườn Trái) -->
             <div class="input-card card-ml">
                 <div class="card-header">
-                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.93V19h-2v-2.07c-3.15-.43-5.69-2.85-6.25-5.93h2.08c.5 2.1 2.37 3.73 4.67 3.73s4.17-1.63 4.67-3.73h2.08c-.56 3.08-3.1 5.5-6.25 5.93z"/></svg>
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.93V19h-2v-2.07c-3.15-.43-5.69-2.85-6.25-5.93h2.08c.5 2.1 2.37 3.73 4.67 3.73s4.17-1.63 4.67-3.73h2.08c-.56 3.08-3.1 5.5-6.25 5.93z" />
+                    </svg>
                     GIỚI TÍNH
                 </div>
                 <select id="gender">
@@ -538,13 +1144,29 @@
                 </select>
             </div>
 
-            <!-- THẺ 3: ĐÃ XÓA CHỌN LỊCH -->
+            <!-- Thẻ 3: CHỌN LỊCH (Góc Trên Phải) -->
+            <div class="input-card card-tr">
+                <div class="card-header">
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11z" />
+                    </svg>
+                    CHỌN LỊCH
+                </div>
+                <select id="calendar-type">
+                    <option value="Xem theo lịch dương">Lịch Dương</option>
+                    <option value="Xem theo lịch âm">Lịch Âm</option>
+                </select>
+            </div>
 
             <!-- Thẻ 4: NGÀY SINH (Góc Trên Phải) -->
             <div class="input-card card-tr">
                 <div class="card-header">
-                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
-                    NGÀY SINH (DƯƠNG LỊCH)
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" />
+                    </svg>
+                    NGÀY THÁNG NĂM SINH
                 </div>
                 <div class="date-inputs">
                     <input type="number" id="birth-day" placeholder="Ngày" required min="1" max="31">
@@ -556,7 +1178,10 @@
             <!-- Thẻ 5: GIỜ SINH (Sườn Phải) -->
             <div class="input-card card-mr">
                 <div class="card-header">
-                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+                    </svg>
                     GIỜ SINH
                 </div>
                 <select id="birth-hour">
@@ -575,7 +1200,10 @@
             <!-- Thẻ 6: TRA CỨU (Dưới Trái) -->
             <div class="input-card card-bl">
                 <div class="card-header">
-                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                    </svg>
                     TRA CỨU VỀ
                 </div>
                 <select id="lookup-category">
@@ -586,39 +1214,33 @@
                 </select>
             </div>
 
-            <!-- THẺ 6: VỢ CHỒNG (Góc Dưới Phải) -->
-            <div id="partner-card" class="input-card card-br disabled-card">
-                <div class="card-header">
-                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    VỢ / CHỒNG (DƯƠNG LỊCH)
-                </div>
-                <div class="date-inputs">
-                    <input type="number" id="partner-birth-day" placeholder="Ngày" min="1" max="31">
-                    <input type="number" id="partner-birth-month" placeholder="Tháng" min="1" max="12">
-                    <input type="number" id="partner-birth-year" placeholder="Năm" min="1900" max="2100">
-                </div>
-                <p style="font-size: 0.65rem; color: #856404; margin-top: 5px; font-style: italic;">* Chỉ nhập khi xem Duyên Nợ</p>
-            </div>
-            
             <div class="click-hint">Bấm vào Bát Quái để Tra Cứu</div>
         </form>
 
         <!-- Overlay đen của Popup -->
         <div class="results-overlay" id="results-overlay"></div>
 
-        <!-- Kết quả Thẻ hiện phía dưới -->
+        <!-- Kết quả Thẻ hiện phía dưới (giữ lại code cũ nhưng sẽ không dùng hiên thị m popup nữa) -->
         <section id="results-section" class="results-section hidden">
             <button class="close-results-btn" id="close-results-btn">✖</button>
             <h2 class="result-title">KẾT QUẢ TRA CỨU: <span id="display-name" style="color: #618A6D;"></span></h2>
             <div class="result-meta" id="result-meta"></div>
-            
+
             <h3 class="decoding-title">GIẢI MÃ CHUYÊN SÂU: <span id="decoding-category"></span></h3>
             <div class="decoding-content" id="decoding-content"></div>
         </section>
 
+        <!-- Container chứa các thẻ Flashcards -->
+        <div id="flashcards-container"></div>
+        <button id="view-all-btn" class="action-btn">Xem tất cả</button>
+        <button id="arrange-cards-btn" class="action-btn">Xếp Gọn Thẻ</button>
+        <button id="clear-cards-btn" class="action-btn">Thu Thẻ</button>
+
     </div>
 
     <!-- Script tương tác form Tra cứu -->
+    <script th:src="@{/js/global.js}"></script>
     <script th:src="@{/js/dashboard.js}"></script>
 </body>
+
 </html>

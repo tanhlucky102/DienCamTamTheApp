@@ -12,27 +12,17 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 
-<body class="auth-body">
+<body>
 
-    <div class="background-animation">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
+    <div class="dashboard-wrapper">
+        <div class="bg-overlay"></div>
+        <div class="spinning-lotus"></div>
 
-    <div class="auth-container glass-panel">
-        <div class="auth-header">
-            <div style="text-align: left; margin-bottom: 2rem;">
-                <a href="javascript:history.back()" class="breadcrumb-back" style="margin-bottom: 0;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                    <span>Quay lại</span>
-                </a>
+        <div class="auth-container glass-panel">
+            <div class="auth-header">
+                <h2 style="font-family: 'Times New Roman', serif; font-size: 2rem; font-weight: 900; background: linear-gradient(to right, #9e7100, #dcb96e, #9e7100); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 1px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15)); margin-bottom: 0.5rem;">DIỄN CẦM TAM THẾ</h2>
+                <p class="brand-subtitle" style="margin-top: 5px;">TRADITIONAL ARTISTRY & SPIRIT</p>
             </div>
-            <div class="nav-brand global-scroll-top" style="cursor: pointer;">
-                <h1 class="brand-title" style="margin-bottom: 0;">DIỄN CẦM TAM THẾ</h1>
-            </div>
-            <p class="brand-subtitle" style="margin-top: 5px;">TRADITIONAL ARTISTRY & SPIRIT</p>
-        </div>
 
         <div class="auth-tabs">
             <button class="tab-btn active" data-tab="login">ĐĂNG NHẬP</button>
@@ -61,32 +51,34 @@
                     <a href="#" class="forgot-password">Quên mật khẩu?</a>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block">ĐĂNG NHẬP</button>
+                <button type="submit" class="btn bronze-btn btn-block">ĐĂNG NHẬP</button>
             </form>
 
             <!-- Form Đăng Ký -->
             <form id="register-form" class="auth-form hidden">
-                <div class="input-group">
-                    <label for="reg-fullname">HỌ VÀ TÊN</label>
-                    <input type="text" id="reg-fullname" placeholder="Nhập họ và tên của bạn" required>
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="reg-fullname">HỌ VÀ TÊN</label>
+                        <input type="text" id="reg-fullname" placeholder="Nhập họ và tên" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-email">EMAIL</label>
+                        <input type="email" id="reg-email" placeholder="Nhập email" required>
+                    </div>
                 </div>
 
-                <div class="input-group">
-                    <label for="reg-email">EMAIL</label>
-                    <input type="email" id="reg-email" placeholder="email@vidu.com" required>
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="reg-password">MẬT KHẨU</label>
+                        <input type="password" id="reg-password" placeholder="••••••••" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-confirm-password">XÁC NHẬN MẬT KHẨU</label>
+                        <input type="password" id="reg-confirm-password" placeholder="••••••••" required>
+                    </div>
                 </div>
 
-                <div class="input-group">
-                    <label for="reg-password">MẬT KHẨU</label>
-                    <input type="password" id="reg-password" placeholder="••••••••" required>
-                </div>
-
-                <div class="input-group">
-                    <label for="reg-confirm-password">NHẬP LẠI MẬT KHẨU</label>
-                    <input type="password" id="reg-confirm-password" placeholder="••••••••" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block">ĐĂNG KÝ</button>
+                <button type="submit" class="btn bronze-btn btn-block">ĐĂNG KÝ</button>
                 <div class="form-switch-prompt">
                     <span>Đã có tài khoản? </span><a href="#" class="switch-to-login">Đăng nhập</a>
                 </div>
@@ -109,20 +101,14 @@
                     <input type="password" id="forgot-confirm-password" placeholder="••••••••" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block">CẬP NHẬT MẬT KHẨU</button>
+                <button type="submit" class="btn bronze-btn btn-block">CẬP NHẬT MẬT KHẨU</button>
                 <div class="form-switch-prompt">
                     <span>Nhớ mật khẩu? </span><a href="#" class="switch-to-login-from-forgot">Đăng nhập</a>
                 </div>
             </form>
         </div>
 
-        <div class="auth-footer">
-            <nav>
-                <a href="#">TRANG CHỦ</a>
-                <a href="#">HỖ TRỢ</a>
-                <a href="#">ĐIỀU KHOẢN</a>
-            </nav>
-            <p class="copyright">© 2026 DIỄN CẦM TAM THẾ. ALL RIGHTS RESERVED.</p>
+
         </div>
     </div>
 
@@ -214,7 +200,7 @@
                     loginForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
 
-                        const username = document.getElementById('login-username').value;
+                        const username = document.getElementById('login-username').value.trim();
                         const password = document.getElementById('login-password').value;
 
                         const btn = loginForm.querySelector('button');
@@ -225,29 +211,20 @@
                         try {
                             const response = await fetch('/auth/login', {
                                 method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    username: username,
-                                    password: password
-                                })
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ username, password })
                             });
 
                             const result = await response.json();
 
-                            if (response.ok && (result.status === 200 || result.code === 0)) {
-                                // Lưu thông tin đăng nhập hoặc token nếu cần (hiện tại backend chỉ trả về string)
-                                // localStorage.setItem('user', JSON.stringify(result.data));
-
-                                // Chuyển hướng sang dashboard
+                            if (response.ok && result.status === 200) {
                                 window.location.href = '/dashboard';
                             } else {
                                 alert('Đăng nhập thất bại: ' + (result.message || 'Tài khoản hoặc mật khẩu không chính xác.'));
                             }
                         } catch (error) {
                             console.error('Lỗi khi gọi API đăng nhập:', error);
-                            alert('Không thể kết nối với máy chủ API!');
+                            alert('Không thể kết nối với máy chủ!');
                         } finally {
                             btn.innerText = originalText;
                             btn.disabled = false;
@@ -259,12 +236,15 @@
                     registerForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
 
+                        const fullName = document.getElementById('reg-fullname').value.trim();
+                        const email    = document.getElementById('reg-email').value.trim();
                         const password = document.getElementById('reg-password').value;
                         const confirmPassword = document.getElementById('reg-confirm-password').value;
 
-                        // Vì database Entity Backend hiện chỉ có username, ta lấy email làm giá trị username
-                        const email = document.getElementById('reg-email').value;
-
+                        if (!fullName) {
+                            alert('Vui lòng nhập họ và tên!');
+                            return;
+                        }
                         if (password !== confirmPassword) {
                             alert('Mật khẩu nhập lại không khớp!');
                             return;
@@ -278,22 +258,21 @@
                         try {
                             const response = await fetch('/auth/register', {
                                 method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
+                                headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
-                                    username: email,
-                                    password: password
+                                    username: email,   // email dùng làm username
+                                    password: password,
+                                    fullName: fullName,
+                                    email: email
                                 })
                             });
 
                             const result = await response.json();
 
                             if (response.ok && result.status === 200) {
-                                alert('Đăng ký thành công! Vui lòng tiến hành đăng nhập.');
+                                alert('Đăng ký thành công! Vui lòng đăng nhập.');
                                 registerForm.reset();
                                 switchTab('login');
-                                // Tiện tay điền thẳng số email vừa lên form Login cho user
                                 if (document.getElementById('login-username')) {
                                     document.getElementById('login-username').value = email;
                                 }
@@ -301,8 +280,8 @@
                                 alert('Lỗi: ' + (result.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.'));
                             }
                         } catch (error) {
-                            console.error('Lỗi khi gọi API:', error);
-                            alert('Không thể kết nối với máy chủ API!');
+                            console.error('Lỗi đăng ký:', error);
+                            alert('Không thể kết nối với máy chủ!');
                         } finally {
                             btn.innerText = originalText;
                             btn.disabled = false;
