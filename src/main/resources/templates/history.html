@@ -11,6 +11,152 @@
         rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <style>
+        /* Header thanh ngang FULL WIDTH như trước nhưng đẹp hơn */
+        .top-header {
+            width: 100%;
+            height: 75px;
+            margin: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(250, 240, 225, 0.75));
+            /* Thả lỏng độ trong suốt */
+            backdrop-filter: blur(35px) saturate(150%);
+            /* Gấp đôi độ mờ kính mờ sương */
+            border: none;
+            border-bottom: 2px solid rgba(220, 185, 110, 0.6);
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 3rem;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: none;
+            z-index: 100;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25), inset 0 -1px 3px rgba(255, 255, 255, 0.6);
+            /* Bơm bóng sâu hơn */
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .header-logo-text {
+            font-family: 'Times New Roman', serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #9e7100, #dcb96e, #9e7100);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.15));
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 2.5rem;
+            margin-left: 2rem;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #555;
+            font-weight: 800;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 5px 0;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: #dcb96e;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #9e7100;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            position: relative;
+        }
+
+        .header-account-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            background:
+                linear-gradient(145deg,
+                    rgba(255, 230, 150, 0.3) 0%,
+                    transparent 40%,
+                    rgba(0, 0, 0, 0.1) 100%),
+                linear-gradient(135deg, #c8991a, #a07010, #c8991a);
+            border-radius: 50%;
+            cursor: pointer;
+            color: #fff !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 240, 180, 0.5),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+                0 0 0 2px rgba(180, 130, 30, 0.6),
+                0 0 0 4px rgba(180, 130, 30, 0.15),
+                0 6px 20px rgba(150, 100, 0, 0.5);
+            border: none;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-account-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, rgba(255, 240, 180, 0.4), transparent 60%);
+            pointer-events: none;
+        }
+
+        .header-account-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 240, 180, 0.5),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+                0 0 0 2px rgba(220, 185, 70, 0.9),
+                0 0 0 5px rgba(220, 185, 70, 0.25),
+                0 8px 25px rgba(150, 100, 0, 0.7),
+                0 0 20px rgba(220, 185, 70, 0.35);
+        }
+
+
+    </style>
 </head>
 
 <body class="dashboard-body">
@@ -24,11 +170,11 @@
         <header class="top-header">
             <div class="header-left">
                 <a th:href="@{/dashboard}" class="header-logo">
-                    <span class="header-logo-text">Diên Cầm<br>Tam Thế</span>
+                    <span class="header-logo-text">Diên Cầm Tam Thế</span>
                 </a>
                 <nav class="header-nav">
                     <a th:href="@{/dashboard}" class="nav-link">TRA CỨU</a>
-                    <a th:href="@{/history}" class="nav-link">LỊCH SỬ</a>
+                    <a th:href="@{/history}" class="nav-link active">LỊCH SỬ</a>
                 </nav>
             </div>
 
@@ -82,7 +228,7 @@
         </header>
 
         <!-- Main Content Layout -->
-        <div class="dashboard-layout" style="margin: 0 auto; width: 100%; max-width: 1000px;">
+        <div class="dashboard-layout" style="margin: 100px auto 30px; width: 100%; max-width: 1000px; padding: 0 20px;">
 
             <!-- Main Scrollable Area -->
             <main class="main-content">

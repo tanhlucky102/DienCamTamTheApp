@@ -268,6 +268,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Đổ nội dung luận giải
                     const decodingText = data.content || generateDecodingContent(categoryValue);
 
+                    const decodingContentEl = document.getElementById('decoding-content');
+                    if (decodingContentEl) {
+                        decodingContentEl.innerHTML = decodingText;
+                    }
+
                     // Hiển thị Flashcards thay vì Modal
                     showFlashcards(decodingText, displayName, displayCategory);
 
@@ -359,8 +364,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const flashcardsContainer = document.getElementById('flashcards-container');
     const arrangeBtn = document.getElementById('arrange-cards-btn');
     const clearBtn = document.getElementById('clear-cards-btn');
+    const viewAllBtn = document.getElementById('view-all-btn');
     let generatedCards = [];
     let activeViewingCard = null;
+
+    if (viewAllBtn) {
+        viewAllBtn.addEventListener('click', () => {
+            const resultsSection = document.getElementById('results-section');
+            const resultsOverlay = document.getElementById('results-overlay');
+            if (resultsSection && resultsOverlay) {
+                if (resultsSection.classList.contains('hidden')) {
+                    resultsSection.classList.remove('hidden');
+                    resultsOverlay.classList.add('active');
+                } else {
+                    resultsSection.classList.add('hidden');
+                    resultsOverlay.classList.remove('active');
+                }
+            }
+        });
+    }
 
     // Handle clicking outside the deeply viewed card
     document.addEventListener('click', (e) => {
@@ -410,8 +432,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showFlashcards(contentHtml, nameStr, categoryStr) {
         clearAllCards();
-        arrangeBtn.style.display = 'block';
-        clearBtn.style.display = 'block';
+        if (arrangeBtn) arrangeBtn.style.display = 'flex';
+        if (clearBtn) clearBtn.style.display = 'flex';
+        if (viewAllBtn) viewAllBtn.style.display = 'flex';
 
         const segments = extractSegments(contentHtml);
 
@@ -613,8 +636,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearAllCards() {
         flashcardsContainer.innerHTML = '';
         generatedCards = [];
-        arrangeBtn.style.display = 'none';
-        clearBtn.style.display = 'none';
+        if (arrangeBtn) arrangeBtn.style.display = 'none';
+        if (clearBtn) clearBtn.style.display = 'none';
+        if (viewAllBtn) viewAllBtn.style.display = 'none';
     }
 
     if (clearBtn) {
@@ -656,8 +680,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, delay);
             });
 
-            arrangeBtn.style.display = 'none';
-            clearBtn.style.display = 'none';
+            if (arrangeBtn) arrangeBtn.style.display = 'none';
+            if (clearBtn) clearBtn.style.display = 'none';
+            if (viewAllBtn) viewAllBtn.style.display = 'none';
 
             const totalClearDuration = (Math.floor(generatedCards.length / 3) * 100) + 1200;
             setTimeout(() => {

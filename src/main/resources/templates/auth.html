@@ -200,7 +200,7 @@
                     loginForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
 
-                        const username = document.getElementById('login-username').value;
+                        const username = document.getElementById('login-username').value.trim();
                         const password = document.getElementById('login-password').value;
 
                         const btn = loginForm.querySelector('button');
@@ -211,29 +211,20 @@
                         try {
                             const response = await fetch('/auth/login', {
                                 method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    username: username,
-                                    password: password
-                                })
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ username, password })
                             });
 
                             const result = await response.json();
 
-                            if (response.ok && (result.status === 200 || result.code === 0)) {
-                                // Lưu thông tin đăng nhập hoặc token nếu cần (hiện tại backend chỉ trả về string)
-                                // localStorage.setItem('user', JSON.stringify(result.data));
-
-                                // Chuyển hướng sang dashboard
+                            if (response.ok && result.status === 200) {
                                 window.location.href = '/dashboard';
                             } else {
                                 alert('Đăng nhập thất bại: ' + (result.message || 'Tài khoản hoặc mật khẩu không chính xác.'));
                             }
                         } catch (error) {
                             console.error('Lỗi khi gọi API đăng nhập:', error);
-                            alert('Không thể kết nối với máy chủ API!');
+                            alert('Không thể kết nối với máy chủ!');
                         } finally {
                             btn.innerText = originalText;
                             btn.disabled = false;
@@ -245,12 +236,15 @@
                     registerForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
 
+                        const fullName = document.getElementById('reg-fullname').value.trim();
+                        const email    = document.getElementById('reg-email').value.trim();
                         const password = document.getElementById('reg-password').value;
                         const confirmPassword = document.getElementById('reg-confirm-password').value;
 
-                        // Vì database Entity Backend hiện chỉ có username, ta lấy email làm giá trị username
-                        const email = document.getElementById('reg-email').value;
-
+                        if (!fullName) {
+                            alert('Vui lòng nhập họ và tên!');
+                            return;
+                        }
                         if (password !== confirmPassword) {
                             alert('Mật khẩu nhập lại không khớp!');
                             return;
@@ -264,22 +258,21 @@
                         try {
                             const response = await fetch('/auth/register', {
                                 method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
+                                headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
-                                    username: email,
-                                    password: password
+                                    username: email,   // email dùng làm username
+                                    password: password,
+                                    fullName: fullName,
+                                    email: email
                                 })
                             });
 
                             const result = await response.json();
 
                             if (response.ok && result.status === 200) {
-                                alert('Đăng ký thành công! Vui lòng tiến hành đăng nhập.');
+                                alert('Đăng ký thành công! Vui lòng đăng nhập.');
                                 registerForm.reset();
                                 switchTab('login');
-                                // Tiện tay điền thẳng số email vừa lên form Login cho user
                                 if (document.getElementById('login-username')) {
                                     document.getElementById('login-username').value = email;
                                 }
@@ -287,8 +280,8 @@
                                 alert('Lỗi: ' + (result.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.'));
                             }
                         } catch (error) {
-                            console.error('Lỗi khi gọi API:', error);
-                            alert('Không thể kết nối với máy chủ API!');
+                            console.error('Lỗi đăng ký:', error);
+                            alert('Không thể kết nối với máy chủ!');
                         } finally {
                             btn.innerText = originalText;
                             btn.disabled = false;
