@@ -37,7 +37,8 @@ public class DivinationServiceImpl {
             rawYear = Integer.parseInt(request.getBirthYear());
             rawDay = Integer.parseInt(request.getBirthDay());
             rawMonth = Integer.parseInt(request.getBirthMonth());
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         // Chuyển đổi sang Âm lịch nếu là Dương lịch
         int birthYear, ngaySinh, thangSinh;
