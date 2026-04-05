@@ -40,14 +40,4 @@ public class DivinationResponse {
     public void setContent(String content) {
         this.content = content;
     }
-
-    private String analysisJson;
-
-    public String getAnalysisJson() {
-        return analysisJson;
-    }
-
-    public void setAnalysisJson(String analysisJson) {
-        this.analysisJson = analysisJson;
-    }
 }

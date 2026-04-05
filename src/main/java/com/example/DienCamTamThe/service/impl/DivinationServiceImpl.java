@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 @Service
 public class DivinationServiceImpl {
@@ -19,7 +17,7 @@ public class DivinationServiceImpl {
     @Autowired
     private BookEntryRepository entryRepo;
 
-    public Map<String, String> processDivination(DivinationRequest request) {
+    public String processDivination(DivinationRequest request) {
         StringBuilder content = new StringBuilder();
         content.append("<div style='text-align: left;'>");
 
@@ -66,58 +64,14 @@ public class DivinationServiceImpl {
         String can = LunarCalendarUtil.getCan(birthYear).toLowerCase();
         String chi = LunarCalendarUtil.getChi(birthYear).toLowerCase();
         String cot = mapChiToCot(chi);
-        String mangShort = calculateMenh(getCanIndex(can), getChiIndex(chi));
-        String napAmFull = LunarCalendarUtil.getNapAm(birthYear);
-        String canXuong = LunarCalendarUtil.getCanXuong(birthYear, thangSinh, ngaySinh, gioSinhFull);
-        
-        String jsonFormat = "{"
-            + "\"duong_lich\":\"" + String.format("%02d/%02d/%d", rawDay, rawMonth, rawYear) + "\","
-            + "\"am_lich\":\"" + String.format("%02d/%02d/%d", ngaySinh, thangSinh, birthYear) + "\","
-            + "\"can_chi\":\"" + LunarCalendarUtil.getCanChiString(birthYear) + "\","
-            + "\"nap_am\":\"" + napAmFull + "\","
-            + "\"can_xuong\":\"" + canXuong + "\","
-            + "\"ghi_chu\":\"Tích hợp hệ Diễn Cầm và Cân Xương\""
-            + "}";
+        String mang = calculateMenh(getCanIndex(can), getChiIndex(chi));
 
-        String fullname = request.getFullname() != null && !request.getFullname().isEmpty() ? request.getFullname().toUpperCase() : "BẠN";
-        String displayGio = canChiGio != null && canChiGio.length() > 0 ? canChiGio.substring(0, 1).toUpperCase() + canChiGio.substring(1).toLowerCase() : "Không rõ";
-
-        content.append("<div class='tuvi-card' style='background: linear-gradient(145deg, #ffffff, #f5f7fa); border-radius: 12px; border: 1px solid #e1e8ed; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 25px; font-family: sans-serif; color: #334155;'>");
-        content.append("  <div style='text-align: center; margin-bottom: 15px; border-bottom: 2px dashed #cbd5e1; padding-bottom: 10px;'>");
-        content.append("    <h3 style='margin: 0; color: #b45309; text-transform: uppercase; letter-spacing: 1px;'>THÔNG TIN BẢN MỆNH</h3>");
-        content.append("    <p style='margin: 5px 0 0 0; font-size: 16px; font-weight: bold; color: #0f172a;'>").append(fullname).append("</p>");
-        content.append("  </div>");
-        content.append("  <table style='width: 100%; border-collapse: collapse; font-size: 15px;'>");
-        
-        // Row 1: Dương lịch & Âm lịch
-        content.append("    <tr>");
-        content.append("      <td style='padding: 8px 0; border-bottom: 1px solid #f1f5f9;'><span style='color: #64748b;'>Dương lịch:</span> <strong style='color: #1e293b;'>").append(String.format("%02d/%02d/%d", rawDay, rawMonth, rawYear)).append("</strong></td>");
-        content.append("      <td style='padding: 8px 0; border-bottom: 1px solid #f1f5f9;'><span style='color: #64748b;'>Âm lịch:</span> <strong style='color: #1e293b;'>").append(String.format("%02d/%02d/%d", ngaySinh, thangSinh, birthYear)).append("</strong></td>");
-        content.append("    </tr>");
-        
-        // Row 2: Năm Can Chi & Giờ sinh
-        content.append("    <tr>");
-        content.append("      <td style='padding: 8px 0; border-bottom: 1px solid #f1f5f9;'><span style='color: #64748b;'>Năm sinh:</span> <strong style='color: #cf2a27;'>").append(can.toUpperCase()).append(" ").append(chi.toUpperCase()).append("</strong></td>");
-        content.append("      <td style='padding: 8px 0; border-bottom: 1px solid #f1f5f9;'><span style='color: #64748b;'>Giờ sinh:</span> <strong style='color: #1e293b;'>").append(displayGio).append("</strong></td>");
-        content.append("    </tr>");
-        
-        // Row 3: Nạp Âm & Cốt Xương
-        content.append("    <tr>");
-        content.append("      <td style='padding: 8px 0; border-bottom: 1px solid #f1f5f9;'><span style='color: #64748b;'>Ngũ Hành:</span> <strong style='color: #047857;'>").append(napAmFull).append("</strong></td>");
-        content.append("      <td style='padding: 8px 0; border-bottom: 1px solid #f1f5f9;'><span style='color: #64748b;'>Hóa cốt:</span> <strong style='color: #1e293b;'>Con ").append(cot.substring(0, 1).toUpperCase() + cot.substring(1)).append("</strong></td>");
-        content.append("    </tr>");
-
-        // Row 4: Cân xương tính số & Chuyên mục tra cứu
-        content.append("    <tr>");
-        content.append("      <td style='padding: 8px 0;'><span style='color: #64748b;'>Cân xương lượng số:</span> <strong style='color: #b45309;'>").append(canXuong).append("</strong></td>");
-        content.append("      <td style='padding: 8px 0;'><span style='color: #64748b;'>Lĩnh vực tra cứu:</span> <strong style='color: #4338ca;'>").append(category).append("</strong></td>");
-        content.append("    </tr>");
-        
-        content.append("  </table>");
-        
-        if (!calendarNote.isEmpty()) {
-             content.append("  <div style='margin-top: 10px; font-size: 13px; color: #94a3b8; font-style: italic; text-align: center;'>* Đã dùng lịch Mặt Trăng quy đổi từ dương lịch</div>");
-        }
+        content.append("<div class='log-box' style='background: #fdf6e3; padding: 15px; border-radius: 8px; border: 1px solid #eee8d5; margin-bottom: 20px; color: #657b83'>");
+        content.append("<strong style='color: #b58900;'>[Thông số Diễn Cầm]</strong><br>");
+        content.append("- Ngày sinh (Âm lịch): <b>").append(ngaySinh).append("/").append(thangSinh).append("/").append(birthYear).append("</b>").append(calendarNote).append("<br>");
+        content.append("- Bạn tuổi: <b>").append(can.toUpperCase()).append(" ").append(chi.toUpperCase()).append("</b><br>");
+        content.append("- Mạng (Ngũ Hành): <b>").append(mang.toUpperCase()).append("</b> - Cốt (Xương): <b>").append(cot.toUpperCase()).append("</b><br>");
+        content.append("<em>=> Đang tra cứu chuyên mục: <b>").append(category).append("</b></em>");
         content.append("</div>");
 
         List<BookSection> sections = sectionRepo.findAllByOrderBySectionNoAsc();
@@ -138,7 +92,7 @@ public class DivinationServiceImpl {
             } else if (sec.getSectionNo() == 10) {
                 appendSo10(content, sec.getSectionCode(), thangThoThai, thangSinh);
             } else {
-                appendOtherSections(content, sec, cot, mangShort);
+                appendOtherSections(content, sec, cot, mang);
             }
         }
 
@@ -147,11 +101,7 @@ public class DivinationServiceImpl {
         }
 
         content.append("</div>");
-        
-        Map<String, String> resultMap = new HashMap<>();
-        resultMap.put("html", content.toString());
-        resultMap.put("json", jsonFormat);
-        return resultMap;
+        return content.toString();
     }
 
     private boolean isSectionInCategory(BookSection sec, String filterCategory) {
@@ -536,7 +486,7 @@ public class DivinationServiceImpl {
     }
 
     private int getCanIndex(String can) {
-        String[] cans = {"canh", "tân", "nhâm", "quý", "giáp", "ất", "bính", "đinh", "mậu", "kỷ"};
+        String[] cans = {"canh", "tan", "nham", "quy", "giap", "at", "binh", "dinh", "mau", "ky"};
         for (int i = 0; i < cans.length; i++) {
             if (cans[i].equalsIgnoreCase(can)) return i;
         }
@@ -544,7 +494,7 @@ public class DivinationServiceImpl {
     }
 
     private int getChiIndex(String chi) {
-        String[] chis = {"thân", "dậu", "tuất", "hợi", "tý", "sửu", "dần", "mão", "thìn", "tỵ", "ngọ", "mùi"};
+        String[] chis = {"than", "dau", "tuat", "hoi", "ty1", "suu", "dan", "mao", "thin", "ty2", "ngo", "mui"};
         for (int i = 0; i < chis.length; i++) {
             if (chis[i].equalsIgnoreCase(chi)) return i;
         }
