@@ -166,7 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (resultsSection) resultsSection.classList.add('hidden');
         if (resultsOverlay) resultsOverlay.classList.remove('active');
 
-        // Chỉ ẩn modal, để nguyên thẻ bài trên màn hình
+        // Bỏ logic revert animation ở đây để người dùng vẫn ở giao diện các thẻ bài (sau tra cứu)
+        // và chỉ thoát khi dọn bài (thu thẻ).
     };
 
     if (closeResultsBtn) closeResultsBtn.addEventListener('click', closeResults);
@@ -177,19 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsSection = document.getElementById('results-section');
     const wheelImgBtn = document.querySelector('.wheel-img');
     const inputCards = document.querySelectorAll('.input-card');
-    const partnerCard = document.getElementById('partner-card');
-
-    // Tự động hiện partner card nếu chọn Tình cảm hoặc Tất cả
-    const lookupCategorySelect = document.getElementById('lookup-category');
-    if (lookupCategorySelect) {
-        lookupCategorySelect.addEventListener('change', (e) => {
-            if (e.target.value === 'Tình cảm - Hôn nhân' || e.target.value === 'Tất cả') {
-                partnerCard.classList.remove('disabled-card');
-            } else {
-                partnerCard.classList.add('disabled-card');
-            }
-        });
-    }
 
     if (wheelImgBtn) {
         wheelImgBtn.addEventListener('click', () => {
@@ -235,15 +223,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const requestPayload = {
                 fullname: fullnameValue,
                 gender: document.getElementById('gender').value,
-                calendarType: 'solar', // Mặc định là Dương lịch như yêu cầu
+                calendarType: document.getElementById('calendar-type').value,
                 birthHour: document.getElementById('birth-hour').value,
                 birthDay: document.getElementById('birth-day').value,
                 birthMonth: document.getElementById('birth-month').value,
                 birthYear: document.getElementById('birth-year').value,
-                lookupCategory: categoryValue,
-                partnerBirthDay: document.getElementById('partner-birth-day').value,
-                partnerBirthMonth: document.getElementById('partner-birth-month').value,
-                partnerBirthYear: document.getElementById('partner-birth-year').value
+                lookupCategory: categoryValue
             };
 
             // Gắn tín hiệu gọi Backend
@@ -280,16 +265,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Đổ nội dung luận giải
                     const decodingText = data.content || generateDecodingContent(categoryValue);
+                    const decContent = document.getElementById('decoding-content');
 
-                    const decodingContentEl = document.getElementById('decoding-content');
-                    if (decodingContentEl) {
-                        decodingContentEl.innerHTML = decodingText;
+                    // Hiển thị Log Box riêng biệt (Metadata)
+                    const logBoxContainer = document.getElementById('log-box-container');
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = decodingText;
+                    const logBox = tempDiv.querySelector('.log-box');
+                    if (logBox && logBoxContainer) {
+                        logBoxContainer.innerHTML = logBox.outerHTML;
+                        // Không remove logBox để Thẻ 1 + Xem Tất Cả đều chứa thông số Mệnh / Tuổi
+                        // logBox.remove(); 
+                        const cleanDecodingText = tempDiv.innerHTML;
+                        if (decContent) decContent.innerHTML = cleanDecodingText;
+                        showFlashcards(cleanDecodingText, displayName, displayCategory);
+                        appendHistory(data.fullname || fullnameValue, data.category || categoryValue, data.dob || dobValue, cleanDecodingText);
+                    } else {
+                        if (logBoxContainer) logBoxContainer.innerHTML = '';
+                        if (decContent) decContent.innerHTML = decodingText;
+                        showFlashcards(decodingText, displayName, displayCategory);
+                        appendHistory(data.fullname || fullnameValue, data.category || categoryValue, data.dob || dobValue, decodingText);
                     }
-
-                    // Hiển thị Flashcards thay vì Modal
-                    showFlashcards(decodingText, displayName, displayCategory);
-
-                    appendHistory(data.fullname || fullnameValue, data.category || categoryValue, data.dob || dobValue, decodingText);
                 })
                 .catch(error => {
                     console.error("Lỗi:", error);
@@ -383,12 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (viewAllBtn) {
         viewAllBtn.addEventListener('click', () => {
-            // Lật tất cả thẻ sang mặt quẻ số (xoá is-flipped) tại chỗ
-            generatedCards.forEach(card => {
-                const fi = card.querySelector('.flashcard');
-                if (fi) fi.classList.remove('is-flipped');
-            });
-
             const resultsSection = document.getElementById('results-section');
             const resultsOverlay = document.getElementById('results-overlay');
             if (resultsSection && resultsOverlay) {
@@ -655,6 +645,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearAllCards() {
         flashcardsContainer.innerHTML = '';
         generatedCards = [];
+        const lbContainer = document.getElementById('log-box-container');
+        if (lbContainer) lbContainer.innerHTML = '';
         if (arrangeBtn) arrangeBtn.style.display = 'none';
         if (clearBtn) clearBtn.style.display = 'none';
         if (viewAllBtn) viewAllBtn.style.display = 'none';
@@ -795,105 +787,48 @@ document.addEventListener('DOMContentLoaded', () => {
         tempDiv.innerHTML = contentHtml;
         const segments = [];
 
-        // Backend bọc toàn bộ HTML trong một thẻ <div style='text-align: left;'>
-        // Nên ta phải trỏ vào đứa con đầu tiên (nếu là div) để lấy ruột mới đúng
-        const wrapper = (tempDiv.firstElementChild && tempDiv.firstElementChild.tagName === 'DIV') 
-            ? tempDiv.firstElementChild 
-            : tempDiv;
+        // Dữ liệu từ API thường bọc trong thẻ div đầu tiên
+        const wrapper = tempDiv.querySelector('div') || tempDiv;
+        
+        // Loại bỏ log-box nếu nó vẫn còn lọt vào đây
+        const lb = wrapper.querySelector('.log-box');
+        if (lb) lb.remove();
 
-        // Duyệt TOÀN BỘ nhánh chính của mã HTML
         const nodes = Array.from(wrapper.childNodes);
 
-        let currentHtml = '';
-        let currentTitle = 'THÔNG TIN BẢN MỆNH';
+        let currentSegmentHtml = '';
+        let currentTitle = '';
 
         nodes.forEach(node => {
             if (node.nodeType === Node.ELEMENT_NODE) {
                 if (node.tagName === 'H4') {
-                    // Đóng gói Quẻ cũ trước khi sang Quẻ mới (Sở mới)
-                    if (currentHtml.trim().length > 0) {
-                        segments.push({ title: currentTitle, html: currentHtml });
-                    } else if (currentTitle !== 'THÔNG TIN BẢN MỆNH') {
-                        // Thẻ bài rỗng do dữ liệu backend bị lỗi thiếu
-                        segments.push({ title: currentTitle, html: '<p><em style="color:#888;">(Nội dung đang được bổ sung...)</em></p>' });
+                    if (currentSegmentHtml.trim() || currentTitle) {
+                        segments.push({ title: currentTitle || 'THÔNG TIN BẢN MỆNH', html: currentSegmentHtml });
+                        currentSegmentHtml = '';
                     }
-
-                    // Setup Quẻ mới
-                    currentHtml = '';
-                    currentTitle = (node.innerText || node.textContent).replace(/Sở\s+/i, '').trim();
+                    currentTitle = node.innerText.replace(/Sở\s+/i, '').trim();
                 } else if (node.tagName === 'HR') {
-                    // Xóa đường gạch ngang
+                    // Dọn dẹp dấu gạch ngang
                 } else {
-                    currentHtml += node.outerHTML;
+                    currentSegmentHtml += node.outerHTML;
                 }
-            } else if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
-                currentHtml += '<p>' + node.textContent.trim() + '</p>';
+            } else if (node.nodeType === Node.TEXT_NODE) {
+                if (node.textContent.trim()) {
+                    currentSegmentHtml += '<p>' + node.textContent + '</p>';
+                }
             }
         });
 
-        // Đóng gói mảng thẻ cuối cùng
-        if (currentHtml.trim().length > 0) {
-            segments.push({ title: currentTitle, html: currentHtml });
-        } else if (currentTitle !== 'THÔNG TIN BẢN MỆNH') {
-            segments.push({ title: currentTitle, html: '<p><em style="color:#888;">(Nội dung đang được bổ sung...)</em></p>' });
+        if (currentSegmentHtml.trim() || currentTitle) {
+            segments.push({ title: currentTitle || 'TỔNG QUAN', html: currentSegmentHtml });
         }
 
-        // Trường hợp khẩn cấp nếu dữ liệu sai bét
-        if (segments.length === 0 && contentHtml.trim().length > 0) {
-            segments.push({ title: 'TỔNG LUẬN', html: tempDiv.innerHTML });
-        }
-
-        return segments;
+        // Đảm bảo không có đoạn trống
+        return segments.filter(seg => seg.html.replace(/<[^>]*>?/gm, '').trim().length > 0);
     }
 
     function makeDraggable(el) {
-        let isDragging = false;
-        let startX, startY, initialLeft, initialTop;
-
-        const mousedown = (e) => {
-            isDragging = false;
-            el.dataset.isDragging = "false";
-            startX = e.clientX || (e.touches && e.touches[0].clientX);
-            startY = e.clientY || (e.touches && e.touches[0].clientY);
-            initialLeft = parseFloat(el.style.left || 0);
-            initialTop = parseFloat(el.style.top || 0);
-            el.style.zIndex = highestZ++;
-
-            document.addEventListener('mousemove', mousemove);
-            document.addEventListener('mouseup', mouseup);
-            // Touch
-            document.addEventListener('touchmove', mousemove, { passive: false });
-            document.addEventListener('touchend', mouseup);
-        };
-
-        const mousemove = (ev) => {
-            const cx = ev.clientX || (ev.touches && ev.touches[0].clientX);
-            const cy = ev.clientY || (ev.touches && ev.touches[0].clientY);
-
-            const dx = cx - startX;
-            const dy = cy - startY;
-            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-                isDragging = true;
-                el.dataset.isDragging = "true";
-            }
-            if (isDragging) {
-                if (ev.cancelable) ev.preventDefault(); // prevent scroll
-                el.style.left = (initialLeft + dx) + 'px';
-                el.style.top = (initialTop + dy) + 'px';
-            }
-        };
-        const mouseup = () => {
-            document.removeEventListener('mousemove', mousemove);
-            document.removeEventListener('mouseup', mouseup);
-            document.removeEventListener('touchmove', mousemove);
-            document.removeEventListener('touchend', mouseup);
-
-            // Hủy isDragging delay nhẹ để sự kiện click không bị trig
-            setTimeout(() => { if (isDragging) el.dataset.isDragging = "false"; isDragging = false; }, 50);
-        };
-
-        el.addEventListener('mousedown', mousedown);
-        el.addEventListener('touchstart', mousedown, { passive: false });
+        // Tắt tính năng kéo thả ở tất cả các thẻ theo yêu cầu của user
     }
 
 });

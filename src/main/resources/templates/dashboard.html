@@ -323,19 +323,14 @@
             left: 104.4%;
         }
 
-        .card-tr { top: 18.5%; left: 104.4%; }
-        .card-mr { top: 50%; left: 112.8%; } 
-        .card-br { top: 81.4%; left: 104.4%; } 
-        
-        .disabled-card {
-            opacity: 0.5;
-            pointer-events: none;
-            filter: grayscale(1);
-            transition: all 0.5s ease;
+        .card-mr {
+            top: 50%;
+            left: 112.8%;
         }
-        .disabled-card:hover {
-            filter: none;
-            opacity: 0.8;
+
+        .card-br {
+            top: 81.4%;
+            left: 104.4%;
         }
 
         /* Tăng cỡ chữ để tương vứng hộp to */
@@ -585,8 +580,8 @@
         }
 
         .flashcard-wrapper[data-view-state="stacked"]:hover {
-            margin-top: -15px !important; /* Nhấc lên 1 chút */
-            /* Tuyệt đối không dùng z-index ở đây để tránh thẻ đè lộn xộn lên các thẻ bài khác trong cột */
+            margin-top: -25px !important;
+            /* Dùng margin-top để đẩy lên, tránh dùng transform vì nó đè mất scale/rotateZ của wrapper cài bằng JS */
         }
 
         /* Xóa rule lật đè transform của .flashcard để giữ yên is-flipped */
@@ -604,50 +599,46 @@
             overflow: hidden;
         }
 
-        /* Front: Hình thẻ gỗ/bài cổ */
+        /* Front: Hình thẻ gỗ/bài cổ phong cách Elite */
         .flashcard-front {
-            background-color: #5c3a21;
-            /* Tạo vân gỗ cực sắc nét bằng các lớp gradient chìm */
-            background-image:
-                linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2)),
-                repeating-linear-gradient(45deg, rgba(30, 15, 5, 0.1) 0px, rgba(30, 15, 5, 0.1) 2px, transparent 2px, transparent 6px),
-                linear-gradient(135deg, #4a2912 0%, #754c29 50%, #3d200e 100%);
-            border: 2px solid #241103;
-            box-shadow:
-                inset 0 0 30px rgba(0, 0, 0, 0.9),
-                inset 0 0 5px rgba(255, 255, 255, 0.2),
-                inset 2px 2px 5px rgba(255, 255, 255, 0.1),
-                inset -2px -2px 10px rgba(0, 0, 0, 0.8),
-                0 5px 15px rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
+            background-color: #4a2912;
+            background-image: 
+                url('https://www.transparenttextures.com/patterns/wood-pattern.png'),
+                linear-gradient(135deg, #5c3318 0%, #3d200e 100%);
+            border: 3px solid #241103;
+            box-shadow: 
+                inset 0 0 40px rgba(0,0,0,0.8),
+                inset 0 2px 5px rgba(255,255,255,0.2),
+                0 10px 25px rgba(0,0,0,0.5);
+            border-radius: 12px;
             color: #ebb96e;
             justify-content: center;
             align-items: center;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.9);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
             position: relative;
         }
 
         .flashcard-front::before {
             content: '';
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
-            border: 2px dashed rgba(235, 185, 110, 0.3);
-            border-radius: 4px;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            border: 1px solid rgba(235, 185, 110, 0.4);
+            border-radius: 8px;
             pointer-events: none;
         }
 
-        /* Hoa văn viền góc trên bên phải giả lập thẻ gỗ */
         .flashcard-front::after {
-            content: '卍';
+            content: '☯';
             position: absolute;
-            top: 12px;
-            right: 12px;
-            font-size: 1.2rem;
+            top: 15px;
+            right: 15px;
+            font-size: 1.4rem;
             color: #ebb96e;
-            opacity: 0.6;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 5px rgba(255, 215, 100, 0.5));
         }
 
         /* Góc trên bên trái có số nhỏ - Dạng 3D Sáng rực */
@@ -1016,6 +1007,30 @@
         .account-dropdown .logout-item:hover svg {
             stroke: #ffb89e;
         }
+
+        /* Tùy chỉnh Log Box cố định phong cách cổ điển */
+        #log-box-container .log-box {
+            background: linear-gradient(135deg, #fdf6e3, #f5ecd5) !important;
+            border: 2px solid #dcb96e !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+            animation: slideInLeft 0.5s ease-out;
+            border-radius: 12px !important;
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .poem-box {
+            border-left: 4px solid #8c1010;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #5c3a21;
+            background: rgba(140, 16, 16, 0.05);
+            padding: 10px 15px;
+        }
     </style>
 </head>
 
@@ -1148,13 +1163,29 @@
                 </select>
             </div>
 
-            <!-- THẺ 3: ĐÃ XÓA CHỌN LỊCH -->
-
-            <!-- Thẻ 4: NGÀY SINH (Góc Trên Phải) -->
+            <!-- Thẻ 3: CHỌN LỊCH (Góc Trên Phải) -->
             <div class="input-card card-tr">
                 <div class="card-header">
-                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
-                    NGÀY SINH (DƯƠNG LỊCH)
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11z" />
+                    </svg>
+                    CHỌN LỊCH
+                </div>
+                <select id="calendar-type">
+                    <option value="Xem theo lịch dương">Lịch Dương</option>
+                    <option value="Xem theo lịch âm">Lịch Âm</option>
+                </select>
+            </div>
+
+            <!-- Thẻ 4: NGÀY SINH (Sườn Phải) -->
+            <div class="input-card card-mr">
+                <div class="card-header">
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" />
+                    </svg>
+                    NGÀY THÁNG NĂM SINH
                 </div>
                 <div class="date-inputs">
                     <input type="number" id="birth-day" placeholder="Ngày" required min="1" max="31">
@@ -1163,8 +1194,8 @@
                 </div>
             </div>
 
-            <!-- Thẻ 5: GIỜ SINH (Sườn Phải) -->
-            <div class="input-card card-mr">
+            <!-- Thẻ 5: GIỜ SINH (Dưới Phải) -->
+            <div class="input-card card-br">
                 <div class="card-header">
                     <svg fill="currentColor" viewBox="0 0 24 24">
                         <path
@@ -1202,20 +1233,6 @@
                 </select>
             </div>
 
-            <!-- THẺ 6: VỢ CHỒNG (Góc Dưới Phải) -->
-            <div id="partner-card" class="input-card card-br disabled-card">
-                <div class="card-header">
-                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    VỢ / CHỒNG (DƯƠNG LỊCH)
-                </div>
-                <div class="date-inputs">
-                    <input type="number" id="partner-birth-day" placeholder="Ngày" min="1" max="31">
-                    <input type="number" id="partner-birth-month" placeholder="Tháng" min="1" max="12">
-                    <input type="number" id="partner-birth-year" placeholder="Năm" min="1900" max="2100">
-                </div>
-                <p style="font-size: 0.65rem; color: #856404; margin-top: 5px; font-style: italic;">* Chỉ nhập khi xem Duyên Nợ</p>
-            </div>
-            
             <div class="click-hint">Bấm vào Bát Quái để Tra Cứu</div>
         </form>
 
@@ -1231,6 +1248,9 @@
             <h3 class="decoding-title">GIẢI MÃ CHUYÊN SÂU: <span id="decoding-category"></span></h3>
             <div class="decoding-content" id="decoding-content"></div>
         </section>
+
+        <!-- Vùng hiển thị thông số (Log Box) cố định -->
+        <div id="log-box-container" style="position: fixed; top: 100px; left: 30px; z-index: 100; max-width: 300px; pointer-events: auto;"></div>
 
         <!-- Container chứa các thẻ Flashcards -->
         <div id="flashcards-container"></div>
