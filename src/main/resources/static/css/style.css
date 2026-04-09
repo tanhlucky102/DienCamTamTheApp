@@ -529,7 +529,7 @@ a:hover {
     background-image: url('../images/background.jpg');
     background-size: 100vw auto;
     background-position: center top;
-    background-repeat: no-repeat;
+    background-repeat: repeat-y;
     background-attachment: fixed;
     position: relative;
     display: flex;
@@ -665,6 +665,8 @@ a:hover {
     font-family: 'Times New Roman', serif;
     font-size: 1.6rem;
     font-weight: 900;
+    line-height: normal;
+    padding-bottom: 3px;
     background: linear-gradient(to right, #9e7100, #dcb96e, #9e7100);
     -webkit-background-clip: text;
     background-clip: text;
@@ -718,6 +720,19 @@ a:hover {
     align-items: center;
     gap: 1.2rem;
     position: relative;
+}
+
+/* Header Responsive Global Overrides */
+@media (max-width: 768px) {
+    .top-header { padding: 0 15px !important; height: 65px !important; }
+    .header-nav { gap: 1.25rem !important; margin-left: auto !important; } 
+    .header-logo-text { 
+        font-size: 1.05rem !important; 
+        line-height: normal !important; 
+        padding-bottom: 2px !important; 
+    }
+    .header-account-btn { width: 35px !important; height: 35px !important; }
+    .nav-link { font-size: 0.7rem !important; }
 }
 
 /* User Account Icon Dropdown */
