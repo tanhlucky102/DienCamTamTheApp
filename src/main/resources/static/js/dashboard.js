@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 gender: document.getElementById('gender').value,
                 calendarType: document.getElementById('calendar-type').value,
                 birthHour: document.getElementById('birth-hour').value,
-                birthTimeSegment: document.getElementById('birth-time-segment').value, // Thêm ô đầu/giữa/cuối
+                birthMinute: document.getElementById('birth-minute').value,
                 birthDay: document.getElementById('birth-day').value,
                 birthMonth: document.getElementById('birth-month').value,
                 birthYear: document.getElementById('birth-year').value,
@@ -255,57 +255,71 @@ document.addEventListener('DOMContentLoaded', () => {
                     return response.json();
                 })
                 .then(data => {
-                    // Đổ dữ liệu định danh lên bảng
-                    const displayName = data.fullname || fullnameValue;
-                    const displayDob = data.dob || dobValue;
-                    const displayCategory = data.category || categoryValue;
+                    try {
+                        // Đổ dữ liệu định danh lên bảng
+                        const displayName = data.fullname || fullnameValue;
+                        const displayDob = data.dob || dobValue;
+                        const displayCategory = data.category || categoryValue;
 
-                    document.getElementById('display-name').innerText = displayName;
-                    document.getElementById('decoding-category').innerText = displayCategory;
+                        document.getElementById('display-name').innerText = displayName;
+                        document.getElementById('decoding-category').innerText = displayCategory;
 
-                    const meta = document.getElementById('result-meta');
-                    if (meta) {
-                        meta.innerHTML = `
-                        <span class="chip">Họ tên: ${displayName}</span>
-                        <span class="chip">Ngày sinh: ${displayDob}</span>
-                        <span class="chip">Danh mục: ${displayCategory}</span>
-                    `;
-                    }
+                        const meta = document.getElementById('result-meta');
+                        if (meta) {
+                            meta.innerHTML = `
+                            <span class="chip">Họ tên: ${displayName}</span>
+                            <span class="chip">Ngày sinh: ${displayDob}</span>
+                            <span class="chip">Danh mục: ${displayCategory}</span>
+                        `;
+                        }
 
-                    // Đổ nội dung luận giải
-                    const decodingText = data.content || generateDecodingContent(categoryValue);
-                    const decContent = document.getElementById('decoding-content');
+                        // Đổ nội dung luận giải
+                        const decodingText = data.content || generateDecodingContent(categoryValue);
+                        const decContent = document.getElementById('decoding-content');
 
-                    // Hiển thị Log Box riêng biệt (Metadata)
-                    const logBoxContainer = document.getElementById('log-box-container');
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = decodingText;
-                    const logBox = tempDiv.querySelector('.log-box');
-                    if (logBox && logBoxContainer) {
-                        logBoxContainer.innerHTML = logBox.outerHTML;
-                        // Không remove logBox để Thẻ 1 + Xem Tất Cả đều chứa thông số Mệnh / Tuổi
-                        // logBox.remove(); 
-                        const cleanDecodingText = tempDiv.innerHTML;
+                        // Hiển thị Log Box riêng biệt (Metadata)
+                        const logBoxContainer = document.getElementById('log-box-container');
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = decodingText;
+                        const logBox = tempDiv.querySelector('.log-box');
+                        
+                        let cleanDecodingText = decodingText;
+                        if (logBox && logBoxContainer) {
+                            logBoxContainer.innerHTML = logBox.outerHTML;
+                            cleanDecodingText = tempDiv.innerHTML;
+                        } else {
+                            if (logBoxContainer) logBoxContainer.innerHTML = '';
+                        }
+                        
                         if (decContent) decContent.innerHTML = cleanDecodingText;
                         showFlashcards(cleanDecodingText, displayName, displayCategory);
-                        appendHistory(data.fullname || fullnameValue, data.category || categoryValue, data.dob || dobValue, cleanDecodingText);
-                        const topCenterBtn = document.getElementById('center-lookup-btn');
-                        if (topCenterBtn) topCenterBtn.innerText = "VỀ";
-                    } else {
-                        if (logBoxContainer) logBoxContainer.innerHTML = '';
-                        if (decContent) decContent.innerHTML = decodingText;
-                        showFlashcards(decodingText, displayName, displayCategory);
-                        appendHistory(data.fullname || fullnameValue, data.category || categoryValue, data.dob || dobValue, decodingText);
-                        const topCenterBtn = document.getElementById('center-lookup-btn');
-                        if (topCenterBtn) topCenterBtn.innerText = "VỀ";
+                        
+                        // Cập nhật nút TRA thành VỀ
+                        const topBtn = document.getElementById('center-lookup-btn');
+                        if (topBtn) topBtn.innerText = "VỀ";
+
+                        // Cố gắng lưu lịch sử
+                        try {
+                            appendHistory(displayName, displayCategory, displayDob, cleanDecodingText);
+                        } catch (hErr) {
+                            console.warn("Không thể lưu lịch sử:", hErr);
+                        }
+                        
+                    } catch (procErr) {
+                        console.error("Lỗi xử lý dữ liệu:", procErr);
+                        alert("Có lỗi xảy ra khi hiển thị kết quả. Vui lòng kiểm tra console.");
                     }
                 })
                 .catch(error => {
-                    console.error("Lỗi:", error);
-                    alert("Đã xảy ra lỗi khi giải mã lá số. Vui lòng thử lại!");
+                    console.error("Lỗi kết nối:", error);
+                    // Chỉ đẩy thông báo lỗi tổng nếu không có bất kỳ kết quả nào được hiển thị
+                    if (!generatedCards || generatedCards.length === 0) {
+                        alert("Đã xảy ra lỗi khi giải mã lá số. Vui lòng thử lại!");
+                    }
                     // Revert animation on error
                     setSpinSpeed(0.05);
                     const inputCards = document.querySelectorAll('.input-card');
+                    if (inputCards) inputCards.forEach(card => card.classList.remove('sucked-in'));
                 });
         });
     }
