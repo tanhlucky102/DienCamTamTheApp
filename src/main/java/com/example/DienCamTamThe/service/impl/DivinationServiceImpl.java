@@ -1266,21 +1266,26 @@ public class DivinationServiceImpl {
                     foundContent = true;
                 }
 
-                // 3. so27_ngaykyhap
+                // 3. so27_ngaykyhap - Lấy tất cả LoiGiai theo Tuoi_CanID và Tuoi_ChiID
                 try {
-                    int d = Integer.parseInt(request.getBirthDay());
-                    int m = Integer.parseInt(request.getBirthMonth());
-                    int y = Integer.parseInt(request.getBirthYear());
-                    int nChiId = calculateDayChiId(d, m, y);
-                    
-                    List<?> res3 = entityManager.createNativeQuery("SELECT LoiGiai FROM so27_ngaykyhap WHERE Tuoi_CanID = ? AND Tuoi_ChiID = ? AND Ngay_ChiID = ?")
-                            .setParameter(1, canId).setParameter(2, chiId).setParameter(3, nChiId).getResultList();
-                    for (Object obj : res3) {
-                        content.append("<div style='margin-top:15px; border-left: 4px solid #d32f2f; padding-left: 10px;'>")
-                               .append("<p style='margin:0;'>").append(obj.toString().replace("\n", "<br>")).append("</p></div>");
-                        foundContent = true;
+                    List<?> res3 = entityManager.createNativeQuery(
+                            "SELECT LoiGiai FROM so27_ngaykyhap WHERE Tuoi_CanID = ? AND Tuoi_ChiID = ?")
+                            .setParameter(1, canId).setParameter(2, chiId).getResultList();
+                    if (!res3.isEmpty()) {
+                        String canName = getCanName(canId);
+                        String chiName = getChiName(chiId);
+                        content.append("<h6 style='color:#d32f2f; margin-top:20px; margin-bottom:8px; font-size:1em;'>")
+                               .append("Ngày kỵ hạp của tuổi ").append(canName).append(" ").append(chiName)
+                               .append("</h6>");
+                        for (Object obj : res3) {
+                            content.append("<div style='margin-top:10px; border-left: 4px solid #d32f2f; padding-left: 10px;'>")
+                                   .append("<p style='margin:0;'>").append(obj.toString().replace("\n", "<br>")).append("</p></div>");
+                            foundContent = true;
+                        }
                     }
-                } catch (Exception eDay) {}
+                } catch (Exception eDay) {
+                    System.err.println("Lỗi query so27_ngaykyhap: " + eDay.getMessage());
+                }
 
             } catch (Exception e) {
                 System.err.println("Lỗi manual Sở 27: " + e.getMessage());
