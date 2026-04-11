@@ -17,7 +17,7 @@ public class DivinationServiceImpl {
 
     // Định nghĩa 34 Sở (Sở 4 → Sở 37) đúng theo Database thực tế
     private static final int FIRST_SECTION = 4;
-    private static final int LAST_SECTION = 37;
+    private static final int LAST_SECTION = 32;
 
     private static final String[] SECTION_TITLES = {
             /* Sở 4 */ "Coi tuổi Mạng (Ngũ hành)",
@@ -48,12 +48,7 @@ public class DivinationServiceImpl {
             /* Sở 29 */ "Coi hành hạn năm",
             /* Sở 30 */ "Coi lời khuyên & nghi lễ",
             /* Sở 31 */ "Coi kết luận (Phần trăm)",
-            /* Sở 32 */ "Coi khi chết",
-            /* Sở 33 */ "Coi tổng luận (Lục tự)",
-            /* Sở 34 */ "Coi ngũ phương & triết lý",
-            /* Sở 35 */ "Coi nhân quả",
-            /* Sở 36 */ "Coi ngũ tạng",
-            /* Sở 37 */ "Lời kết"
+            /* Sở 32 */ "Coi khi chết"
     };
 
     public String processDivination(DivinationRequest request) {
@@ -95,10 +90,14 @@ public class DivinationServiceImpl {
             ngaySinh = rawDay;
         }
 
-        String hr = (request.getBirthHour() == null || request.getBirthHour().isEmpty()) ? "00" : request.getBirthHour();
-        String mi = (request.getBirthMinute() == null || request.getBirthMinute().isEmpty()) ? "00" : request.getBirthMinute();
-        if (hr.length() == 1) hr = "0" + hr;
-        if (mi.length() == 1) mi = "0" + mi;
+        String hr = (request.getBirthHour() == null || request.getBirthHour().isEmpty()) ? "00"
+                : request.getBirthHour();
+        String mi = (request.getBirthMinute() == null || request.getBirthMinute().isEmpty()) ? "00"
+                : request.getBirthMinute();
+        if (hr.length() == 1)
+            hr = "0" + hr;
+        if (mi.length() == 1)
+            mi = "0" + mi;
         String gioSinhFull = hr + ":" + mi;
 
         String canChiGio = extractCanChi(gioSinhFull);
@@ -113,14 +112,17 @@ public class DivinationServiceImpl {
 
         boolean foundAny = false;
 
-        content.append("<div class='log-box' style='background: #fff9eb; padding: 18px; border-radius: 12px; border: 1px solid #eec; margin-bottom: 25px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.05);'>");
+        content.append(
+                "<div class='log-box' style='background: #fff9eb; padding: 18px; border-radius: 12px; border: 1px solid #eec; margin-bottom: 25px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.05);'>");
         content.append("<strong style='color: #8c1010; font-size: 1.1em;'>[Thông số Diễn Cầm]</strong><br>");
         content.append("<div style='margin-left: 10px; margin-top: 8px; line-height: 1.6;'>");
         content.append("- Ngày sinh (Âm lịch): <b>").append(ngaySinh).append("/").append(thangSinh).append("/")
                 .append(birthYear).append("</b>").append(calendarNote).append("<br>");
-        content.append("- Bạn tuổi: <b>").append(can.toUpperCase()).append(" ").append(chi.toUpperCase()).append("</b><br>");
+        content.append("- Bạn tuổi: <b>").append(can.toUpperCase()).append(" ").append(chi.toUpperCase())
+                .append("</b><br>");
         content.append("- Mạng (Ngũ Hành): <b>").append(mapNguHanhToVietnamese(mang).toUpperCase()).append("</b><br>");
-        content.append("<span style='color: #274e13;'>=> Đang tra cứu chuyên mục: <b>").append(category).append("</b></span>");
+        content.append("<span style='color: #274e13;'>=> Đang tra cứu chuyên mục: <b>").append(category)
+                .append("</b></span>");
         content.append("</div></div>");
 
         // Tính TruongSanhID 1 lần để dùng cho Sở 22, 23
@@ -140,7 +142,9 @@ public class DivinationServiceImpl {
                 // Header for extraction (H4)
                 content.append("\n<hr><h4>Sở ").append(i).append(". ").append(title).append("</h4>\n");
                 // Detailed header for View All (Hidden by default)
-                content.append("<div class='view-all-header' style='display: none; color: #8c1010; font-size: 1.3em; font-weight: bold; margin-top: 40px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; text-align: center; font-family: serif; text-transform: uppercase;'>SỞ SỐ ").append(i).append("</div>");
+                content.append(
+                        "<div class='view-all-header' style='display: none; color: #8c1010; font-size: 1.3em; font-weight: bold; margin-top: 40px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; text-align: center; font-family: serif; text-transform: uppercase;'>SỞ SỐ ")
+                        .append(i).append("</div>");
 
                 // Xử lý truy vấn động vào bảng soXX tương ứng
                 processDynamicSection(content, i, request, can, chi, ngaySinh, thangSinh, canChiGio, thangThoThai, mang,
@@ -159,9 +163,9 @@ public class DivinationServiceImpl {
     }
 
     private boolean isSectionInCategory(int secNo, String filterCategory) {
-        // Sections 35, 36, 37 are now merged into Sở 34.
-        // We skip processing them independently to avoid redundant cards.
-        if (secNo == 35 || secNo == 36 || secNo == 37) {
+        // Sections 33, 34, 35, 36, 37 are now removed or merged.
+        // We skip processing them to comply with the request to make them disappear.
+        if (secNo >= 33 && secNo <= 37) {
             return false;
         }
 
@@ -455,11 +459,14 @@ public class DivinationServiceImpl {
                 for (String tableName : possibleTables) {
                     try {
                         List<?> allRows = entityManager.createNativeQuery("SELECT * FROM " + tableName).getResultList();
-                        if (allRows.isEmpty()) continue;
+                        if (allRows.isEmpty())
+                            continue;
 
-                        List<Object[]> colsInfo = entityManager.createNativeQuery("SHOW COLUMNS FROM " + tableName).getResultList();
+                        List<Object[]> colsInfo = entityManager.createNativeQuery("SHOW COLUMNS FROM " + tableName)
+                                .getResultList();
                         java.util.List<String> colNames = new java.util.ArrayList<>();
-                        for (Object[] col : colsInfo) colNames.add(col[0].toString().toLowerCase());
+                        for (Object[] col : colsInfo)
+                            colNames.add(col[0].toString().toLowerCase());
 
                         int nhIdx = findColIndex(colNames, "nguhanhid", "ngu_hanhid", "mang_id");
                         int tsIdx = findColIndex(colNames, "thangsanh", "thang_sanh", "thang");
@@ -469,13 +476,17 @@ public class DivinationServiceImpl {
 
                         for (Object obj : allRows) {
                             Object[] row = (Object[]) obj;
-                            
+
                             // Check match mangId
-                            boolean matchNH = (nhIdx < 0) || (row[nhIdx] != null && row[nhIdx].toString().equals(String.valueOf(mangId)));
+                            boolean matchNH = (nhIdx < 0)
+                                    || (row[nhIdx] != null && row[nhIdx].toString().equals(String.valueOf(mangId)));
                             // Check match thangSinh
-                            boolean matchTS = (tsIdx < 0) || (row[tsIdx] != null && row[tsIdx].toString().equals(String.valueOf(thangSinh)));
+                            boolean matchTS = (tsIdx < 0)
+                                    || (row[tsIdx] != null && row[tsIdx].toString().equals(String.valueOf(thangSinh)));
                             // Check match gender
-                            boolean matchGT = (gtIdx < 0) || (row[gtIdx] != null && (row[gtIdx].toString().equalsIgnoreCase(genderVn) || row[gtIdx].toString().toLowerCase().contains(genderVn.toLowerCase())));
+                            boolean matchGT = (gtIdx < 0)
+                                    || (row[gtIdx] != null && (row[gtIdx].toString().equalsIgnoreCase(genderVn)
+                                            || row[gtIdx].toString().toLowerCase().contains(genderVn.toLowerCase())));
 
                             if (matchNH && matchTS && matchGT) {
                                 String cauSoVal = (csIdx >= 0 && row[csIdx] != null) ? row[csIdx].toString() : "N/A";
@@ -488,13 +499,16 @@ public class DivinationServiceImpl {
                                 break;
                             }
                         }
-                    } catch (Exception eInner) {}
-                    if (foundContent) break;
+                    } catch (Exception eInner) {
+                    }
+                    if (foundContent)
+                        break;
                 }
             } catch (Exception e) {
                 System.err.println("Lỗi manual Sở 7: " + e.getMessage());
             }
-            if (foundContent) return;
+            if (foundContent)
+                return;
         }
 
         // === SỞ 8: Coi giờ sanh (3 giai đoạn) ===
@@ -502,7 +516,7 @@ public class DivinationServiceImpl {
             try {
                 String giaiDoan = getGiaiDoanGio(gioSinhFull);
                 String chiGio = canChiGio;
-                
+
                 // Tìm TẤT CẢ bảng có tên bắt đầu bằng so08
                 List<String> s8Tables = entityManager.createNativeQuery("SHOW TABLES LIKE 'so08%'").getResultList();
                 if (s8Tables.isEmpty()) {
@@ -512,18 +526,22 @@ public class DivinationServiceImpl {
 
                 for (String tableName : s8Tables) {
                     try {
-                        List<Object[]> colsInfo = entityManager.createNativeQuery("SHOW COLUMNS FROM `" + tableName + "`").getResultList();
+                        List<Object[]> colsInfo = entityManager
+                                .createNativeQuery("SHOW COLUMNS FROM `" + tableName + "`").getResultList();
                         java.util.List<String> colNames = new java.util.ArrayList<>();
-                        for (Object[] col : colsInfo) colNames.add(col[0].toString().toLowerCase());
+                        for (Object[] col : colsInfo)
+                            colNames.add(col[0].toString().toLowerCase());
 
-                        int chiColIdx = findColIndex(colNames, "chiid", "chi_id", "gio_id", "ten_gio_chi", "tuoi_chiid");
+                        int chiColIdx = findColIndex(colNames, "chiid", "chi_id", "gio_id", "ten_gio_chi",
+                                "tuoi_chiid");
                         int gdColIdx = findColIndex(colNames, "giaidoan", "giai_doan", "phan", "segment", "buoi_sanh");
                         int lgColIdx = findColIndex(colNames, "loigiai", "loi_giai", "ketqua", "noi_dung", "mota");
 
                         // Xây dựng query filter theo Chi và GiaiDoan
-                        StringBuilder sql = new StringBuilder("SELECT * FROM `").append(tableName).append("` WHERE 1=1 ");
+                        StringBuilder sql = new StringBuilder("SELECT * FROM `").append(tableName)
+                                .append("` WHERE 1=1 ");
                         List<Object> params = new java.util.ArrayList<>();
-                        
+
                         if (chiColIdx >= 0) {
                             sql.append(" AND `").append(colNames.get(chiColIdx)).append("` = ? ");
                             params.add(getChiId(chiGio));
@@ -531,17 +549,19 @@ public class DivinationServiceImpl {
                         // Nếu có cột GiaiDoan, lọc đúng segment
                         if (gdColIdx >= 0) {
                             sql.append(" AND (`").append(colNames.get(gdColIdx)).append("` LIKE ? OR `")
-                               .append(colNames.get(gdColIdx)).append("` LIKE ? ) ");
+                                    .append(colNames.get(gdColIdx)).append("` LIKE ? ) ");
                             params.add("%" + giaiDoan + "%");
                             params.add("%" + (giaiDoan.equals("Sau") ? "Cuối" : giaiDoan) + "%");
                         }
 
                         var query = entityManager.createNativeQuery(sql.toString());
-                        for (int i=0; i<params.size(); i++) query.setParameter(i+1, params.get(i));
+                        for (int i = 0; i < params.size(); i++)
+                            query.setParameter(i + 1, params.get(i));
                         List<?> rows = query.getResultList();
 
                         if (!rows.isEmpty()) {
-                            // Nếu có nhiều hơn 1 row (do like filter), ưu tiên row khớp nhất hoặc lấy row đầu
+                            // Nếu có nhiều hơn 1 row (do like filter), ưu tiên row khớp nhất hoặc lấy row
+                            // đầu
                             Object[] row = (Object[]) rows.get(0);
                             String loiGiaiVal = "N/A";
                             if (lgColIdx >= 0 && row[lgColIdx] != null) {
@@ -556,12 +576,12 @@ public class DivinationServiceImpl {
                                     }
                                 }
                             }
-                            
+
                             content.append("<p><strong>").append(giaiDoan).append(" giờ ").append(chiGio)
-                                   .append("</strong><br>").append(loiGiaiVal).append("</p>");
+                                    .append("</strong><br>").append(loiGiaiVal).append("</p>");
                             foundContent = true;
                             // Quan trọng: return để KHÔNG chạy logic dynamic scanner phía dưới
-                            return; 
+                            return;
                         }
                     } catch (Exception eInner) {
                         System.err.println("Lỗi query bảng " + tableName + ": " + eInner.getMessage());
@@ -571,7 +591,7 @@ public class DivinationServiceImpl {
                 System.err.println("Lỗi manual Sở 8: " + e.getMessage());
             }
         }
-        
+
         // === SỞ 9: Coi ngày sanh (Ngày) ===
         if (secNo == 9) {
             try {
@@ -581,36 +601,42 @@ public class DivinationServiceImpl {
                 }
                 for (String tableName : s9Tables) {
                     try {
-                        List<Object[]> colsInfo = entityManager.createNativeQuery("SHOW COLUMNS FROM `" + tableName + "`").getResultList();
+                        List<Object[]> colsInfo = entityManager
+                                .createNativeQuery("SHOW COLUMNS FROM `" + tableName + "`").getResultList();
                         java.util.List<String> colNames = new java.util.ArrayList<>();
-                        for (Object[] col : colsInfo) colNames.add(col[0].toString().toLowerCase());
+                        for (Object[] col : colsInfo)
+                            colNames.add(col[0].toString().toLowerCase());
 
                         int dayColIdx = findColIndex(colNames, "ngay", "ngaysanh", "ngay_sanh", "ngay_id");
                         int starColIdx = findColIndex(colNames, "tensao", "ten_sao", "hieu_ngay", "sao", "tieu_de");
                         int lgColIdx = findColIndex(colNames, "loigiai", "loi_giai", "ketqua", "noi_dung", "mota");
 
-                        String sql = "SELECT * FROM `" + tableName + "` WHERE `" + colNames.get(dayColIdx >= 0 ? dayColIdx : 0) + "` = ?";
+                        String sql = "SELECT * FROM `" + tableName + "` WHERE `"
+                                + colNames.get(dayColIdx >= 0 ? dayColIdx : 0) + "` = ?";
                         var query = entityManager.createNativeQuery(sql);
                         query.setParameter(1, ngaySinh);
                         List<?> rows = query.getResultList();
 
                         if (!rows.isEmpty()) {
                             Object[] row = (Object[]) rows.get(0);
-                            String tenSao = (starColIdx >= 0 && row[starColIdx] != null) ? row[starColIdx].toString() : "N/A";
-                            String loiGiaiVal = (lgColIdx >= 0 && row[lgColIdx] != null) ? row[lgColIdx].toString() : "N/A";
-                            
+                            String tenSao = (starColIdx >= 0 && row[starColIdx] != null) ? row[starColIdx].toString()
+                                    : "N/A";
+                            String loiGiaiVal = (lgColIdx >= 0 && row[lgColIdx] != null) ? row[lgColIdx].toString()
+                                    : "N/A";
+
                             content.append("<p><strong>Ngày ").append(ngaySinh).append(": ").append(tenSao)
-                                   .append("</strong><br>").append(loiGiaiVal).append("</p>");
+                                    .append("</strong><br>").append(loiGiaiVal).append("</p>");
                             foundContent = true;
                             return;
                         }
-                    } catch (Exception eInner) {}
+                    } catch (Exception eInner) {
+                    }
                 }
             } catch (Exception e) {
                 System.err.println("Lỗi manual Sở 9: " + e.getMessage());
             }
         }
-        
+
         // === SỞ 10: Thọ thai sanh (Tháng thọ thai & tháng sanh) ===
         if (secNo == 10) {
             try {
@@ -621,9 +647,11 @@ public class DivinationServiceImpl {
 
                 for (String tableName : s10Tables) {
                     try {
-                        List<Object[]> colsInfo = entityManager.createNativeQuery("SHOW COLUMNS FROM `" + tableName + "`").getResultList();
+                        List<Object[]> colsInfo = entityManager
+                                .createNativeQuery("SHOW COLUMNS FROM `" + tableName + "`").getResultList();
                         java.util.List<String> colNames = new java.util.ArrayList<>();
-                        for (Object[] col : colsInfo) colNames.add(col[0].toString().toLowerCase());
+                        for (Object[] col : colsInfo)
+                            colNames.add(col[0].toString().toLowerCase());
 
                         // Tìm cột Tháng Thọ Thai (ưu tiên các từ khóa liên quan thọ thai)
                         int thoColIdx = findColIndex(colNames, "thang_tho_thai", "thothai", "tho_thai");
@@ -632,7 +660,8 @@ public class DivinationServiceImpl {
                         // Cột Lời Giải
                         int lgColIdx = findColIndex(colNames, "loigiai", "loi_giai", "ketqua", "noi_dung", "mota");
 
-                        if (thoColIdx < 0 && sanhColIdx < 0) continue; // Không phải bảng chuẩn
+                        if (thoColIdx < 0 && sanhColIdx < 0)
+                            continue; // Không phải bảng chuẩn
 
                         String sql = "SELECT * FROM `" + tableName + "` WHERE 1=1 ";
                         List<Object> params = new java.util.ArrayList<>();
@@ -646,7 +675,8 @@ public class DivinationServiceImpl {
                         }
 
                         var query = entityManager.createNativeQuery(sql);
-                        for (int i=0; i<params.size(); i++) query.setParameter(i+1, params.get(i));
+                        for (int i = 0; i < params.size(); i++)
+                            query.setParameter(i + 1, params.get(i));
                         List<?> rows = query.getResultList();
 
                         if (!rows.isEmpty()) {
@@ -664,19 +694,21 @@ public class DivinationServiceImpl {
                                     }
                                 }
                             }
-                            
-                            content.append("<p><strong>Thọ thai tháng ").append(thangThoThai).append(" sanh tháng ").append(thangSinh)
-                                   .append("</strong><br>").append(loiGiaiVal).append("</p>");
+
+                            content.append("<p><strong>Thọ thai tháng ").append(thangThoThai).append(" sanh tháng ")
+                                    .append(thangSinh)
+                                    .append("</strong><br>").append(loiGiaiVal).append("</p>");
                             foundContent = true;
                             return; // Dừng lại ở bảng đầu tiên có dữ liệu
                         }
-                    } catch (Exception eInner) {}
+                    } catch (Exception eInner) {
+                    }
                 }
             } catch (Exception e) {
                 System.err.println("Lỗi manual Sở 10: " + e.getMessage());
             }
         }
-        
+
         // === SỞ 11: Coi nghề nghiệp (Mạng & Tháng sanh) ===
         if (secNo == 11) {
             try {
@@ -686,22 +718,28 @@ public class DivinationServiceImpl {
                 }
                 for (String tableName : s11Tables) {
                     try {
-                        List<Object[]> colsInfo = entityManager.createNativeQuery("SHOW COLUMNS FROM `" + tableName + "`").getResultList();
+                        List<Object[]> colsInfo = entityManager
+                                .createNativeQuery("SHOW COLUMNS FROM `" + tableName + "`").getResultList();
                         java.util.List<String> colNames = new java.util.ArrayList<>();
-                        for (Object[] col : colsInfo) colNames.add(col[0].toString().toLowerCase());
+                        for (Object[] col : colsInfo)
+                            colNames.add(col[0].toString().toLowerCase());
 
                         int nhColIdx = findColIndex(colNames, "nguhanhid", "ngu_hanhid", "mang", "mang_id");
                         int tsColIdx = findColIndex(colNames, "thangsanh", "thang_sanh", "thang");
-                        int lgColIdx = findColIndex(colNames, "nhom_nghe", "nhomnghe", "loigiai", "ketqua", "noi_dung", "mota");
+                        int lgColIdx = findColIndex(colNames, "nhom_nghe", "nhomnghe", "loigiai", "ketqua", "noi_dung",
+                                "mota");
 
-                        String sql = "SELECT * FROM `" + tableName + "` WHERE `" + colNames.get(nhColIdx >= 0 ? nhColIdx : 0) + "` = ? AND `" + colNames.get(tsColIdx >= 0 ? tsColIdx : 1) + "` = ?";
+                        String sql = "SELECT * FROM `" + tableName + "` WHERE `"
+                                + colNames.get(nhColIdx >= 0 ? nhColIdx : 0) + "` = ? AND `"
+                                + colNames.get(tsColIdx >= 0 ? tsColIdx : 1) + "` = ?";
                         var query = entityManager.createNativeQuery(sql);
                         query.setParameter(1, mangId);
                         query.setParameter(2, thangSinh);
                         List<?> rows = query.getResultList();
 
                         if (!rows.isEmpty()) {
-                            content.append("<p><strong>Mạng ").append(mang).append(" sinh tháng ").append(thangSinh).append("</strong></p>");
+                            content.append("<p><strong>Mạng ").append(mang).append(" sinh tháng ").append(thangSinh)
+                                    .append("</strong></p>");
                             for (Object objRow : rows) {
                                 Object[] row = (Object[]) objRow;
                                 String loiGiaiVal = "N/A";
@@ -717,18 +755,20 @@ public class DivinationServiceImpl {
                                         }
                                     }
                                 }
-                                content.append("<div style='margin-bottom:8px;'>• ").append(loiGiaiVal).append("</div>");
+                                content.append("<div style='margin-bottom:8px;'>• ").append(loiGiaiVal)
+                                        .append("</div>");
                             }
                             foundContent = true;
                             return;
                         }
-                    } catch (Exception eInner) {}
+                    } catch (Exception eInner) {
+                    }
                 }
             } catch (Exception e) {
                 System.err.println("Lỗi manual Sở 11: " + e.getMessage());
             }
         }
-        
+
         // === SỞ 12: Coi cốt con gì (Tuổi & Tháng sanh) ===
         if (secNo == 12) {
             try {
@@ -738,16 +778,20 @@ public class DivinationServiceImpl {
                 }
                 for (String tableName : s12Tables) {
                     try {
-                        List<Object[]> colsInfo = entityManager.createNativeQuery("SHOW COLUMNS FROM `" + tableName + "`").getResultList();
+                        List<Object[]> colsInfo = entityManager
+                                .createNativeQuery("SHOW COLUMNS FROM `" + tableName + "`").getResultList();
                         java.util.List<String> colNames = new java.util.ArrayList<>();
-                        for (Object[] col : colsInfo) colNames.add(col[0].toString().toLowerCase());
+                        for (Object[] col : colsInfo)
+                            colNames.add(col[0].toString().toLowerCase());
 
                         int chiColIdx = findColIndex(colNames, "chiid", "tuoi_chiid", "chi", "chi_id");
                         int tsColIdx = findColIndex(colNames, "thangsanh", "thang_sanh", "thang");
                         int cotColIdx = findColIndex(colNames, "tencot", "ten_cot", "cot", "ketqua");
                         int lgColIdx = findColIndex(colNames, "loigiai", "loi_giai", "noi_dung", "mota");
 
-                        String sql = "SELECT * FROM `" + tableName + "` WHERE `" + colNames.get(chiColIdx >= 0 ? chiColIdx : 0) + "` = ? AND `" + colNames.get(tsColIdx >= 0 ? tsColIdx : 1) + "` = ?";
+                        String sql = "SELECT * FROM `" + tableName + "` WHERE `"
+                                + colNames.get(chiColIdx >= 0 ? chiColIdx : 0) + "` = ? AND `"
+                                + colNames.get(tsColIdx >= 0 ? tsColIdx : 1) + "` = ?";
                         var query = entityManager.createNativeQuery(sql);
                         query.setParameter(1, chiId);
                         query.setParameter(2, thangSinh);
@@ -755,16 +799,20 @@ public class DivinationServiceImpl {
 
                         if (!rows.isEmpty()) {
                             Object[] row = (Object[]) rows.get(0);
-                            String tenCot = (cotColIdx >= 0 && row[cotColIdx] != null) ? row[cotColIdx].toString() : "N/A";
-                            String loiGiaiVal = (lgColIdx >= 0 && row[lgColIdx] != null) ? row[lgColIdx].toString().replace("\n", "<br>") : "N/A";
-                            
+                            String tenCot = (cotColIdx >= 0 && row[cotColIdx] != null) ? row[cotColIdx].toString()
+                                    : "N/A";
+                            String loiGiaiVal = (lgColIdx >= 0 && row[lgColIdx] != null)
+                                    ? row[lgColIdx].toString().replace("\n", "<br>")
+                                    : "N/A";
+
                             content.append("<p><strong>Tuổi ").append(chi).append(" sinh tháng ").append(thangSinh)
-                                   .append(": ").append(tenCot).append("</strong><br>")
-                                   .append(loiGiaiVal).append("</p>");
+                                    .append(": ").append(tenCot).append("</strong><br>")
+                                    .append(loiGiaiVal).append("</p>");
                             foundContent = true;
                             return;
                         }
-                    } catch (Exception eInner) {}
+                    } catch (Exception eInner) {
+                    }
                 }
             } catch (Exception e) {
                 System.err.println("Lỗi manual Sở 12: " + e.getMessage());
@@ -775,8 +823,9 @@ public class DivinationServiceImpl {
         if (secNo == 13) {
             try {
                 // Tiêu đề phần Can
-                content.append("<p><strong>Can ").append(can).append(" Sinh Tháng ").append(thangSinh).append("</strong></p>");
-                
+                content.append("<p><strong>Can ").append(can).append(" Sinh Tháng ").append(thangSinh)
+                        .append("</strong></p>");
+
                 // 1. so13_nghenghiep
                 appendSo13TableResult(content, "so13_nghenghiep", "CanID", canId, thangSinh);
                 // 2. so13_can_sanghen
@@ -789,13 +838,14 @@ public class DivinationServiceImpl {
                 content.append("<br>");
 
                 // Tiêu đề phần Chi
-                content.append("<p><strong>Chi ").append(chi).append(" Sinh Tháng ").append(thangSinh).append("</strong></p>");
-                
+                content.append("<p><strong>Chi ").append(chi).append(" Sinh Tháng ").append(thangSinh)
+                        .append("</strong></p>");
+
                 // 5. so13_chi_sat
                 appendSo13TableResult(content, "so13_chi_sat", "ChiID", chiId, thangSinh);
                 // 6. so13_chi_thu
                 appendSo13TableResult(content, "so13_chi_thu", "ChiID", chiId, thangSinh);
-                
+
                 foundContent = true;
                 return;
             } catch (Exception e) {
@@ -810,7 +860,7 @@ public class DivinationServiceImpl {
                 String sql = "SELECT KetQua, LoiGiai FROM so14_nuoithuvat WHERE ChiID = ? AND ThangSanh = ? LIMIT 1";
                 List<?> results = entityManager.createNativeQuery(sql)
                         .setParameter(1, chiId).setParameter(2, thangSinh).getResultList();
-                
+
                 if (!results.isEmpty()) {
                     Object[] row = (Object[]) results.get(0);
                     String ketQua = row[0] != null ? row[0].toString() : "";
@@ -818,7 +868,7 @@ public class DivinationServiceImpl {
 
                     // Chỉ in ra KetQua + LoiGiai theo yêu cầu
                     content.append("<p><strong>").append(ketQua).append("</strong> ")
-                           .append(loiGiai.replace("\n", "<br>")).append("</p>");
+                            .append(loiGiai.replace("\n", "<br>")).append("</p>");
                     foundContent = true;
                     return;
                 }
@@ -834,14 +884,14 @@ public class DivinationServiceImpl {
                 String sql = "SELECT KetQua, LoiGiai FROM so15_ruongdat WHERE NguHanhID = ? AND ThangSanh = ? LIMIT 1";
                 List<?> results = entityManager.createNativeQuery(sql)
                         .setParameter(1, mangId).setParameter(2, thangSinh).getResultList();
-                
+
                 if (!results.isEmpty()) {
                     Object[] row = (Object[]) results.get(0);
                     String ketQua = row[0] != null ? row[0].toString() : "";
                     String loiGiai = row[1] != null ? row[1].toString() : "";
 
                     content.append("<p><strong>").append(ketQua).append("</strong> ")
-                           .append(loiGiai.replace("\n", "<br>")).append("</p>");
+                            .append(loiGiai.replace("\n", "<br>")).append("</p>");
                     foundContent = true;
                     return;
                 }
@@ -857,14 +907,14 @@ public class DivinationServiceImpl {
                 String sql = "SELECT TenTruc, LoiGiai FROM so16_hocgioido WHERE ChiID = ? AND ThangSanh = ? LIMIT 1";
                 List<?> results = entityManager.createNativeQuery(sql)
                         .setParameter(1, chiId).setParameter(2, thangSinh).getResultList();
-                
+
                 if (!results.isEmpty()) {
                     Object[] row = (Object[]) results.get(0);
                     String tenTruc = row[0] != null ? row[0].toString() : "";
                     String loiGiai = row[1] != null ? row[1].toString() : "";
 
                     content.append("<p><strong>").append(tenTruc).append("</strong> ")
-                           .append(loiGiai.replace("\n", "<br>")).append("</p>");
+                            .append(loiGiai.replace("\n", "<br>")).append("</p>");
                     foundContent = true;
                     return;
                 }
@@ -878,54 +928,62 @@ public class DivinationServiceImpl {
             try {
                 // Tiêu đề Kỳ nhất
                 content.append("<p><strong>Thi cử kỳ nhất</strong></p>");
-                
+
                 // Query Kỳ nhất (dùng SELECT * và tìm cột động để tránh sai sót)
-                List<?> res1 = entityManager.createNativeQuery("SELECT * FROM so17_thicu_kynhat WHERE ChiID = ? AND ThangSanh = ?")
+                List<?> res1 = entityManager
+                        .createNativeQuery("SELECT * FROM so17_thicu_kynhat WHERE ChiID = ? AND ThangSanh = ?")
                         .setParameter(1, chiId).setParameter(2, thangSinh).getResultList();
-                
+
                 if (res1.isEmpty()) {
                     content.append("<p>Số này không có luận giải cho kỳ thi này.</p>");
                 } else {
                     List<String> cols1 = getTableColumnNames("so17_thicu_kynhat");
                     int tenIdx = -1, lgIdx = -1;
-                    for(int i=0; i<cols1.size(); i++){
+                    for (int i = 0; i < cols1.size(); i++) {
                         String c = cols1.get(i).toLowerCase();
-                        if(c.contains("ten") || c.contains("tu")) tenIdx = i;
-                        if(c.contains("loigiai")) lgIdx = i;
+                        if (c.contains("ten") || c.contains("tu"))
+                            tenIdx = i;
+                        if (c.contains("loigiai"))
+                            lgIdx = i;
                     }
                     for (Object obj : res1) {
                         Object[] row = (Object[]) obj;
                         String ten = (tenIdx >= 0 && row[tenIdx] != null) ? row[tenIdx].toString() : "";
                         String lg = (lgIdx >= 0 && row[lgIdx] != null) ? row[lgIdx].toString() : "";
-                        content.append("<p><b>").append(ten).append("</b> ").append(lg.replace("\n", "<br>")).append("</p>");
+                        content.append("<p><b>").append(ten).append("</b> ").append(lg.replace("\n", "<br>"))
+                                .append("</p>");
                     }
                 }
 
                 // Tiêu đề Kỳ nhì
                 content.append("<p><strong>Thi cử kỳ nhì</strong></p>");
-                
+
                 // Query Kỳ nhì
-                List<?> res2 = entityManager.createNativeQuery("SELECT * FROM so17_thicu_kynhi WHERE ChiID = ? AND ThangSanh = ?")
+                List<?> res2 = entityManager
+                        .createNativeQuery("SELECT * FROM so17_thicu_kynhi WHERE ChiID = ? AND ThangSanh = ?")
                         .setParameter(1, chiId).setParameter(2, thangSinh).getResultList();
-                
+
                 if (res2.isEmpty()) {
                     content.append("<p>Số này không có luận giải cho kỳ thi này.</p>");
                 } else {
                     List<String> cols2 = getTableColumnNames("so17_thicu_kynhi");
                     int tenIdx2 = -1, lgIdx2 = -1;
-                    for(int i=0; i<cols2.size(); i++){
+                    for (int i = 0; i < cols2.size(); i++) {
                         String c = cols2.get(i).toLowerCase();
-                        if(c.contains("ten") || c.contains("ketqua")) tenIdx2 = i;
-                        if(c.contains("loigiai")) lgIdx2 = i;
+                        if (c.contains("ten") || c.contains("ketqua"))
+                            tenIdx2 = i;
+                        if (c.contains("loigiai"))
+                            lgIdx2 = i;
                     }
                     for (Object obj : res2) {
                         Object[] row = (Object[]) obj;
                         String ten = (tenIdx2 >= 0 && row[tenIdx2] != null) ? row[tenIdx2].toString() : "";
                         String lg = (lgIdx2 >= 0 && row[lgIdx2] != null) ? row[lgIdx2].toString() : "";
-                        content.append("<p><b>").append(ten).append("</b> ").append(lg.replace("\n", "<br>")).append("</p>");
+                        content.append("<p><b>").append(ten).append("</b> ").append(lg.replace("\n", "<br>"))
+                                .append("</p>");
                     }
                 }
-                
+
                 foundContent = true;
                 return;
             } catch (Exception e) {
@@ -1005,25 +1063,28 @@ public class DivinationServiceImpl {
                 content.append("<p><em>(Số này chưa tính được Vòng Trường Sinh - Không thể tra Sở 22)</em></p>");
             } else {
                 try {
-                    List<?> results = entityManager.createNativeQuery("SELECT * FROM so22_nuoicon WHERE TruongSanhID = ?")
+                    List<?> results = entityManager
+                            .createNativeQuery("SELECT * FROM so22_nuoicon WHERE TruongSanhID = ?")
                             .setParameter(1, truongSanhId).getResultList();
-                    
+
                     if (!results.isEmpty()) {
                         List<String> colNames = getTableColumnNames("so22_nuoicon");
                         int tenIdx = -1, lgIdx = -1;
                         for (int i = 0; i < colNames.size(); i++) {
                             String lower = colNames.get(i).toLowerCase();
-                            if (lower.contains("ten") || lower.contains("sao")) tenIdx = i;
-                            if (lower.contains("loigiai")) lgIdx = i;
+                            if (lower.contains("ten") || lower.contains("sao"))
+                                tenIdx = i;
+                            if (lower.contains("loigiai"))
+                                lgIdx = i;
                         }
 
                         for (Object obj : results) {
                             Object[] row = (Object[]) obj;
                             String ten = (tenIdx >= 0 && row[tenIdx] != null) ? row[tenIdx].toString() : "";
                             String lg = (lgIdx >= 0 && row[lgIdx] != null) ? row[lgIdx].toString() : "";
-                            
+
                             content.append("<p><strong>").append(ten).append("</strong><br>")
-                                   .append(lg.replace("\n", "<br>")).append("</p>");
+                                    .append(lg.replace("\n", "<br>")).append("</p>");
                             foundContent = true;
                         }
                     }
@@ -1031,7 +1092,8 @@ public class DivinationServiceImpl {
                     System.err.println("Lỗi manual Sở 22: " + e.getMessage());
                 }
             }
-            if (foundContent) return;
+            if (foundContent)
+                return;
         }
 
         // === SỞ 23: Anh em (cần TruongSanhID từ Sở 21) ===
@@ -1042,34 +1104,42 @@ public class DivinationServiceImpl {
                 try {
                     List<?> results = entityManager.createNativeQuery("SELECT * FROM so23_anhem WHERE TruongSanhID = ?")
                             .setParameter(1, truongSanhId).getResultList();
-                    
+
                     if (!results.isEmpty()) {
                         List<String> colNames = getTableColumnNames("so23_anhem");
                         int tenIdx = -1, thoIdx = -1;
                         for (int i = 0; i < colNames.size(); i++) {
                             String lower = colNames.get(i).toLowerCase();
-                            if (lower.contains("ten") || lower.contains("sao")) tenIdx = i;
-                            if (lower.contains("baitho")) thoIdx = i;
+                            if (lower.contains("ten") || lower.contains("sao"))
+                                tenIdx = i;
+                            if (lower.contains("baitho"))
+                                thoIdx = i;
                         }
 
                         for (Object obj : results) {
                             Object[] row = (Object[]) obj;
                             String ten = (tenIdx >= 0 && row[tenIdx] != null) ? row[tenIdx].toString() : "";
                             String tho = (thoIdx >= 0 && row[thoIdx] != null) ? row[thoIdx].toString() : "";
-                            
+
                             content.append("<div style='margin-bottom:20px; text-align: left;'>");
-                            content.append("<p style='text-align: center;'><strong>").append(ten).append(":</strong></p>");
-                            
+                            content.append("<p style='text-align: center;'><strong>").append(ten)
+                                    .append(":</strong></p>");
+
                             String[] lines = tho.split("\n");
                             for (int k = 0; k < lines.length; k++) {
                                 String lineText = lines[k].trim();
-                                if (lineText.isEmpty()) continue;
+                                if (lineText.isEmpty())
+                                    continue;
                                 if (k % 2 != 0) {
                                     // Dòng 8: Không thụt lề, căn giữa
-                                    content.append("<div style='padding: 0 0px; margin-bottom: 5px; text-align: center;'>").append(lineText).append("</div>");
+                                    content.append(
+                                            "<div style='padding: 0 0px; margin-bottom: 5px; text-align: center;'>")
+                                            .append(lineText).append("</div>");
                                 } else {
                                     // Dòng 6: Thụt lề 20px hai bên, căn giữa
-                                    content.append("<div style='padding: 0 20px; margin-bottom: 5px; text-align: center;'>").append(lineText).append("</div>");
+                                    content.append(
+                                            "<div style='padding: 0 20px; margin-bottom: 5px; text-align: center;'>")
+                                            .append(lineText).append("</div>");
                                 }
                             }
                             content.append("</div>");
@@ -1080,7 +1150,8 @@ public class DivinationServiceImpl {
                     System.err.println("Lỗi manual Sở 23: " + e.getMessage());
                 }
             }
-            if (foundContent) return;
+            if (foundContent)
+                return;
         }
 
         // === SỞ 30: Lời khuyên & Ngày cầu Tiên Bà ===
@@ -1107,12 +1178,13 @@ public class DivinationServiceImpl {
             } catch (Exception e) {
                 System.err.println("Lỗi manual Sở 30: " + e.getMessage());
             }
-            if (foundContent) return;
+            if (foundContent)
+                return;
         }
 
         // === SỞ 34-37: Mega section (Triết lý, Nhân quả, Ngũ tạng, Lời kết) ===
         if (secNo == 34 || secNo == 35 || secNo == 36 || secNo == 37) {
-            // Because these are combined into section 34, we must "consume" 35, 36, 37 
+            // Because these are combined into section 34, we must "consume" 35, 36, 37
             // by appending a hidden marker so the generic logic doesn't run.
             if (secNo != 34) {
                 content.append("<!-- Handled in Sở 34 -->");
@@ -1121,83 +1193,103 @@ public class DivinationServiceImpl {
 
             try {
                 // 1. Sở 34: Triết lý & Ngũ phương
-                content.append("<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px;'>TRIẾT LÝ & NGŨ PHƯƠNG</h3>");
-                List<Object[]> trietly = entityManager.createNativeQuery("SELECT TieuDe, NoiDung FROM so34_trietly").getResultList();
+                content.append(
+                        "<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px;'>TRIẾT LÝ & NGŨ PHƯƠNG</h3>");
+                List<Object[]> trietly = entityManager.createNativeQuery("SELECT TieuDe, NoiDung FROM so34_trietly")
+                        .getResultList();
                 for (Object[] row : trietly) {
                     content.append("<p><strong>").append(row[0]).append("</strong><br>")
-                           .append(row[1].toString().replace("\n", "<br>")).append("</p>");
+                            .append(row[1].toString().replace("\n", "<br>")).append("</p>");
                 }
 
                 // Ngũ phương content
-                List<Object[]> nguphuong = entityManager.createNativeQuery("SELECT TenDe, NguHanh, MauSac FROM so34_nguphuong").getResultList();
+                List<Object[]> nguphuong = entityManager
+                        .createNativeQuery("SELECT TenDe, NguHanh, MauSac FROM so34_nguphuong").getResultList();
                 for (Object[] row : nguphuong) {
                     content.append("<p>• <strong>").append(row[0]).append("</strong>: ")
-                           .append(row[1]).append(" (").append(row[2]).append(")</p>");
+                            .append(row[1]).append(" (").append(row[2]).append(")</p>");
                 }
 
                 // 2. Sở 35: Nhân quả
-                content.append("<div class='view-all-header' style='display: none; color: #8c1010; font-size: 1.3em; font-weight: bold; margin-top: 40px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; text-align: center; font-family: serif; text-transform: uppercase;'>SỞ SỐ 35</div>");
-                content.append("<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px; margin-top: 30px;'>NHÂN QUẢ</h3>");
-                List<Object[]> nhanqua = entityManager.createNativeQuery("SELECT BoPhan, HanhVi_Nhan, KetQua_Qua FROM so35_nhan_qua").getResultList();
+                content.append(
+                        "<div class='view-all-header' style='display: none; color: #8c1010; font-size: 1.3em; font-weight: bold; margin-top: 40px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; text-align: center; font-family: serif; text-transform: uppercase;'>SỞ SỐ 35</div>");
+                content.append(
+                        "<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px; margin-top: 30px;'>NHÂN QUẢ</h3>");
+                List<Object[]> nhanqua = entityManager
+                        .createNativeQuery("SELECT BoPhan, HanhVi_Nhan, KetQua_Qua FROM so35_nhan_qua").getResultList();
                 for (Object[] row : nhanqua) {
                     content.append("<p>• <strong>").append(row[0]).append("</strong>: ")
-                           .append(row[1]).append(" &rarr; <em>").append(row[2]).append("</em></p>");
+                            .append(row[1]).append(" &rarr; <em>").append(row[2]).append("</em></p>");
                 }
 
                 // 3. Sở 36: Ngũ tạng
-                content.append("<div class='view-all-header' style='display: none; color: #8c1010; font-size: 1.3em; font-weight: bold; margin-top: 40px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; text-align: center; font-family: serif; text-transform: uppercase;'>SỞ SỐ 36</div>");
-                content.append("<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px; margin-top: 30px;'>NGŨ TẠNG</h3>");
-                List<Object[]> ngutang = entityManager.createNativeQuery("SELECT TangPhu, NguHanh, MoTa FROM so36_ngu_tang").getResultList();
+                content.append(
+                        "<div class='view-all-header' style='display: none; color: #8c1010; font-size: 1.3em; font-weight: bold; margin-top: 40px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; text-align: center; font-family: serif; text-transform: uppercase;'>SỞ SỐ 36</div>");
+                content.append(
+                        "<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px; margin-top: 30px;'>NGŨ TẠNG</h3>");
+                List<Object[]> ngutang = entityManager
+                        .createNativeQuery("SELECT TangPhu, NguHanh, MoTa FROM so36_ngu_tang").getResultList();
                 for (Object[] row : ngutang) {
                     content.append("<p><strong>").append(row[0]).append("</strong> (").append(row[1]).append(")<br>")
-                           .append(row[2]).append("</p>");
+                            .append(row[2]).append("</p>");
                 }
 
                 // 4. Sở 37: Lời kết
-                content.append("<div class='view-all-header' style='display: none; color: #8c1010; font-size: 1.3em; font-weight: bold; margin-top: 40px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; text-align: center; font-family: serif; text-transform: uppercase;'>SỞ SỐ 37</div>");
-                content.append("<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px; margin-top: 30px;'>LỜI KẾT</h3>");
-                List<Object[]> loiket = entityManager.createNativeQuery("SELECT TieuDe, NoiDung FROM so37_loi_ket").getResultList();
+                content.append(
+                        "<div class='view-all-header' style='display: none; color: #8c1010; font-size: 1.3em; font-weight: bold; margin-top: 40px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; text-align: center; font-family: serif; text-transform: uppercase;'>SỞ SỐ 37</div>");
+                content.append(
+                        "<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px; margin-top: 30px;'>LỜI KẾT</h3>");
+                List<Object[]> loiket = entityManager.createNativeQuery("SELECT TieuDe, NoiDung FROM so37_loi_ket")
+                        .getResultList();
                 for (Object[] row : loiket) {
                     content.append("<p><strong>").append(row[0]).append("</strong><br>")
-                           .append(row[1].toString().replace("\n", "<br>")).append("</p>");
+                            .append(row[1].toString().replace("\n", "<br>")).append("</p>");
                 }
 
                 foundContent = true;
             } catch (Exception e) {
                 System.err.println("Lỗi manual Sở 34 mega: " + e.getMessage());
             }
-            if (foundContent) return;
+            if (foundContent)
+                return;
         }
         if (secNo == 24) {
             try {
                 String sql1 = "SELECT ViTri FROM so24_huynhde_mapping WHERE mua = ? AND ChiID = ?";
                 List<?> vitriList = entityManager.createNativeQuery(sql1)
                         .setParameter(1, mua).setParameter(2, chiId).getResultList();
-                
+
                 if (!vitriList.isEmpty()) {
                     String vitri = vitriList.get(0).toString();
                     content.append("<p style='text-align: center; margin-bottom: 15px;'>")
-                           .append("<span style='color: #1a5fb4; font-weight: bold; font-size: 1.1em;'>Mùa ").append(mua).append(" tuổi ").append(chi).append("</span><br>")
-                           .append("<span style='color: #b8860b; font-weight: bold; font-size: 1.1em;'>Ở tại ").append(vitri).append("</span>")
-                           .append("</p>");
+                            .append("<span style='color: #1a5fb4; font-weight: bold; font-size: 1.1em;'>Mùa ")
+                            .append(mua).append(" tuổi ").append(chi).append("</span><br>")
+                            .append("<span style='color: #b8860b; font-weight: bold; font-size: 1.1em;'>Ở tại ")
+                            .append(vitri).append("</span>")
+                            .append("</p>");
 
                     String sql2 = "SELECT BaiTho FROM so24_huynhde_loigiai WHERE ViTri = ?";
                     List<?> thoList = entityManager.createNativeQuery(sql2)
                             .setParameter(1, vitri).getResultList();
-                    
+
                     for (Object obj : thoList) {
                         if (obj != null) {
                             String tho = obj.toString();
                             String[] lines = tho.split("\n");
                             for (int k = 0; k < lines.length; k++) {
                                 String lineText = lines[k].trim();
-                                if (lineText.isEmpty()) continue;
+                                if (lineText.isEmpty())
+                                    continue;
                                 if (k % 2 != 0) {
                                     // Dòng 8
-                                    content.append("<div style='padding: 0 0px; margin-bottom: 5px; text-align: center;'>").append(lineText).append("</div>");
+                                    content.append(
+                                            "<div style='padding: 0 0px; margin-bottom: 5px; text-align: center;'>")
+                                            .append(lineText).append("</div>");
                                 } else {
                                     // Dòng 6
-                                    content.append("<div style='padding: 0 20px; margin-bottom: 5px; text-align: center;'>").append(lineText).append("</div>");
+                                    content.append(
+                                            "<div style='padding: 0 20px; margin-bottom: 5px; text-align: center;'>")
+                                            .append(lineText).append("</div>");
                                 }
                             }
                         }
@@ -1207,45 +1299,55 @@ public class DivinationServiceImpl {
             } catch (Exception e) {
                 System.err.println("Lỗi manual Sở 24: " + e.getMessage());
             }
-            if (foundContent) return;
+            if (foundContent)
+                return;
         }
 
         // === SỞ 27: Tuổi hạp, kỵ (Tổng quan, Tháng, Ngày) ===
         if (secNo == 27) {
             try {
                 String genderVn = getGenderVn(request.getGender());
-                
+
                 // 1. so27_tongquan
-                List<?> res1 = entityManager.createNativeQuery("SELECT Tuoi_CanID, Tuoi_ChiID, Mang, Luan, Tho FROM so27_tongquan WHERE Tuoi_CanID = ? AND Tuoi_ChiID = ? AND GioiTinh = ?")
+                List<?> res1 = entityManager.createNativeQuery(
+                        "SELECT Tuoi_CanID, Tuoi_ChiID, Mang, Luan, Tho FROM so27_tongquan WHERE Tuoi_CanID = ? AND Tuoi_ChiID = ? AND GioiTinh = ?")
                         .setParameter(1, canId).setParameter(2, chiId).setParameter(3, genderVn).getResultList();
-                
+
                 for (Object obj : res1) {
                     Object[] row = (Object[]) obj;
-                    String cName = getCanName((int)row[0]);
-                    String chName = getChiName((int)row[1]);
+                    String cName = getCanName((int) row[0]);
+                    String chName = getChiName((int) row[1]);
                     String mVal = row[2] != null ? row[2].toString() : "";
                     String lVal = row[3] != null ? row[3].toString() : "";
                     String tVal = row[4] != null ? row[4].toString() : "";
 
                     content.append("<p style='line-height:1.6;'>")
-                           .append("<span style='color:#d32f2f; font-weight:bold;'>Tuổi: </span>").append(cName).append(" ").append(chName).append("<br>")
-                           .append("<span style='color:#1a5fb4; font-weight:bold;'>Mạng: </span>").append(mVal).append("<br>")
-                           .append("<span style='color:#7b1fa2; font-weight:bold;'>Luận: </span>").append(lVal).append("<br>")
-                           .append("<span style='color:#2e7d32; font-weight:bold;'>Thơ: </span>")
-                           .append("</p>");
-                    
+                            .append("<span style='color:#d32f2f; font-weight:bold;'>Tuổi: </span>").append(cName)
+                            .append(" ").append(chName).append("<br>")
+                            .append("<span style='color:#1a5fb4; font-weight:bold;'>Mạng: </span>").append(mVal)
+                            .append("<br>")
+                            .append("<span style='color:#7b1fa2; font-weight:bold;'>Luận: </span>").append(lVal)
+                            .append("<br>")
+                            .append("<span style='color:#2e7d32; font-weight:bold;'>Thơ: </span>")
+                            .append("</p>");
+
                     if (!tVal.isEmpty()) {
                         String[] lines = tVal.split("\n");
                         content.append("<div style='margin-bottom: 20px;'>");
                         for (int k = 0; k < lines.length; k++) {
                             String lt = lines[k].trim();
-                            if (lt.isEmpty()) continue;
+                            if (lt.isEmpty())
+                                continue;
                             if (k % 2 != 0) {
                                 // Dòng 8: padding 0
-                                content.append("<div style='padding: 0 0px; margin-bottom: 5px; text-align: center; font-style: italic;'>").append(lt).append("</div>");
+                                content.append(
+                                        "<div style='padding: 0 0px; margin-bottom: 5px; text-align: center; font-style: italic;'>")
+                                        .append(lt).append("</div>");
                             } else {
                                 // Dòng 6: padding 20px
-                                content.append("<div style='padding: 0 20px; margin-bottom: 5px; text-align: center; font-style: italic;'>").append(lt).append("</div>");
+                                content.append(
+                                        "<div style='padding: 0 20px; margin-bottom: 5px; text-align: center; font-style: italic;'>")
+                                        .append(lt).append("</div>");
                             }
                         }
                         content.append("</div>");
@@ -1254,15 +1356,21 @@ public class DivinationServiceImpl {
                 }
 
                 // 2. so27_thangkyhap
-                List<?> res2 = entityManager.createNativeQuery("SELECT TuoiApDung, DieuHap, DieuKy FROM so27_thangkyhap WHERE Tuoi_CanID = ? AND Tuoi_ChiID = ? AND GioiTinh = ? AND ThangSanh = ?")
-                        .setParameter(1, canId).setParameter(2, chiId).setParameter(3, genderVn).setParameter(4, thangSinh).getResultList();
+                List<?> res2 = entityManager.createNativeQuery(
+                        "SELECT TuoiApDung, DieuHap, DieuKy FROM so27_thangkyhap WHERE Tuoi_CanID = ? AND Tuoi_ChiID = ? AND GioiTinh = ? AND ThangSanh = ?")
+                        .setParameter(1, canId).setParameter(2, chiId).setParameter(3, genderVn)
+                        .setParameter(4, thangSinh).getResultList();
                 for (Object obj : res2) {
                     Object[] row = (Object[]) obj;
-                    content.append("<div style='margin-top:15px; background: rgba(26, 95, 180, 0.05); padding: 10px; border-radius: 8px;'>")
-                           .append("<p style='margin:0;'>")
-                           .append("<strong>Tuổi áp dụng: </strong>").append(row[0] != null ? row[0].toString() : "").append("<br>")
-                           .append("<strong>Điều Hạp: </strong>").append(row[1] != null ? row[1].toString() : "").append("<br>")
-                           .append("<strong>Điều Kỵ: </strong>").append(row[2] != null ? row[2].toString() : "").append("</p></div>");
+                    content.append(
+                            "<div style='margin-top:15px; background: rgba(26, 95, 180, 0.05); padding: 10px; border-radius: 8px;'>")
+                            .append("<p style='margin:0;'>")
+                            .append("<strong>Tuổi áp dụng: </strong>").append(row[0] != null ? row[0].toString() : "")
+                            .append("<br>")
+                            .append("<strong>Điều Hạp: </strong>").append(row[1] != null ? row[1].toString() : "")
+                            .append("<br>")
+                            .append("<strong>Điều Kỵ: </strong>").append(row[2] != null ? row[2].toString() : "")
+                            .append("</p></div>");
                     foundContent = true;
                 }
 
@@ -1275,11 +1383,13 @@ public class DivinationServiceImpl {
                         String canName = getCanName(canId);
                         String chiName = getChiName(chiId);
                         content.append("<h6 style='color:#d32f2f; margin-top:20px; margin-bottom:8px; font-size:1em;'>")
-                               .append("Ngày kỵ hạp của tuổi ").append(canName).append(" ").append(chiName)
-                               .append("</h6>");
+                                .append("Ngày kỵ hạp của tuổi ").append(canName).append(" ").append(chiName)
+                                .append("</h6>");
                         for (Object obj : res3) {
-                            content.append("<div style='margin-top:10px; border-left: 4px solid #d32f2f; padding-left: 10px;'>")
-                                   .append("<p style='margin:0;'>").append(obj.toString().replace("\n", "<br>")).append("</p></div>");
+                            content.append(
+                                    "<div style='margin-top:10px; border-left: 4px solid #d32f2f; padding-left: 10px;'>")
+                                    .append("<p style='margin:0;'>").append(obj.toString().replace("\n", "<br>"))
+                                    .append("</p></div>");
                             foundContent = true;
                         }
                     }
@@ -1290,9 +1400,9 @@ public class DivinationServiceImpl {
             } catch (Exception e) {
                 System.err.println("Lỗi manual Sở 27: " + e.getMessage());
             }
-            if (foundContent) return;
+            if (foundContent)
+                return;
         }
-
 
         // === SỞ 32: Coi khi chết ===
         if (secNo == 32) {
@@ -1301,15 +1411,15 @@ public class DivinationServiceImpl {
                 String sql1 = "SELECT loi_giai FROM so32_coi_khi_chet WHERE Mang = ? AND ThangSanh = ?";
                 List<?> res1 = entityManager.createNativeQuery(sql1)
                         .setParameter(1, mangId).setParameter(2, thangSinh).getResultList();
-                
+
                 if (!res1.isEmpty()) {
                     String lg = res1.get(0).toString();
                     content.append("<p><strong>Mạng ").append(mapNguHanhToVietnamese(mang))
-                           .append(" sinh tháng&nbsp;&nbsp;&nbsp;&nbsp;").append(thangSinh).append("</strong></p>");
+                            .append(" sinh tháng&nbsp;&nbsp;&nbsp;&nbsp;").append(thangSinh).append("</strong></p>");
                     content.append("<p>").append(lg.replace("\n", "<br>")).append("</p>");
                     foundContent = true;
                 }
-                
+
                 // so32_co_hom_khong
                 try {
                     String mangStr32 = "Mạng " + mapNguHanhToVietnamese(mang);
@@ -1325,11 +1435,12 @@ public class DivinationServiceImpl {
                 } catch (Exception e2) {
                     System.err.println("Lỗi manual Sở 32 (hòm không): " + e2.getMessage());
                 }
-                
+
             } catch (Exception e) {
                 System.err.println("Lỗi manual Sở 32: " + e.getMessage());
             }
-            if (foundContent) return;
+            if (foundContent)
+                return;
         }
 
         // === SỞ 31: Định số sống lâu ===
@@ -1338,30 +1449,34 @@ public class DivinationServiceImpl {
                 String sql = "SELECT TieuSo, DaiSo, LoiNhac FROM so31_dinh_so_song_lau WHERE MangID = ? AND ThangSanh = ?";
                 List<?> res = entityManager.createNativeQuery(sql)
                         .setParameter(1, mangId).setParameter(2, thangSinh).getResultList();
-                
+
                 if (!res.isEmpty()) {
                     Object[] row = (Object[]) res.get(0);
-                    int tieuSo = (int)row[0];
-                    int daiSo = (int)row[1];
+                    int tieuSo = (int) row[0];
+                    int daiSo = (int) row[1];
                     String loiNhac = row[2] != null ? row[2].toString() : "";
 
-                    content.append("<p><strong>• Mạng ").append(mapNguHanhToVietnamese(mang)).append(" sinh tháng ").append(thangSinh).append("</strong><br>");
+                    content.append("<p><strong>• Mạng ").append(mapNguHanhToVietnamese(mang)).append(" sinh tháng ")
+                            .append(thangSinh).append("</strong><br>");
                     content.append("Tiểu số: ").append(tieuSo).append("<br>");
                     content.append("Đại số: ").append(daiSo).append("</p>");
-                    content.append("<p><strong>• Lời Nhắc</strong><br>").append(loiNhac.replace("\n", "<br>")).append("</p>");
-                    
+                    content.append("<p><strong>• Lời Nhắc</strong><br>").append(loiNhac.replace("\n", "<br>"))
+                            .append("</p>");
+
                     foundContent = true;
                 }
             } catch (Exception e) {
                 System.err.println("Lỗi manual Sở 31: " + e.getMessage());
             }
-            if (foundContent) return;
+            if (foundContent)
+                return;
         }
 
         // ===================== GENERIC DYNAMIC QUERY LOGIC =====================
         for (String table : tables) {
             try {
-                List<Object[]> cols = entityManager.createNativeQuery("SHOW COLUMNS FROM `" + table + "`").getResultList();
+                List<Object[]> cols = entityManager.createNativeQuery("SHOW COLUMNS FROM `" + table + "`")
+                        .getResultList();
                 List<String> colNames = new java.util.ArrayList<>();
                 List<String> colNamesOriginal = new java.util.ArrayList<>();
                 for (Object[] colObj : cols) {
@@ -1400,7 +1515,8 @@ public class DivinationServiceImpl {
                     params.add(mapNguHanhToVietnamese(mang));
                 }
 
-                String thangCol = findColumn(colNames, "thangsanh", "thang_sanh", "sanh_thang", "thang_sinh", "thang_ky", "thang");
+                String thangCol = findColumn(colNames, "thangsanh", "thang_sanh", "sanh_thang", "thang_sinh",
+                        "thang_ky", "thang");
                 if (thangCol != null) {
                     conditions.add("`" + getOriginalCol(colNamesOriginal, colNames, thangCol) + "` = ?");
                     params.add(thangSinh);
@@ -1450,7 +1566,10 @@ public class DivinationServiceImpl {
                 if (tuoiCol != null) {
                     int cYear = java.time.Year.now().getValue();
                     int bYear = 1999;
-                    try { bYear = Integer.parseInt(request.getBirthYear()); } catch (Exception e) {}
+                    try {
+                        bYear = Integer.parseInt(request.getBirthYear());
+                    } catch (Exception e) {
+                    }
                     int tuoiAmLich = cYear - bYear + 1;
                     conditions.add("`" + getOriginalCol(colNamesOriginal, colNames, tuoiCol) + "` = ?");
                     params.add(tuoiAmLich);
@@ -1468,7 +1587,9 @@ public class DivinationServiceImpl {
 
                 if (conditions.isEmpty()) {
                     String tl = table.toLowerCase();
-                    if (!(tl.contains("tongquan") || tl.contains("loikhuyen") || tl.contains("trietly") || tl.contains("loi_ket") || tl.contains("nghile") || tl.contains("nhan_qua") || tl.contains("ngu_tang") || tl.contains("nguphuong"))) {
+                    if (!(tl.contains("tongquan") || tl.contains("loikhuyen") || tl.contains("trietly")
+                            || tl.contains("loi_ket") || tl.contains("nghile") || tl.contains("nhan_qua")
+                            || tl.contains("ngu_tang") || tl.contains("nguphuong"))) {
                         continue;
                     }
                 }
@@ -1476,23 +1597,27 @@ public class DivinationServiceImpl {
                 String whereClause = conditions.isEmpty() ? "1=1" : String.join(" AND ", conditions);
                 List<String> outputCols = new java.util.ArrayList<>();
                 for (int ci = 0; ci < colNames.size(); ci++) {
-                    if (isOutputColumn(colNames.get(ci))) outputCols.add(colNamesOriginal.get(ci));
+                    if (isOutputColumn(colNames.get(ci)))
+                        outputCols.add(colNamesOriginal.get(ci));
                 }
-                if (outputCols.isEmpty()) outputCols.add(colNamesOriginal.get(colNamesOriginal.size() - 1));
+                if (outputCols.isEmpty())
+                    outputCols.add(colNamesOriginal.get(colNamesOriginal.size() - 1));
 
                 String selectFields = "`" + String.join("`, `", outputCols) + "`";
                 String sql = "SELECT " + selectFields + " FROM `" + table + "` WHERE " + whereClause + " LIMIT 20";
 
                 try {
                     var query = entityManager.createNativeQuery(sql);
-                    for (int pi = 0; pi < params.size(); pi++) query.setParameter(pi + 1, params.get(pi));
+                    for (int pi = 0; pi < params.size(); pi++)
+                        query.setParameter(pi + 1, params.get(pi));
                     List<?> rawResults = query.getResultList();
 
                     if (!rawResults.isEmpty()) {
                         foundContent = true;
                         if (tables.size() > 1) {
                             String cleanName = table.substring(table.indexOf('_') + 1).replace("_", " ");
-                            content.append("<h6 style='color:#b8860b; margin-top:10px;'>▶ ").append(cleanName.toUpperCase()).append("</h6>");
+                            content.append("<h6 style='color:#b8860b; margin-top:10px;'>▶ ")
+                                    .append(cleanName.toUpperCase()).append("</h6>");
                         }
                         for (Object rawRow : rawResults) {
                             Object[] row = (rawRow instanceof Object[]) ? (Object[]) rawRow : new Object[] { rawRow };
@@ -1502,7 +1627,8 @@ public class DivinationServiceImpl {
                                     String val = row[ri].toString().replace("\n", "<br>");
                                     if (row.length > 1 && val.length() < 50 && ri < row.length - 1) {
                                         // Bỏ dấu ":" cho các Sở người dùng yêu cầu (14, 15, 16, 25, 26, 28, 29...)
-                                        if (secNo == 14 || secNo == 15 || secNo == 16 || secNo == 25 || secNo == 26 || secNo == 28 || secNo == 29) {
+                                        if (secNo == 14 || secNo == 15 || secNo == 16 || secNo == 25 || secNo == 26
+                                                || secNo == 28 || secNo == 29) {
                                             rowVal.append("<strong>").append(val).append("</strong><br>");
                                         } else {
                                             rowVal.append("<strong>").append(val).append(":</strong> ");
@@ -1513,7 +1639,8 @@ public class DivinationServiceImpl {
                                 }
                             }
                             if (rowVal.length() > 0) {
-                                content.append("<p style='margin-bottom:8px;'>").append(rowVal.toString()).append("</p>");
+                                content.append("<p style='margin-bottom:8px;'>").append(rowVal.toString())
+                                        .append("</p>");
                             }
                         }
                     }
@@ -1639,8 +1766,10 @@ public class DivinationServiceImpl {
 
             // Tìm giờ bắt đầu của khung 2 tiếng (23, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21)
             int hStart = (h % 2 == 0) ? h - 1 : h;
-            if (h == 0) hStart = 23; 
-            else if (hStart < 0) hStart = 23;
+            if (h == 0)
+                hStart = 23;
+            else if (hStart < 0)
+                hStart = 23;
 
             int totalMinutesOffset;
             if (h == 0 && hStart == 23) {
@@ -1770,21 +1899,23 @@ public class DivinationServiceImpl {
     private String lookupBoneName(int chiId, int thangSinh) {
         try {
             // Check multiple table names for robustness
-            String[] tables = {"so12_coi_cot_con_gi", "so12_cot_con_gi", "so12_tuoi_thang_cot"};
+            String[] tables = { "so12_coi_cot_con_gi", "so12_cot_con_gi", "so12_tuoi_thang_cot" };
             for (String table : tables) {
                 try {
                     // Try to find columns dynamically since it might vary
-                    List<Object[]> cols = entityManager.createNativeQuery("SHOW COLUMNS FROM `" + table + "`").getResultList();
+                    List<Object[]> cols = entityManager.createNativeQuery("SHOW COLUMNS FROM `" + table + "`")
+                            .getResultList();
                     List<String> colNames = new java.util.ArrayList<>();
-                    for (Object[] col : cols) colNames.add(col[0].toString().toLowerCase());
+                    for (Object[] col : cols)
+                        colNames.add(col[0].toString().toLowerCase());
 
                     int chiColIdx = findColIndex(colNames, "chiid", "tuoi_chiid", "chi", "chi_id");
                     int tsColIdx = findColIndex(colNames, "thangsanh", "thang_sanh", "thang");
                     int cotColIdx = findColIndex(colNames, "tencot", "ten_cot", "cot", "ketqua");
 
                     if (chiColIdx >= 0 && tsColIdx >= 0 && cotColIdx >= 0) {
-                        String sql = "SELECT `" + colNames.get(cotColIdx) + "` FROM `" + table + "` WHERE `" + 
-                                     colNames.get(chiColIdx) + "` = ? AND `" + colNames.get(tsColIdx) + "` = ? LIMIT 1";
+                        String sql = "SELECT `" + colNames.get(cotColIdx) + "` FROM `" + table + "` WHERE `" +
+                                colNames.get(chiColIdx) + "` = ? AND `" + colNames.get(tsColIdx) + "` = ? LIMIT 1";
                         List<?> results = entityManager.createNativeQuery(sql)
                                 .setParameter(1, chiId)
                                 .setParameter(2, thangSinh)
@@ -1804,11 +1935,11 @@ public class DivinationServiceImpl {
         return mapChiToCot(getChiName(chiId));
     }
 
-
     private int findColIndex(List<String> columns, String... targets) {
         for (String target : targets) {
             int idx = columns.indexOf(target.toLowerCase());
-            if (idx >= 0) return idx;
+            if (idx >= 0)
+                return idx;
         }
         return -1;
     }
@@ -1873,19 +2004,21 @@ public class DivinationServiceImpl {
 
     private String getChiName(int chiId) {
         String[] chis = { "", "Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi" };
-        if (chiId >= 1 && chiId <= 12) return chis[chiId];
+        if (chiId >= 1 && chiId <= 12)
+            return chis[chiId];
         return "";
     }
-    
+
     private int calculateDayChiId(int d, int m, int y) {
         if (m < 3) {
             y--;
             m += 12;
         }
         // Công thức Julian Day đơn giản hóa để tính Chi ngày của Việt Nam
-        long jd = (long)(365.25 * (y + 4716)) + (long)(30.6001 * (m + 1)) + d - 1524;
-        int chi = (int)((jd + 1) % 12);
-        if (chi < 0) chi += 12;
+        long jd = (long) (365.25 * (y + 4716)) + (long) (30.6001 * (m + 1)) + d - 1524;
+        int chi = (int) ((jd + 1) % 12);
+        if (chi < 0)
+            chi += 12;
         return chi + 1; // 1=Tý, ..., 12=Hợi
     }
 
@@ -1904,7 +2037,8 @@ public class DivinationServiceImpl {
     }
 
     private void appendExaminationResult(StringBuilder content, String tableName, int chiId, int thangSinh) {
-        // ... không cần thiết vì đã dùng inline logic ở trên, nhưng có thể giữ nếu muốn refactor
+        // ... không cần thiết vì đã dùng inline logic ở trên, nhưng có thể giữ nếu muốn
+        // refactor
     }
 
     private void appendSo13TableResult(StringBuilder content, String tableName, String idColName, Object idValue,
@@ -1916,8 +2050,10 @@ public class DivinationServiceImpl {
                 return;
 
             List<String> colNames = getTableColumnNames(tableName);
-            if (colNames.isEmpty()) return;
-            List<String> lowerCols = colNames.stream().map(String::toLowerCase).collect(java.util.stream.Collectors.toList());
+            if (colNames.isEmpty())
+                return;
+            List<String> lowerCols = colNames.stream().map(String::toLowerCase)
+                    .collect(java.util.stream.Collectors.toList());
 
             int valColIdx = findColIndex(lowerCols, idColName.toLowerCase(), "canid", "chiid");
             int tsColIdx = findColIndex(lowerCols, "thangsanh", "thang_sanh", "thang");
@@ -1934,7 +2070,8 @@ public class DivinationServiceImpl {
             for (Object objRow : rows) {
                 Object[] row = (Object[]) objRow;
                 String resName = (resColIdx >= 0 && row[resColIdx] != null) ? row[resColIdx].toString() : "";
-                String loiGiaiVal = (lgColIdx >= 0 && row[lgColIdx] != null) ? row[lgColIdx].toString().replace("\n", "<br>")
+                String loiGiaiVal = (lgColIdx >= 0 && row[lgColIdx] != null)
+                        ? row[lgColIdx].toString().replace("\n", "<br>")
                         : "N/A";
 
                 content.append("<div style='margin-bottom:8px;'>• <b>").append(resName).append("</b>: ")
@@ -1985,6 +2122,5 @@ public class DivinationServiceImpl {
                 return "Kim";
         }
     }
-
 
 }

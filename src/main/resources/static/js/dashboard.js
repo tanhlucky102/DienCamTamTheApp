@@ -157,7 +157,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Đợi animation hoàn thành rồi mới tung thẻ
         setTimeout(() => {
-            showFlashcards(data.content, data.fullname, data.category);
+            // Cập nhật thông tin vào modal Xem Tất Cả để khi người dùng nhấn nút sẽ có nội dung
+            const displayName = data.fullname;
+            const displayDob = data.dob;
+            const displayCategory = data.category;
+            const cleanDecodingText = data.content;
+
+            const nameEl = document.getElementById('display-name');
+            if (nameEl) nameEl.innerText = displayName;
+
+            const catEl = document.getElementById('decoding-category');
+            if (catEl) catEl.innerText = displayCategory;
+
+            const meta = document.getElementById('result-meta');
+            if (meta) {
+                meta.innerHTML = `
+                    <span class="chip">Họ tên: ${displayName}</span>
+                    <span class="chip">Ngày sinh: ${displayDob}</span>
+                    <span class="chip">Danh mục: ${displayCategory}</span>
+                `;
+            }
+
+            const decContent = document.getElementById('decoding-content');
+            if (decContent) decContent.innerHTML = cleanDecodingText;
+
+            // Bung thẻ
+            showFlashcards(cleanDecodingText, displayName, displayCategory);
         }, 1200);
 
         if (window.innerWidth <= 1024) closeSidebar();
@@ -202,8 +227,51 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (form && !form.checkValidity()) {
-                form.reportValidity();
+                const firstInvalid = form.querySelector(':invalid');
+                if (firstInvalid) {
+                    showErrorHint(firstInvalid, firstInvalid.validationMessage || "Vui lòng nhập đầy đủ thông tin");
+                    firstInvalid.focus();
+                }
                 return;
+            }
+
+            function showErrorHint(element, message) {
+                // Xóa tooltip cũ nếu có
+                const old = document.querySelector('.error-tooltip');
+                if (old) old.remove();
+
+                const tooltip = document.createElement('div');
+                tooltip.className = 'error-tooltip';
+                tooltip.innerText = message;
+
+                // Gắn tooltip vào input-card gần nhất để tọa độ đi theo card (chống lệch khi transform)
+                const parentCard = element.closest('.input-card');
+                if (parentCard) {
+                    parentCard.appendChild(tooltip);
+
+                    const elRect = element.getBoundingClientRect();
+                    const cardRect = parentCard.getBoundingClientRect();
+
+                    // Tính toán vị trí tâm của input so với card
+                    const leftPos = (elRect.left - cardRect.left) + (elRect.width / 2);
+                    const topPos = (elRect.bottom - cardRect.top) + 10;
+
+                    tooltip.style.left = leftPos + 'px';
+                    tooltip.style.top = topPos + 'px';
+                    tooltip.style.transform = 'translateX(-50%)'; // Căn giữa theo trục ngang
+                } else {
+                    // Fallback nếu không thấy card (hiếm gặp)
+                    document.body.appendChild(tooltip);
+                    const rect = element.getBoundingClientRect();
+                    tooltip.style.left = (rect.left + rect.width / 2) + 'px';
+                    tooltip.style.top = (rect.bottom + window.scrollY + 10) + 'px';
+                    tooltip.style.transform = 'translateX(-50%)';
+                }
+
+                setTimeout(() => {
+                    tooltip.style.opacity = '0';
+                    setTimeout(() => tooltip.remove(), 400);
+                }, 2500);
             }
 
             // Trigger Magical Animation (Gia tốc vút lên mượt mà vô cực)
@@ -282,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const tempDiv = document.createElement('div');
                         tempDiv.innerHTML = decodingText;
                         const logBox = tempDiv.querySelector('.log-box');
-                        
+
                         let cleanDecodingText = decodingText;
                         if (logBox && logBoxContainer) {
                             logBoxContainer.innerHTML = logBox.outerHTML;
@@ -290,10 +358,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else {
                             if (logBoxContainer) logBoxContainer.innerHTML = '';
                         }
-                        
+
                         if (decContent) decContent.innerHTML = cleanDecodingText;
                         showFlashcards(cleanDecodingText, displayName, displayCategory);
-                        
+
                         // Cập nhật nút TRA thành VỀ
                         const topBtn = document.getElementById('center-lookup-btn');
                         if (topBtn) topBtn.innerText = "VỀ";
@@ -304,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         } catch (hErr) {
                             console.warn("Không thể lưu lịch sử:", hErr);
                         }
-                        
+
                     } catch (procErr) {
                         console.error("Lỗi xử lý dữ liệu:", procErr);
                         alert("Có lỗi xảy ra khi hiển thị kết quả. Vui lòng kiểm tra console.");
@@ -469,9 +537,10 @@ document.addEventListener('DOMContentLoaded', () => {
             card.dataset.isAnimating = "false";
         }, 500);
 
-        // Khôi phục mặt Úp (Cover) khi cất thẻ vào stack theo yêu cầu
-        const flashcardInner = card.querySelector('.flashcard');
-        if (flashcardInner) flashcardInner.classList.add('is-flipped');
+        // KHÔNG còn ép thẻ úp lại (add is-flipped) khi cất thẻ theo yêu cầu mới
+        // (để thẻ giữ nguyên mặt ngửa nếu đã xem)
+        // const flashcardInner = card.querySelector('.flashcard');
+        // if (flashcardInner) flashcardInner.classList.add('is-flipped');
 
         card.dataset.viewed = "true";
 
@@ -485,7 +554,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearAllCards();
         if (actionBtnsWrapper) actionBtnsWrapper.style.display = 'flex';
         if (viewAllBtn) viewAllBtn.style.display = 'flex';
-        
+
         // Cập nhật dòng nhắc nhở
         const clickHint = document.querySelector('.click-hint');
         if (clickHint) clickHint.innerText = 'Bấm nút THU THẺ để trở lại';
@@ -501,8 +570,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let w, h;
         const isMobileS = vpW <= 1200;
         if (!isMobileS) {
-            w = 145;
-            h = 220;
+            w = 130;
+            h = 200;
         } else {
             const isPhoneS = vpW <= 500;
             w = isPhoneS ? 90 : 120;
@@ -651,11 +720,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else if (window.innerHeight < 900) {
                         // Laptop: Push center lower to clear header comfortably
                         cardWrapper.style.left = (window.innerWidth / 2 - 170) + 'px';
-                        cardWrapper.style.top  = (window.innerHeight / 2 - 200) + 'px';
+                        cardWrapper.style.top = (window.innerHeight / 2 - 200) + 'px';
                     } else {
                         // Desktop: Absolute Center
                         cardWrapper.style.left = (window.innerWidth / 2 - 170) + 'px';
-                        cardWrapper.style.top  = (window.innerHeight / 2 - 265) + 'px';
+                        cardWrapper.style.top = (window.innerHeight / 2 - 265) + 'px';
                     }
 
                     // Thực hiện lật ra Mặt Detail (Ngửa)
@@ -687,7 +756,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (lbContainer) lbContainer.innerHTML = '';
         if (actionBtnsWrapper) actionBtnsWrapper.style.display = 'none';
         if (viewAllBtn) viewAllBtn.style.display = 'none';
-        
+
         // Trả lại dòng nhắc nhở ban đầu
         const clickHint = document.querySelector('.click-hint');
         if (clickHint) clickHint.innerText = 'Bấm Nút TRA để Tra Cứu';
@@ -741,7 +810,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setSpinSpeed(0.05); // Dịch chuyển lá bài xong thì NGỪNG XOAY NHANH, vè Idle của Tra Cứu
                 const inputCards = document.querySelectorAll('.input-card');
                 if (inputCards) inputCards.forEach(card => card.classList.remove('sucked-in'));
-                
+
                 const topBtn = document.getElementById('center-lookup-btn');
                 if (topBtn) topBtn.innerText = "TRA";
             }, totalClearDuration);
@@ -781,87 +850,97 @@ document.addEventListener('DOMContentLoaded', () => {
                     const isMobile = vpW <= 1200;
                     if (isMobile) {
                         // === MOBILE / TABLET ===
-                        const wheelEl   = document.querySelector('.wheel-group');
+                        const wheelEl = document.querySelector('.wheel-group');
                         const wheelRect = wheelEl ? wheelEl.getBoundingClientRect() : null;
 
-                        const btnBarH    = 80;
-                        const areaTop    = wheelRect
+                        const btnBarH = 80;
+                        const areaTop = wheelRect
                             ? Math.round(wheelRect.bottom + window.scrollY + 8)
                             : Math.round(vpH * 0.48);
                         const areaBottom = vpH - btnBarH;
-                        const areaLeft   = 10;
-                        const areaRight  = vpW - 10;
-                        const areaW      = areaRight - areaLeft;
-                        const areaH      = Math.max(100, areaBottom - areaTop);
+                        const areaLeft = 10;
+                        const areaRight = vpW - 10;
+                        const areaW = areaRight - areaLeft;
+                        const areaH = Math.max(100, areaBottom - areaTop);
 
-                        const isPhone    = vpW <= 500;
+                        const isPhone = vpW <= 500;
 
                         // Kích thước thẻ
-                        const maxCardW   = isPhone ? 90  : 120;
-                        const maxCardH   = isPhone ? 140 : 170;
-                        const gap        = 8;
+                        const maxCardW = isPhone ? 90 : 120;
+                        const maxCardH = isPhone ? 140 : 170;
+                        const gap = 8;
 
                         // iPhone: cứng 4 cột | iPad: tính tối ưu min 5 cột
-                        const cols       = isPhone
+                        const cols = isPhone
                             ? 4
                             : Math.max(5, Math.floor(areaW / (maxCardW + gap)));
-                        const colW       = Math.min(maxCardW, Math.floor((areaW - gap * (cols - 1)) / cols));
-                        const colH       = maxCardH;
+                        const colW = Math.min(maxCardW, Math.floor((areaW - gap * (cols - 1)) / cols));
+                        const colH = maxCardH;
 
                         // rowSpacing: cả phone lẫn tablet đều cứng 38px
                         // → chỉ lộ phần title (~38px) của thẻ bên dưới, không giãn toàn thẻ
-                        const totalRows  = Math.ceil(generatedCards.length / cols);
+                        const totalRows = Math.ceil(generatedCards.length / cols);
                         const rowSpacing = 38;
 
                         const col = idx % cols;
                         const row = Math.floor(idx / cols);
 
                         const totalGridW = cols * colW + (cols - 1) * gap;
-                        const gridLeft   = Math.round((vpW - totalGridW) / 2);
+                        const gridLeft = Math.round((vpW - totalGridW) / 2);
 
                         targetLeft = gridLeft + col * (colW + gap);
-                        targetTop  = areaTop  + row * rowSpacing;
+                        targetTop = areaTop + row * rowSpacing;
 
-                        card.style.width  = colW + 'px';
+                        card.style.width = colW + 'px';
                         card.style.height = colH + 'px';
                     } else {
-                        // === DESKTOP: xếp 2 bên bát quái ===
-                        const desktopW = 145; // Thu nhỏ thẻ trên desktop
-                        const desktopH = 220;
-                        const CARDS_PER_COL    = Math.ceil(generatedCards.length / 2); // Chia đều 2 bên
-                        const isLeft           = (idx < CARDS_PER_COL); // Nửa đầu bên trái, nửa sau bên phải
-                        const stackPos         = isLeft ? idx : (idx - CARDS_PER_COL);
-                        const stackGroup       = 0; // Chỉ có 1 cột mỗi bên
-                        const stackOffsetX     = desktopW + 20;
+                        // === DESKTOP: 4 columns split LEFT and RIGHT ===
+                        const desktopW = 130;
+                        const desktopH = 200;
+                        const COLS = 4;
+                        const totalCards = generatedCards.length;
+                        const CARDS_PER_COL = Math.ceil(totalCards / COLS);
 
-                        // Đẩy cột thẻ xuống để không dính Header (Header h=75px + margin)
-                        const startY = 110; 
+                        const col = Math.floor(idx / CARDS_PER_COL);
+                        const row = idx % CARDS_PER_COL;
 
-                        // Tính toán độ giãn Y tự động để vừa bằng với chiều cao màn hình hiện tại
-                        const availableHeight = vpH - startY - desktopH - 30; // 30px padding bottom
-                        const staggerY = Math.min(45, Math.max(15, availableHeight / Math.max(1, CARDS_PER_COL - 1))); 
-                        
-                        const safeRadius = 350; // Adjusted for bigger cards
+                        const gapX = 25;
+                        const staggerY = 42;
+                        const safeRadius = 380; // Tránh bát quái trung tâm
 
-                        if (isLeft) {
-                            targetLeft = (vpW / 2) - safeRadius - desktopW - (stackGroup * stackOffsetX);
-                            targetTop  = startY + (stackPos * staggerY);
+                        if (col < 2) {
+                            // Cột 0 và 1 ở bên TRÁI
+                            // Cột 0 ngoài cùng, cột 1 sát bát quái
+                            const leftBase = (vpW / 2) - safeRadius - desktopW;
+                            if (col === 0) {
+                                targetLeft = leftBase - desktopW - gapX;
+                            } else {
+                                targetLeft = leftBase;
+                            }
                         } else {
-                            targetLeft = (vpW / 2) + safeRadius + (stackGroup * stackOffsetX);
-                            targetTop  = startY + (stackPos * staggerY);
+                            // Cột 2 và 3 ở bên PHẢI
+                            // Cột 2 sát bát quái, cột 3 ngoài cùng
+                            const rightBase = (vpW / 2) + safeRadius;
+                            if (col === 2) {
+                                targetLeft = rightBase;
+                            } else {
+                                targetLeft = rightBase + desktopW + gapX;
+                            }
                         }
-                        
-                        card.style.width  = desktopW + 'px';
+
+                        targetTop = 110 + row * staggerY;
+
+                        card.style.width = desktopW + 'px';
                         card.style.height = desktopH + 'px';
                     }
 
                     card.style.left = targetLeft + 'px';
-                    card.style.top  = targetTop  + 'px';
+                    card.style.top = targetTop + 'px';
 
                     const targetZ = baseZ + idx;
                     card.style.zIndex = targetZ;
                     card.dataset.stableZIndex = targetZ;
-                    card.dataset.origZIndex   = targetZ;
+                    card.dataset.origZIndex = targetZ;
 
                     setTimeout(() => {
                         card.style.transition = 'width 0.3s, height 0.3s, top 0.4s, left 0.4s, transform 0.4s';
@@ -878,7 +957,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Dữ liệu từ API thường bọc trong thẻ div đầu tiên
         const wrapper = tempDiv.querySelector('div') || tempDiv;
-        
+
         // Loại bỏ log-box nếu nó vẫn còn lọt vào đây
         const lb = wrapper.querySelector('.log-box');
         if (lb) lb.remove();
@@ -923,7 +1002,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ================== CUSTOM DROPDOWN SYSTEM ================== //
     function initCustomSelects() {
         const selects = document.querySelectorAll('.input-card select');
-        
+
         selects.forEach(select => {
             // Check if already initialized
             if (select.parentNode.classList.contains('custom-select-wrapper')) return;
@@ -932,57 +1011,57 @@ document.addEventListener('DOMContentLoaded', () => {
             const wrapper = document.createElement('div');
             wrapper.className = 'custom-select-wrapper';
             select.parentNode.insertBefore(wrapper, select);
-            
+
             // Di chuyển select vào wrapper và ẩn đi
             wrapper.appendChild(select);
             select.classList.add('select-hide');
-            
+
             // Tạo Trigger (Thanh hiển thị giá trị đang chọn)
             const trigger = document.createElement('div');
             trigger.className = 'custom-select-trigger';
             trigger.tabIndex = 0; // Để có thể focus
             trigger.innerText = select.options[select.selectedIndex].text;
             wrapper.appendChild(trigger);
-            
+
             // Tạo danh sách Options
             const optionsContainer = document.createElement('div');
             optionsContainer.className = 'custom-options';
-            
+
             Array.from(select.options).forEach((option, index) => {
                 const optElement = document.createElement('div');
                 optElement.className = 'custom-option';
                 if (index === select.selectedIndex) optElement.classList.add('selected');
                 optElement.innerText = option.text;
                 optElement.dataset.value = option.value;
-                
+
                 optElement.addEventListener('click', (e) => {
                     e.stopPropagation();
                     // Cập nhật giá trị hiển thị và giá trị thực tế
                     select.selectedIndex = index;
                     trigger.innerText = option.text;
-                    
+
                     // Cập nhật class 'selected'
                     optionsContainer.querySelectorAll('.custom-option').forEach(el => el.classList.remove('selected'));
                     optElement.classList.add('selected');
-                    
+
                     // Đóng menu
                     wrapper.classList.remove('open');
                     const parentCard = wrapper.closest('.input-card');
                     if (parentCard) parentCard.classList.remove('active-card');
-                    
+
                     // Kích hoạt sự kiện change cho select gốc (để JS form capturer nhận diện)
                     select.dispatchEvent(new Event('change', { bubbles: true }));
                 });
-                
+
                 optionsContainer.appendChild(optElement);
             });
-            
+
             wrapper.appendChild(optionsContainer);
-            
+
             // Xử lý sự kiện mở menu
             trigger.addEventListener('click', (e) => {
                 e.stopPropagation();
-                
+
                 // Đóng các dropdown khác đang mở
                 document.querySelectorAll('.custom-select-wrapper.open').forEach(w => {
                     if (w !== wrapper) {
@@ -992,18 +1071,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (p) p.classList.remove('active-card');
                     }
                 });
-                
+
                 // Kiểm tra không gian phía dưới để quyết định hướng mở (Smart Flip)
                 const rect = trigger.getBoundingClientRect();
                 const spaceBelow = window.innerHeight - rect.bottom;
                 const neededSpace = 260; // max-height (250) + margin (10)
-                
+
                 if (spaceBelow < neededSpace) {
                     wrapper.classList.add('open-up');
                 } else {
                     wrapper.classList.remove('open-up');
                 }
-                
+
                 const isOpen = wrapper.classList.toggle('open');
                 const parentCard = wrapper.closest('.input-card');
                 if (parentCard) {
@@ -1012,7 +1091,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
-        
+
         // Đóng dropdown khi click ra ngoài
         document.addEventListener('click', () => {
             document.querySelectorAll('.custom-select-wrapper.open').forEach(w => {

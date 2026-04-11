@@ -27,7 +27,8 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 3rem;
-            position: fixed; /* Khóa cứng để không bao giờ bị cuộn mất */
+            position: fixed;
+            /* Khóa cứng để không bao giờ bị cuộn mất */
             top: 0;
             left: 0;
             transform: none;
@@ -153,8 +154,6 @@
                 0 8px 25px rgba(150, 100, 0, 0.7),
                 0 0 20px rgba(220, 185, 70, 0.35);
         }
-
-
     </style>
 </head>
 
@@ -169,7 +168,7 @@
         <header class="top-header">
             <div class="header-left">
                 <a th:href="@{/dashboard}" class="header-logo">
-                    <span class="header-logo-text">Diên Cầm Tam Thế</span>
+                    <span class="header-logo-text">Diễn Cầm Tam Thế</span>
                 </a>
                 <nav class="header-nav">
                     <a th:href="@{/dashboard}" class="nav-link">TRA CỨU</a>
@@ -233,25 +232,32 @@
                     style="padding: 2.5rem; background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,245,245,0.85)); border: 2px solid rgba(255,255,255,0.9); box-shadow: 0 15px 35px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(220,185,110,0.3);">
 
                     <!-- Avatar + tiêu đề -->
-                    <div style="display:flex; align-items:center; gap:2rem; margin-bottom:2rem; border-bottom:1px solid rgba(220,185,110,0.3); padding-bottom:2rem;">
+                    <div
+                        style="display:flex; align-items:center; gap:2rem; margin-bottom:2rem; border-bottom:1px solid rgba(220,185,110,0.3); padding-bottom:2rem;">
                         <div id="profile-avatar"
                             style="width:100px; height:100px; border-radius:50%; background:linear-gradient(135deg,#dcb96e 0%,#b8860b 100%); display:flex; align-items:center; justify-content:center; font-size:2.5rem; color:#fff; font-weight:700; flex-shrink:0; box-shadow:0 5px 15px rgba(220,185,110,0.4);">
                             ?
                         </div>
                         <div>
-                            <h1 style="font-family:var(--font-heading); color:#9e7100; margin-bottom:0.5rem; font-size:2rem;">
+                            <h1
+                                style="font-family:var(--font-heading); color:#9e7100; margin-bottom:0.5rem; font-size:2rem;">
                                 Hồ Sơ Cá Nhân</h1>
-                            <p class="text-muted" style="color:#666;">Quản lý thông tin bảo mật và cài đặt tài khoản để cá nhân hóa kết quả tra cứu của bạn.</p>
+                            <p class="text-muted" style="color:#666;">Quản lý thông tin bảo mật và cài đặt tài khoản để
+                                cá nhân hóa kết quả tra cứu của bạn.</p>
                         </div>
                     </div>
 
                     <!-- Thông báo chung -->
-                    <div id="profile-msg" style="display:none; margin-bottom:1rem; padding:0.75rem 1rem; border-radius:8px; font-weight:600;"></div>
+                    <div id="profile-msg"
+                        style="display:none; margin-bottom:1rem; padding:0.75rem 1rem; border-radius:8px; font-weight:600;">
+                    </div>
 
                     <!-- Banner cảnh báo phiên hết hạn (ẩn lúc đầu, hiện qua JS) -->
-                    <div id="session-warning" style="display:none; margin-bottom:1.5rem; padding:1rem 1.25rem; border-radius:10px; background:linear-gradient(135deg,rgba(255,246,213,0.95),rgba(255,237,179,0.9)); border:1.5px solid #dcb96e; color:#7a5c00; font-size:0.97rem;">
+                    <div id="session-warning"
+                        style="display:none; margin-bottom:1.5rem; padding:1rem 1.25rem; border-radius:10px; background:linear-gradient(135deg,rgba(255,246,213,0.95),rgba(255,237,179,0.9)); border:1.5px solid #dcb96e; color:#7a5c00; font-size:0.97rem;">
                         ⚠️ <strong>Phiên đăng nhập đã hết hạn.</strong> Vui lòng
-                        <a href="/auth" style="color:#9e7100; font-weight:700; text-decoration:underline;">đăng kí đăng nhập lại</a>
+                        <a href="/auth" style="color:#9e7100; font-weight:700; text-decoration:underline;">đăng kí đăng
+                            nhập lại</a>
                         để tải dữ liệu hồ sơ.
                     </div>
 
@@ -282,7 +288,8 @@
                         <div class="profile-actions"
                             style="display:flex; justify-content:center; gap:1.5rem; margin-top:2rem;">
                             <a th:href="@{/dashboard}" class="btn"
-                                style="background:rgba(200,200,200,0.2); color:#555; border:1px solid #ddd; padding:12px 24px; font-weight:700; border-radius:6px;">QUAY LẠI</a>
+                                style="background:rgba(200,200,200,0.2); color:#555; border:1px solid #ddd; padding:12px 24px; font-weight:700; border-radius:6px;">QUAY
+                                LẠI</a>
                             <button type="submit" id="save-profile-btn" class="btn bronze-btn">LƯU THÔNG TIN</button>
                         </div>
                     </form>
@@ -320,20 +327,34 @@
     </div>
 
     <style>
-        .lookup-form .input-group label { color: #555; }
+        .lookup-form .input-group label {
+            color: #555;
+        }
+
         .lookup-form .input-group input {
             background: #fff;
             border: 1px solid #ddd;
             color: #222;
         }
+
         .lookup-form .sidebar-subtitle {
             color: #9e7100;
             font-family: 'Times New Roman', serif;
             text-transform: uppercase;
             font-size: 1.2rem;
         }
-        #profile-msg.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        #profile-msg.error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        #profile-msg.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        #profile-msg.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 
     <script th:src="@{/js/global.js}"></script>
@@ -360,7 +381,7 @@
                 try {
                     const res = await fetch(`/auth/me`);
                     const result = await res.json();
-                    
+
                     if (res.status === 401 || !result.data) {
                         window.location.href = '/auth';
                         return;
@@ -368,10 +389,10 @@
 
                     if (res.ok && result.status === 200 && result.data) {
                         const d = result.data;
-                        document.getElementById('prof-fullname').value = d.fullName    || '';
-                        document.getElementById('prof-email').value    = d.email       || '';
-                        document.getElementById('prof-phone').value    = d.phone       || '';
-                        document.getElementById('prof-dob').value      = d.dateOfBirth || '';
+                        document.getElementById('prof-fullname').value = d.fullName || '';
+                        document.getElementById('prof-email').value = d.email || '';
+                        document.getElementById('prof-phone').value = d.phone || '';
+                        document.getElementById('prof-dob').value = d.dateOfBirth || '';
                         if (avatarEl) avatarEl.textContent = window.AuthHelper.getAvatar(d);
                     }
                 } catch (err) {
@@ -394,9 +415,9 @@
                     btn.textContent = 'ĐANG LƯU...';
 
                     const body = {
-                        fullName:    document.getElementById('prof-fullname').value.trim(),
-                        email:       document.getElementById('prof-email').value.trim(),
-                        phone:       document.getElementById('prof-phone').value.trim(),
+                        fullName: document.getElementById('prof-fullname').value.trim(),
+                        email: document.getElementById('prof-email').value.trim(),
+                        phone: document.getElementById('prof-phone').value.trim(),
                         dateOfBirth: document.getElementById('prof-dob').value
                     };
 
@@ -436,7 +457,7 @@
                     e.preventDefault();
 
                     const currentPw = document.getElementById('prof-current-password').value;
-                    const newPw     = document.getElementById('prof-new-password').value;
+                    const newPw = document.getElementById('prof-new-password').value;
                     const confirmPw = document.getElementById('prof-confirm-password').value;
 
                     if (!currentPw || !newPw || !confirmPw) {
