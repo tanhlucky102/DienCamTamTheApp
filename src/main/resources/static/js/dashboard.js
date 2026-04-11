@@ -469,9 +469,9 @@ document.addEventListener('DOMContentLoaded', () => {
             card.dataset.isAnimating = "false";
         }, 500);
 
-        // Keep it face up on "mặt detail" (front)
+        // Khôi phục mặt Úp (Cover) khi cất thẻ vào stack theo yêu cầu
         const flashcardInner = card.querySelector('.flashcard');
-        if (flashcardInner) flashcardInner.classList.remove('is-flipped');
+        if (flashcardInner) flashcardInner.classList.add('is-flipped');
 
         card.dataset.viewed = "true";
 
@@ -501,8 +501,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let w, h;
         const isMobileS = vpW <= 1200;
         if (!isMobileS) {
-            w = 105;
-            h = 160;
+            w = 145;
+            h = 220;
         } else {
             const isPhoneS = vpW <= 500;
             w = isPhoneS ? 90 : 120;
@@ -636,8 +636,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     cardWrapper.style.transition = 'all 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
                     cardWrapper.style.transform = 'rotateZ(0deg) scale(1)';
 
-                    cardWrapper.style.width = '300px';
-                    cardWrapper.style.height = '465px';
+                    cardWrapper.style.width = '340px';
+                    cardWrapper.style.height = '530px';
 
                     // Highest z-index for viewing - Use high constant plus active class
                     cardWrapper.classList.add('viewing-active');
@@ -646,16 +646,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Centering Logic - Responsive based on viewport
                     if (window.innerWidth <= 768) {
                         // Mobile: Center Top (Higher up to avoid bottom stacks)
-                        cardWrapper.style.left = (window.innerWidth / 2 - 150) + 'px';
+                        cardWrapper.style.left = (window.innerWidth / 2 - 170) + 'px';
                         cardWrapper.style.top = "80px";
                     } else if (window.innerHeight < 900) {
                         // Laptop: Push center lower to clear header comfortably
-                        cardWrapper.style.left = (window.innerWidth / 2 - 150) + 'px';
-                        cardWrapper.style.top  = (window.innerHeight / 2 - 180) + 'px';
+                        cardWrapper.style.left = (window.innerWidth / 2 - 170) + 'px';
+                        cardWrapper.style.top  = (window.innerHeight / 2 - 200) + 'px';
                     } else {
                         // Desktop: Absolute Center
-                        cardWrapper.style.left = (window.innerWidth / 2 - 150) + 'px';
-                        cardWrapper.style.top  = (window.innerHeight / 2 - 232.5) + 'px';
+                        cardWrapper.style.left = (window.innerWidth / 2 - 170) + 'px';
+                        cardWrapper.style.top  = (window.innerHeight / 2 - 265) + 'px';
                     }
 
                     // Thực hiện lật ra Mặt Detail (Ngửa)
@@ -826,26 +826,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         card.style.height = colH + 'px';
                     } else {
                         // === DESKTOP: xếp 2 bên bát quái ===
-                        const desktopW = 105; // Thu nhỏ thẻ trên desktop
-                        const desktopH = 160;
-                        const CARDS_PER_COL    = 10;
-                        const columnIdx        = Math.floor(idx / CARDS_PER_COL);
-                        const stackPos         = idx % CARDS_PER_COL;
-                        const isLeft           = (columnIdx % 2 === 0);
-                        const stackGroup       = Math.floor(columnIdx / 2);
-                        const stackOffsetX     = desktopW + 25;
-                        const staggerY         = 32; // Khít hơn chút
-                        const cardsInThisCol   = Math.min(generatedCards.length - columnIdx * CARDS_PER_COL, CARDS_PER_COL);
-                        const totalStackHeight = desktopH + (cardsInThisCol - 1) * staggerY;
-                        
+                        const desktopW = 145; // Thu nhỏ thẻ trên desktop
+                        const desktopH = 220;
+                        const CARDS_PER_COL    = Math.ceil(generatedCards.length / 2); // Chia đều 2 bên
+                        const isLeft           = (idx < CARDS_PER_COL); // Nửa đầu bên trái, nửa sau bên phải
+                        const stackPos         = isLeft ? idx : (idx - CARDS_PER_COL);
+                        const stackGroup       = 0; // Chỉ có 1 cột mỗi bên
+                        const stackOffsetX     = desktopW + 20;
+
                         // Đẩy cột thẻ xuống để không dính Header (Header h=75px + margin)
                         const startY = 110; 
 
+                        // Tính toán độ giãn Y tự động để vừa bằng với chiều cao màn hình hiện tại
+                        const availableHeight = vpH - startY - desktopH - 30; // 30px padding bottom
+                        const staggerY = Math.min(45, Math.max(15, availableHeight / Math.max(1, CARDS_PER_COL - 1))); 
+                        
+                        const safeRadius = 350; // Adjusted for bigger cards
+
                         if (isLeft) {
-                            targetLeft = (vpW / 2) - safeWheelRadius - desktopW - (stackGroup * stackOffsetX);
+                            targetLeft = (vpW / 2) - safeRadius - desktopW - (stackGroup * stackOffsetX);
                             targetTop  = startY + (stackPos * staggerY);
                         } else {
-                            targetLeft = (vpW / 2) + safeWheelRadius + (stackGroup * stackOffsetX);
+                            targetLeft = (vpW / 2) + safeRadius + (stackGroup * stackOffsetX);
                             targetTop  = startY + (stackPos * staggerY);
                         }
                         
