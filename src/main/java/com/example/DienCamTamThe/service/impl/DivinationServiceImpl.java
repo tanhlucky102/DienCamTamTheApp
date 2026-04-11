@@ -113,19 +113,15 @@ public class DivinationServiceImpl {
 
         boolean foundAny = false;
 
-        // Hiển thị TỔNG QUAN trước (không phải từ DB, mà là metadata nhập liệu)
-        content.append("\n<hr><h4>Sở Tổng Quan. Tam Thế Diễn Cầm TỔNG QUAN</h4>\n");
-        content.append(
-                "<div class='log-box' style='background: #fdf6e3; padding: 15px; border-radius: 8px; border: 1px solid #eee8d5; margin-bottom: 20px; color: #657b83'>");
-        content.append("<strong style='color: #b58900;'>[Thông số Diễn Cầm]</strong><br>");
+        content.append("<div class='log-box' style='background: #fff9eb; padding: 18px; border-radius: 12px; border: 1px solid #eec; margin-bottom: 25px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.05);'>");
+        content.append("<strong style='color: #8c1010; font-size: 1.1em;'>[Thông số Diễn Cầm]</strong><br>");
+        content.append("<div style='margin-left: 10px; margin-top: 8px; line-height: 1.6;'>");
         content.append("- Ngày sinh (Âm lịch): <b>").append(ngaySinh).append("/").append(thangSinh).append("/")
                 .append(birthYear).append("</b>").append(calendarNote).append("<br>");
-        content.append("- Bạn tuổi: <b>").append(can.toUpperCase()).append(" ").append(chi.toUpperCase())
-                .append("</b><br>");
-        content.append("- Mạng (Ngũ Hành): <b>").append(mang.toUpperCase()).append("</b> - Cốt (Xương): <b>")
-                .append(cot.toUpperCase()).append("</b><br>");
-        content.append("<em>=> Đang tra cứu chuyên mục: <b>").append(category).append("</b></em>");
-        content.append("</div>");
+        content.append("- Bạn tuổi: <b>").append(can.toUpperCase()).append(" ").append(chi.toUpperCase()).append("</b><br>");
+        content.append("- Mạng (Ngũ Hành): <b>").append(mapNguHanhToVietnamese(mang).toUpperCase()).append("</b><br>");
+        content.append("<span style='color: #274e13;'>=> Đang tra cứu chuyên mục: <b>").append(category).append("</b></span>");
+        content.append("</div></div>");
 
         // Tính TruongSanhID 1 lần để dùng cho Sở 22, 23
         int truongSanhId = lookupTruongSanhId(getChiId(chi), getNguHanhId(mang));
@@ -140,7 +136,11 @@ public class DivinationServiceImpl {
                 int titleIndex = i - FIRST_SECTION;
                 String title = (titleIndex >= 0 && titleIndex < SECTION_TITLES.length) ? SECTION_TITLES[titleIndex]
                         : "Sở " + i;
+
+                // Header for extraction (H4)
                 content.append("\n<hr><h4>Sở ").append(i).append(". ").append(title).append("</h4>\n");
+                // Detailed header for View All (Hidden by default)
+                content.append("<div class='view-all-header' style='display: none; color: #8c1010; font-size: 1.3em; font-weight: bold; margin-top: 40px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; text-align: center; font-family: serif; text-transform: uppercase;'>SỞ SỐ ").append(i).append("</div>");
 
                 // Xử lý truy vấn động vào bảng soXX tương ứng
                 processDynamicSection(content, i, request, can, chi, ngaySinh, thangSinh, canChiGio, thangThoThai, mang,
@@ -159,6 +159,12 @@ public class DivinationServiceImpl {
     }
 
     private boolean isSectionInCategory(int secNo, String filterCategory) {
+        // Sections 35, 36, 37 are now merged into Sở 34.
+        // We skip processing them independently to avoid redundant cards.
+        if (secNo == 35 || secNo == 36 || secNo == 37) {
+            return false;
+        }
+
         if (filterCategory.equals("Tất cả")) {
             return true;
         }
@@ -1115,7 +1121,7 @@ public class DivinationServiceImpl {
 
             try {
                 // 1. Sở 34: Triết lý & Ngũ phương
-                content.append("<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px;'>SỞ 34: COI NGŨ PHƯƠNG & TRIẾT LÝ</h3>");
+                content.append("<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px;'>TRIẾT LÝ & NGŨ PHƯƠNG</h3>");
                 List<Object[]> trietly = entityManager.createNativeQuery("SELECT TieuDe, NoiDung FROM so34_trietly").getResultList();
                 for (Object[] row : trietly) {
                     content.append("<p><strong>").append(row[0]).append("</strong><br>")
@@ -1130,7 +1136,8 @@ public class DivinationServiceImpl {
                 }
 
                 // 2. Sở 35: Nhân quả
-                content.append("<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px; margin-top: 30px;'>SỞ 35: NHÂN QUẢ</h3>");
+                content.append("<div class='view-all-header' style='display: none; color: #8c1010; font-size: 1.3em; font-weight: bold; margin-top: 40px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; text-align: center; font-family: serif; text-transform: uppercase;'>SỞ SỐ 35</div>");
+                content.append("<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px; margin-top: 30px;'>NHÂN QUẢ</h3>");
                 List<Object[]> nhanqua = entityManager.createNativeQuery("SELECT BoPhan, HanhVi_Nhan, KetQua_Qua FROM so35_nhan_qua").getResultList();
                 for (Object[] row : nhanqua) {
                     content.append("<p>• <strong>").append(row[0]).append("</strong>: ")
@@ -1138,7 +1145,8 @@ public class DivinationServiceImpl {
                 }
 
                 // 3. Sở 36: Ngũ tạng
-                content.append("<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px; margin-top: 30px;'>SỞ 36: NGŨ TẠNG</h3>");
+                content.append("<div class='view-all-header' style='display: none; color: #8c1010; font-size: 1.3em; font-weight: bold; margin-top: 40px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; text-align: center; font-family: serif; text-transform: uppercase;'>SỞ SỐ 36</div>");
+                content.append("<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px; margin-top: 30px;'>NGŨ TẠNG</h3>");
                 List<Object[]> ngutang = entityManager.createNativeQuery("SELECT TangPhu, NguHanh, MoTa FROM so36_ngu_tang").getResultList();
                 for (Object[] row : ngutang) {
                     content.append("<p><strong>").append(row[0]).append("</strong> (").append(row[1]).append(")<br>")
@@ -1146,7 +1154,8 @@ public class DivinationServiceImpl {
                 }
 
                 // 4. Sở 37: Lời kết
-                content.append("<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px; margin-top: 30px;'>SỞ 37: LỜI KẾT</h3>");
+                content.append("<div class='view-all-header' style='display: none; color: #8c1010; font-size: 1.3em; font-weight: bold; margin-top: 40px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; text-align: center; font-family: serif; text-transform: uppercase;'>SỞ SỐ 37</div>");
+                content.append("<h3 style='color: #d32f2f; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 5px; margin-top: 30px;'>LỜI KẾT</h3>");
                 List<Object[]> loiket = entityManager.createNativeQuery("SELECT TieuDe, NoiDung FROM so37_loi_ket").getResultList();
                 for (Object[] row : loiket) {
                     content.append("<p><strong>").append(row[0]).append("</strong><br>")
@@ -1753,6 +1762,52 @@ public class DivinationServiceImpl {
         return idx > 0 ? rawGio.substring(0, idx).trim() : rawGio;
     }
 
+    private String lookupBoneName(int chiId, int thangSinh) {
+        try {
+            // Check multiple table names for robustness
+            String[] tables = {"so12_coi_cot_con_gi", "so12_cot_con_gi", "so12_tuoi_thang_cot"};
+            for (String table : tables) {
+                try {
+                    // Try to find columns dynamically since it might vary
+                    List<Object[]> cols = entityManager.createNativeQuery("SHOW COLUMNS FROM `" + table + "`").getResultList();
+                    List<String> colNames = new java.util.ArrayList<>();
+                    for (Object[] col : cols) colNames.add(col[0].toString().toLowerCase());
+
+                    int chiColIdx = findColIndex(colNames, "chiid", "tuoi_chiid", "chi", "chi_id");
+                    int tsColIdx = findColIndex(colNames, "thangsanh", "thang_sanh", "thang");
+                    int cotColIdx = findColIndex(colNames, "tencot", "ten_cot", "cot", "ketqua");
+
+                    if (chiColIdx >= 0 && tsColIdx >= 0 && cotColIdx >= 0) {
+                        String sql = "SELECT `" + colNames.get(cotColIdx) + "` FROM `" + table + "` WHERE `" + 
+                                     colNames.get(chiColIdx) + "` = ? AND `" + colNames.get(tsColIdx) + "` = ? LIMIT 1";
+                        List<?> results = entityManager.createNativeQuery(sql)
+                                .setParameter(1, chiId)
+                                .setParameter(2, thangSinh)
+                                .getResultList();
+                        if (!results.isEmpty() && results.get(0) != null) {
+                            return results.get(0).toString().trim();
+                        }
+                    }
+                } catch (Exception inner) {
+                    // Ignore and try next table
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi lookupBoneName: " + e.getMessage());
+        }
+        // Fallback to static mapping if DB lookup fails
+        return mapChiToCot(getChiName(chiId));
+    }
+
+
+    private int findColIndex(List<String> columns, String... targets) {
+        for (String target : targets) {
+            int idx = columns.indexOf(target.toLowerCase());
+            if (idx >= 0) return idx;
+        }
+        return -1;
+    }
+
     private String mapChiToCot(String chi) {
         if (chi == null)
             return "chuot";
@@ -1814,7 +1869,7 @@ public class DivinationServiceImpl {
     private String getChiName(int chiId) {
         String[] chis = { "", "Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi" };
         if (chiId >= 1 && chiId <= 12) return chis[chiId];
-        return String.valueOf(chiId);
+        return "";
     }
     
     private int calculateDayChiId(int d, int m, int y) {
@@ -1926,12 +1981,5 @@ public class DivinationServiceImpl {
         }
     }
 
-    private int findColIndex(java.util.List<String> colNames, String... candidates) {
-        for (String candidate : candidates) {
-            int idx = colNames.indexOf(candidate);
-            if (idx >= 0)
-                return idx;
-        }
-        return -1;
-    }
+
 }
