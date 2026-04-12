@@ -1310,7 +1310,7 @@ public class DivinationServiceImpl {
 
                 // 1. so27_tongquan
                 List<?> res1 = entityManager.createNativeQuery(
-                        "SELECT Tuoi_CanID, Tuoi_ChiID, Mang, Luan, Tho FROM so27_tongquan WHERE Tuoi_CanID = ? AND Tuoi_ChiID = ? AND GioiTinh = ?")
+                        "SELECT Tuoi_CanID, Tuoi_ChiID, Mang, Tho FROM so27_tongquan WHERE Tuoi_CanID = ? AND Tuoi_ChiID = ? AND GioiTinh = ?")
                         .setParameter(1, canId).setParameter(2, chiId).setParameter(3, genderVn).getResultList();
 
                 for (Object obj : res1) {
@@ -1318,15 +1318,12 @@ public class DivinationServiceImpl {
                     String cName = getCanName((int) row[0]);
                     String chName = getChiName((int) row[1]);
                     String mVal = row[2] != null ? row[2].toString() : "";
-                    String lVal = row[3] != null ? row[3].toString() : "";
-                    String tVal = row[4] != null ? row[4].toString() : "";
+                    String tVal = row[3] != null ? row[3].toString() : "";
 
                     content.append("<p style='line-height:1.6;'>")
                             .append("<span style='color:#d32f2f; font-weight:bold;'>Tuổi: </span>").append(cName)
                             .append(" ").append(chName).append("<br>")
                             .append("<span style='color:#1a5fb4; font-weight:bold;'>Mạng: </span>").append(mVal)
-                            .append("<br>")
-                            .append("<span style='color:#7b1fa2; font-weight:bold;'>Luận: </span>").append(lVal)
                             .append("<br>")
                             .append("<span style='color:#2e7d32; font-weight:bold;'>Thơ: </span>")
                             .append("</p>");
@@ -1338,13 +1335,14 @@ public class DivinationServiceImpl {
                             String lt = lines[k].trim();
                             if (lt.isEmpty())
                                 continue;
-                            if (k % 2 != 0) {
-                                // Dòng 8: padding 0
+                            int wordCount = lt.split("\\s+").length;
+                            if (wordCount >= 7) {
+                                // Dòng 8 chữ: padding 0px
                                 content.append(
                                         "<div style='padding: 0 0px; margin-bottom: 5px; text-align: center; font-style: italic;'>")
                                         .append(lt).append("</div>");
                             } else {
-                                // Dòng 6: padding 20px
+                                // Dòng 6 chữ: padding 20px
                                 content.append(
                                         "<div style='padding: 0 20px; margin-bottom: 5px; text-align: center; font-style: italic;'>")
                                         .append(lt).append("</div>");
