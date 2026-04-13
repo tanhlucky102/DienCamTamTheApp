@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diễn Cầm Tam Thế | Hồ Sơ Cá Nhân</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <style>
+        /* Header thanh ngang FULL WIDTH như trước nhưng đẹp hơn */
+        .top-header {
+            width: 100%;
+            height: 75px;
+            margin: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(250, 240, 225, 0.75));
+            /* Thả lỏng độ trong suốt */
+            backdrop-filter: blur(35px) saturate(150%);
+            /* Gấp đôi độ mờ kính mờ sương */
+            border: none;
+            border-bottom: 2px solid rgba(220, 185, 110, 0.6);
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 3rem;
+            position: fixed;
+            /* Khóa cứng để không bao giờ bị cuộn mất */
+            top: 0;
+            left: 0;
+            transform: none;
+            z-index: 100;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25), inset 0 -1px 3px rgba(255, 255, 255, 0.6);
+            /* Bơm bóng sâu hơn */
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .header-logo-text {
+            font-family: 'Times New Roman', serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #9e7100, #dcb96e, #9e7100);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.15));
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 2.5rem;
+            margin-left: 2rem;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #555;
+            font-weight: 800;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 5px 0;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: #dcb96e;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #9e7100;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            position: relative;
+        }
+
+        .header-account-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            background:
+                linear-gradient(145deg,
+                    rgba(255, 230, 150, 0.3) 0%,
+                    transparent 40%,
+                    rgba(0, 0, 0, 0.1) 100%),
+                linear-gradient(135deg, #c8991a, #a07010, #c8991a);
+            border-radius: 50%;
+            cursor: pointer;
+            color: #fff !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 240, 180, 0.5),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+                0 0 0 2px rgba(180, 130, 30, 0.6),
+                0 0 0 4px rgba(180, 130, 30, 0.15),
+                0 6px 20px rgba(150, 100, 0, 0.5);
+            border: none;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-account-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, rgba(255, 240, 180, 0.4), transparent 60%);
+            pointer-events: none;
+        }
+
+        .header-account-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 240, 180, 0.5),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+                0 0 0 2px rgba(220, 185, 70, 0.9),
+                0 0 0 5px rgba(220, 185, 70, 0.25),
+                0 8px 25px rgba(150, 100, 0, 0.7),
+                0 0 20px rgba(220, 185, 70, 0.35);
+        }
+    </style>
+</head>
+
+<body class="dashboard-body">
+
+    <div class="dashboard-wrapper dashboard-layout-page">
+        <div class="bg-overlay"></div>
+        <div class="spinning-lotus-l"></div>
+        <div class="spinning-lotus-r"></div>
+
+        <!-- Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <a th:href="@{/dashboard}" class="header-logo">
+                    <span class="header-logo-text">Diễn Cầm Tam Thế</span>
+                </a>
+                <nav class="header-nav">
+                    <a th:href="@{/dashboard}" class="nav-link">TRA CỨU</a>
+                    <a th:href="@{/history}" class="nav-link">LỊCH SỬ</a>
+                </nav>
+            </div>
+
+            <div class="header-right">
+                <div class="account-dropdown-wrapper" style="position: relative;">
+                    <button class="header-account-btn" id="account-btn" aria-label="Tài khoản">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </button>
+                    <div class="account-dropdown" id="account-dropdown">
+                        <div class="dropdown-header">
+                            <div class="dropdown-avatar">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                            <div class="dropdown-user-info">
+                                <span class="dropdown-username">Người dùng</span>
+                                <span class="dropdown-role">Thành viên</span>
+                            </div>
+                        </div>
+                        <div class="dropdown-menu">
+                            <a th:href="@{/profile}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                Hồ sơ
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="logout-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                </svg>
+                                Đăng xuất
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="dashboard-layout" style="margin: 100px auto 30px; width: 100%; max-width: 900px; padding: 0 20px;">
+            <main class="main-content">
+
+                <div class="glass-panel"
+                    style="padding: 2.5rem; background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(245,245,245,0.85)); border: 2px solid rgba(255,255,255,0.9); box-shadow: 0 15px 35px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(220,185,110,0.3);">
+
+                    <!-- Avatar + tiêu đề -->
+                    <div
+                        style="display:flex; align-items:center; gap:2rem; margin-bottom:2rem; border-bottom:1px solid rgba(220,185,110,0.3); padding-bottom:2rem;">
+                        <div id="profile-avatar"
+                            style="width:100px; height:100px; border-radius:50%; background:linear-gradient(135deg,#dcb96e 0%,#b8860b 100%); display:flex; align-items:center; justify-content:center; font-size:2.5rem; color:#fff; font-weight:700; flex-shrink:0; box-shadow:0 5px 15px rgba(220,185,110,0.4);">
+                            ?
+                        </div>
+                        <div>
+                            <h1
+                                style="font-family:var(--font-heading); color:#9e7100; margin-bottom:0.5rem; font-size:2rem;">
+                                Hồ Sơ Cá Nhân</h1>
+                            <p class="text-muted" style="color:#666;">Quản lý thông tin bảo mật và cài đặt tài khoản để
+                                cá nhân hóa kết quả tra cứu của bạn.</p>
+                        </div>
+                    </div>
+
+                    <!-- Thông báo chung -->
+                    <div id="profile-msg"
+                        style="display:none; margin-bottom:1rem; padding:0.75rem 1rem; border-radius:8px; font-weight:600;">
+                    </div>
+
+                    <!-- Banner cảnh báo phiên hết hạn (ẩn lúc đầu, hiện qua JS) -->
+                    <div id="session-warning"
+                        style="display:none; margin-bottom:1.5rem; padding:1rem 1.25rem; border-radius:10px; background:linear-gradient(135deg,rgba(255,246,213,0.95),rgba(255,237,179,0.9)); border:1.5px solid #dcb96e; color:#7a5c00; font-size:0.97rem;">
+                        ⚠️ <strong>Phiên đăng nhập đã hết hạn.</strong> Vui lòng
+                        <a href="/auth" style="color:#9e7100; font-weight:700; text-decoration:underline;">đăng kí đăng
+                            nhập lại</a>
+                        để tải dữ liệu hồ sơ.
+                    </div>
+
+                    <!-- Form thông tin cơ bản -->
+                    <form id="profile-form" class="lookup-form">
+                        <h3 class="sidebar-subtitle" style="margin-bottom:1.5rem;">Thông Tin Cơ Bản</h3>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label>Họ và Tên</label>
+                                <input type="text" id="prof-fullname" placeholder="Nhập họ và tên" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Số điện thoại</label>
+                                <input type="tel" id="prof-phone" placeholder="09xxxxxxx">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label>Email liên hệ</label>
+                                <input type="email" id="prof-email" placeholder="email@vidu.com" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Ngày sinh</label>
+                                <input type="date" id="prof-dob" style="color-scheme:dark;">
+                            </div>
+                        </div>
+
+                        <div class="profile-actions"
+                            style="display:flex; justify-content:center; gap:1.5rem; margin-top:2rem;">
+                            <a th:href="@{/dashboard}" class="btn"
+                                style="background:rgba(200,200,200,0.2); color:#555; border:1px solid #ddd; padding:12px 24px; font-weight:700; border-radius:6px;">QUAY
+                                LẠI</a>
+                            <button type="submit" id="save-profile-btn" class="btn bronze-btn">LƯU THÔNG TIN</button>
+                        </div>
+                    </form>
+
+                    <!-- Phân cách -->
+                    <hr style="border:none; border-top:1px solid rgba(220,185,110,0.3); margin:2rem 0;">
+
+                    <!-- Form đổi mật khẩu -->
+                    <form id="change-password-form" class="lookup-form">
+                        <h3 class="sidebar-subtitle" style="margin-bottom:1.5rem;">Đổi Mật Khẩu</h3>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label>Mật khẩu hiện tại</label>
+                                <input type="password" id="prof-current-password" placeholder="Nhập mật khẩu cũ">
+                            </div>
+                            <div class="input-group">
+                                <label>Mật khẩu mới</label>
+                                <input type="password" id="prof-new-password" placeholder="Nhập mật khẩu mới">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label>Xác nhận mật khẩu mới</label>
+                                <input type="password" id="prof-confirm-password" placeholder="Nhập lại mật khẩu mới">
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:center; margin-top:1.5rem;">
+                            <button type="submit" id="save-password-btn" class="btn bronze-btn">ĐỔI MẬT KHẨU</button>
+                        </div>
+                    </form>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <style>
+        .lookup-form .input-group label {
+            color: #555;
+        }
+
+        .lookup-form .input-group input {
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #222;
+        }
+
+        .lookup-form .sidebar-subtitle {
+            color: #9e7100;
+            font-family: 'Times New Roman', serif;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+        }
+
+        #profile-msg.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        #profile-msg.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+
+    <script th:src="@{/js/global.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+
+            // -----------------------------------------------
+            // Helper: hiển thị thông báo
+            // -----------------------------------------------
+            function showMsg(text, type = 'success') {
+                const el = document.getElementById('profile-msg');
+                el.textContent = text;
+                el.className = type;
+                el.style.display = 'block';
+                setTimeout(() => el.style.display = 'none', 4000);
+            }
+
+            const avatarEl = document.getElementById('profile-avatar');
+
+            // -----------------------------------------------
+            // Load thông tin mới nhất từ server session
+            // -----------------------------------------------
+            async function loadProfile() {
+                try {
+                    const res = await fetch(`/auth/me`);
+                    const result = await res.json();
+
+                    if (res.status === 401 || !result.data) {
+                        window.location.href = '/auth';
+                        return;
+                    }
+
+                    if (res.ok && result.status === 200 && result.data) {
+                        const d = result.data;
+                        document.getElementById('prof-fullname').value = d.fullName || '';
+                        document.getElementById('prof-email').value = d.email || '';
+                        document.getElementById('prof-phone').value = d.phone || '';
+                        document.getElementById('prof-dob').value = d.dateOfBirth || '';
+                        if (avatarEl) avatarEl.textContent = window.AuthHelper.getAvatar(d);
+                    }
+                } catch (err) {
+                    console.error('Lỗi load hồ sơ:', err);
+                }
+            }
+
+            await loadProfile();
+
+            // -----------------------------------------------
+            // Submit form cập nhật thông tin cơ bản
+            // -----------------------------------------------
+            const profileForm = document.getElementById('profile-form');
+            if (profileForm) {
+                profileForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const btn = document.getElementById('save-profile-btn');
+                    btn.disabled = true;
+                    btn.textContent = 'ĐANG LƯU...';
+
+                    const body = {
+                        fullName: document.getElementById('prof-fullname').value.trim(),
+                        email: document.getElementById('prof-email').value.trim(),
+                        phone: document.getElementById('prof-phone').value.trim(),
+                        dateOfBirth: document.getElementById('prof-dob').value
+                    };
+
+                    try {
+                        const res = await fetch(`/auth/profile`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(body)
+                        });
+                        const result = await res.json();
+
+                        if (res.ok && result.status === 200 && result.data) {
+                            if (avatarEl) avatarEl.textContent = window.AuthHelper.getAvatar(result.data);
+                            const dropName = document.querySelector('.dropdown-username');
+                            if (dropName) dropName.textContent = window.AuthHelper.getDisplayName(result.data);
+                            showMsg('✓ Cập nhật thông tin thành công!', 'success');
+                        } else if (res.status === 401) {
+                            window.location.href = '/auth';
+                        } else {
+                            showMsg('✗ ' + (result.message || 'Lỗi khi lưu thông tin.'), 'error');
+                        }
+                    } catch (err) {
+                        showMsg('✗ Không thể kết nối với máy chủ.', 'error');
+                    } finally {
+                        btn.disabled = false;
+                        btn.textContent = 'LƯU THÔNG TIN';
+                    }
+                });
+            }
+
+            // -----------------------------------------------
+            // Submit form đổi mật khẩu
+            // -----------------------------------------------
+            const changePwForm = document.getElementById('change-password-form');
+            if (changePwForm) {
+                changePwForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const currentPw = document.getElementById('prof-current-password').value;
+                    const newPw = document.getElementById('prof-new-password').value;
+                    const confirmPw = document.getElementById('prof-confirm-password').value;
+
+                    if (!currentPw || !newPw || !confirmPw) {
+                        showMsg('✗ Vui lòng điền đầy đủ thông tin mật khẩu.', 'error');
+                        return;
+                    }
+                    if (newPw !== confirmPw) {
+                        showMsg('✗ Mật khẩu mới và xác nhận không khớp.', 'error');
+                        return;
+                    }
+                    if (newPw.length < 6) {
+                        showMsg('✗ Mật khẩu mới phải có ít nhất 6 ký tự.', 'error');
+                        return;
+                    }
+
+                    const btn = document.getElementById('save-password-btn');
+                    btn.disabled = true;
+                    btn.textContent = 'ĐANG ĐỔI...';
+
+                    try {
+                        const res = await fetch('/auth/change-password', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                currentPassword: currentPw,
+                                newPassword: newPw
+                            })
+                        });
+                        const result = await res.json();
+
+                        if (res.ok && result.status === 200) {
+                            changePwForm.reset();
+                            showMsg('✓ Đổi mật khẩu thành công!', 'success');
+                        } else if (res.status === 401) {
+                            window.location.href = '/auth';
+                        } else {
+                            showMsg('✗ ' + (result.message || 'Mật khẩu hiện tại không đúng.'), 'error');
+                        }
+                    } catch (err) {
+                        showMsg('✗ Không thể kết nối với máy chủ.', 'error');
+                    } finally {
+                        btn.disabled = false;
+                        btn.textContent = 'ĐỔI MẬT KHẨU';
+                    }
+                });
+            }
+        });
+    </script>
+    <script th:src="@{/js/dashboard.js}"></script>
+</body>
+
+</html>
